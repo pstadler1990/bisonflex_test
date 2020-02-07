@@ -12,9 +12,12 @@
 
 %union {
     int ival;
+    char* sname;
 }
 
 %token<ival> INT
+%token<sname> IDENTIFIER
+%token ASSIGN EQUALS
 %token PLUS MINUS
 %token MULTIPLY DIVIDE
 %token NEWLINE
@@ -22,7 +25,7 @@
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
 
-%type<ival> expression
+%type<ival> int_expression
 
 %%
 prgm:
@@ -30,14 +33,21 @@ prgm:
     ;   
     
 line: NEWLINE
-    | expression NEWLINE { printf("%d ok\n", $1); }
+    | expression NEWLINE { printf("ok\n"); }
+    
+expression: assign
+            | int_expression
+            
+assign: ASSIGN IDENTIFIER { printf("Assigning identifier %s\n", $2); }
+        | ASSIGN IDENTIFIER EQUALS int_expression { printf("Assigning identifier %s with value %d\n", $2, $4); }
+        ;
 
-expression: INT { $$ = $1; }
-            | expression MULTIPLY expression { $$ = $1 * $3; }
-            | expression DIVIDE expression { $$ = $1 / $3; }
-            | expression PLUS expression { $$ = $1 + $3; }
-            | expression MINUS expression { $$ = $1 - $3; }
-            ;
+int_expression: INT 
+                | int_expression MULTIPLY int_expression { $$ = $1 * $3; }
+                | int_expression DIVIDE int_expression { $$ = $1 / $3; }
+                | int_expression PLUS int_expression { $$ = $1 + $3; }
+                | int_expression MINUS int_expression { $$ = $1 - $3; }
+                ;
 %%
 
 int main(void) {

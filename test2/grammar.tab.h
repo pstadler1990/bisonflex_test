@@ -50,11 +50,14 @@ extern int yydebug;
   enum yytokentype
   {
     INT = 258,
-    PLUS = 259,
-    MINUS = 260,
-    MULTIPLY = 261,
-    DIVIDE = 262,
-    NEWLINE = 263
+    IDENTIFIER = 259,
+    ASSIGN = 260,
+    EQUALS = 261,
+    PLUS = 262,
+    MINUS = 263,
+    MULTIPLY = 264,
+    DIVIDE = 265,
+    NEWLINE = 266
   };
 #endif
 
@@ -66,8 +69,9 @@ union YYSTYPE
 #line 13 "grammar.y" /* yacc.c:1921  */
 
     int ival;
+    char* sname;
 
-#line 71 "grammar.tab.h" /* yacc.c:1921  */
+#line 75 "grammar.tab.h" /* yacc.c:1921  */
 };
 
 typedef union YYSTYPE YYSTYPE;
