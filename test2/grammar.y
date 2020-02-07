@@ -2,6 +2,8 @@
     #include <stdio.h>
     #include <stdlib.h>
     
+    #include "evoscript.h"
+    
     extern int yylex();
     extern int yyparse();
     
@@ -36,7 +38,7 @@ line: NEWLINE
     | expression NEWLINE { printf("ok\n"); }
     
 expression: assign
-            | int_expression
+            | int_expression { printf("> %d\n", $1); }
             
 assign: ASSIGN IDENTIFIER { printf("Assigning identifier %s\n", $2); }
         | ASSIGN IDENTIFIER EQUALS int_expression { printf("Assigning identifier %s with value %d\n", $2, $4); }
@@ -51,7 +53,7 @@ int_expression: INT
 %%
 
 int main(void) {
-    printf("Test language interpreter, welcome!\n");
+    printf("evoScript %s\n", E_VERSION);
     yyin = stdin;
     do {
         yyparse();
