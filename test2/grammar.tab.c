@@ -1516,6 +1516,8 @@ yyreturn:
 
 int main(void) {
     printf("evoScript %s\n", E_VERSION);
+    e_init();
+    
     yyin = stdin;
     do {
         yyparse();
