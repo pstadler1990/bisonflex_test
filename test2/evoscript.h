@@ -42,6 +42,11 @@ typedef struct table_entry {
     e_table_value svalue;
 } e_table_entry;
 
+typedef struct {
+    e_statusc status;
+    e_table_value svalue;
+} e_table_entry_ret;
+
 #define E_GLOBAL_SYM_TAB_ENTRIES    ((int)32)    
 #define E_GLOBAL_SYM_TAB_SIZE   ((int)sizeof(e_table_entry) * E_GLOBAL_SYM_TAB_ENTRIES)
 
@@ -56,6 +61,7 @@ void e_init(void);
 
 // Symbol tables
 int e_table_add_entry(e_table* tab, const char* idname, e_table_value val);
+e_table_entry_ret e_table_load_entry(const e_table* tab, const char* idname);
 e_statusc e_table_change_entry(e_table* tab, const char* idname, e_table_value val);
 void e_table_memdump(const e_table* tab);
 e_table_value e_create_int(int val);

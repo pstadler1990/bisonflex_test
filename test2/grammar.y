@@ -90,12 +90,38 @@ assign: ASSIGN IDENTIFIER {
                     default:
                         yyerror("Trying to assign to unknown identifier\n");
                         break;
+                    case E_STATUS_NOINIT:
+                        yyerror("Symbol table not inizialized\n");
+                        break;
                 }
             }
         }
         ;
 
 int_expression: INT
+                | IDENTIFIER { 
+                    e_table_entry_ret returned_val = e_table_load_entry(&global_sym_table, $1);
+                    if(returned_val.status != E_STATUS_OK) {
+                        switch(returned_val.status) {
+                            case E_STATUS_NOTFOUND:
+                            default:
+                                yyerror("Trying to assign to unknown identifier\n");
+                                break;
+                            case E_STATUS_NOINIT:
+                                yyerror("Symbol table not inizialized\n");
+                                break;
+                        }
+                    }
+                    
+                    if(returned_val.svalue.argtype == E_ARGT_INT) {
+                        $$ = returned_val.svalue.val.ival;
+                    } else if(returned_val.svalue.argtype == E_ARGT_FLOAT) {
+                        $$ = (int)returned_val.svalue.val.fval;
+                    } else {
+                        // TODO: Implicit cast from string? $$ = atoi();
+                        yyerror("Cannot use non-numerical type here\n");
+                    }
+                }
                 | int_expression MULTIPLY int_expression { $$ = $1 * $3; }
                 | int_expression DIVIDE int_expression { $$ = $1 / $3; }
                 | int_expression PLUS int_expression { $$ = $1 + $3; }

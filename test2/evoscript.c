@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 static void e_table_init(e_table* tab, unsigned int entries_nr);
+static int e_table_find_entry(const e_table* tab, const char* idname);
 
 // Global symbol table (fixed block)
 e_table global_sym_table;
@@ -85,40 +86,62 @@ e_table_change_entry(e_table* tab, const char* idname, e_table_value val) {
     if(tab->tab_ptr[0].used == E_TAB_ENTRY_FREE) {
         return E_STATUS_NOTFOUND;
     } else {
-        unsigned int p = 0;
-        signed int f = -1;
-        do {
-            if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED 
-                && f == -1) {
-                if(strcmp(tab->tab_ptr[p].idname, idname) == 0) {
-                    f = 1;
-                    break;
-                }
-            }
-            p++;
-        } while(p < tab->entries_nr);
-        
-        if(f != -1) {
-            slot_index = p;
-        } else {
-            return E_STATUS_NOTFOUND;
+        int tmp_slot = e_table_find_entry(tab, idname);
+        if(tmp_slot < 0) {
+           return tmp_slot; /* error */
         }
-        
+        slot_index = tmp_slot;
     }
-        
-//         if(tab->tab_ptr[slot_index].svalue.argtype != val.argtype) {
-//             /* error, data type mismatch */
-//             return E_STATUS_DATATMIS;
-//         }
+    
+// if(tab->tab_ptr[slot_index].svalue.argtype != val.argtype) {
+// /* error, data type mismatch */
+// return E_STATUS_DATATMIS;
+// }
         
     tab->tab_ptr[slot_index].svalue = val;
     return E_STATUS_OK;
 }
 
+int
+e_table_find_entry(const e_table* tab, const char* idname) {
+    if(tab == NULL || tab->entries_nr == 0) {
+        return E_STATUS_NOINIT;
+    }
+    
+    unsigned int p = 0;
+    signed int f = -1;
+    do {
+        if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED 
+            && f == -1) {
+            if(strcmp(tab->tab_ptr[p].idname, idname) == 0) {
+                f = 1;
+                break;
+            }
+        }
+        p++;
+    } while(p < tab->entries_nr);
+    
+    if(f != -1) {
+        return p;
+    } else {
+        return E_STATUS_NOTFOUND;
+    }
+}
+
+e_table_entry_ret
+e_table_load_entry(const e_table* tab, const char* idname) {
+    int tmp_slot = e_table_find_entry(tab, idname);
+    if(tmp_slot < 0) {
+        return (e_table_entry_ret) { .status = E_STATUS_NOTFOUND, .svalue = 0 };
+    }
+    
+    return (e_table_entry_ret) { .status = E_STATUS_OK, .svalue = tab->tab_ptr[tmp_slot].svalue };
+}
+
 
 void
 e_table_memdump(const e_table* tab) {
-    printf("** Memory dumping table **\n");
+    printf("** Memory dump of global system table **\n");
     for(unsigned int r = 0; r < tab->entries_nr; r++) {
         if(tab->tab_ptr[r].used == E_TAB_ENTRY_USED) {
             
