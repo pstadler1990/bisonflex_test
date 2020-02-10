@@ -4,11 +4,18 @@
 #define E_VERSION "0.01"
 
 typedef enum {
+    E_STATUS_ALRDYDEF = -3,
     E_STATUS_NESIZE = -2,
     E_STATUS_NOINIT = -1,
     E_STATUS_UNDEF = 0,
     E_STATUS_OK = 1,
 } e_statusc;
+
+typedef enum {
+    E_ARGT_INT,
+    E_ARGT_FLOAT,
+    E_ARGT_STRING
+} e_arg_type;
 
 typedef struct {
     char* sval;
@@ -28,7 +35,7 @@ typedef struct table_entry {
     unsigned char used;
     char* idname;
     e_table_value val;
-    struct table_entry* next;
+    e_arg_type argtype;
 } e_table_entry;
 
 #define E_GLOBAL_SYM_TAB_ENTRIES    ((int)32)    
@@ -44,6 +51,6 @@ typedef struct {
 void e_init(void);
 
 // Symbol tables
-int e_table_add_entry(e_table* tab, const char* idname, e_table_value val);
-
+int e_table_add_entry(e_table* tab, const char* idname, e_table_value val, e_arg_type argtype);
+void e_table_memdump(const e_table* tab);
 #endif
