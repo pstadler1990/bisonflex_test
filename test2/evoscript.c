@@ -20,12 +20,12 @@ e_init(void) {
     e_table_init(&global_sym_table, E_GLOBAL_SYM_TAB_ENTRIES);
     
     // Remove me
-    e_table_add_entry(&global_sym_table, "x", e_table_value_create_int(42), E_ARGT_INT);
-    e_table_add_entry(&global_sym_table, "y", e_table_value_create_string("Hello World"), E_ARGT_STRING);
+    e_table_add_entry(&global_sym_table, "x", e_table_value_create_int(42));
+    e_table_add_entry(&global_sym_table, "y", e_table_value_create_string("Hello World"));
     
     e_table_memdump(&global_sym_table);
     
-    e_table_add_entry(&global_sym_table, "x", e_table_value_create_int(99), E_ARGT_INT);
+    e_table_add_entry(&global_sym_table, "x", e_table_value_create_int(99));
     
     e_table_memdump(&global_sym_table);
 }
@@ -43,7 +43,7 @@ e_table_init(e_table* tab, unsigned int entries_nr) {
 
 // TODO: e_table_add_entry result needs to be checked within higher wrapping function call (i.e. for duplicates)
 e_statusc 
-e_table_add_entry(e_table* tab, const char* idname, e_table_value val, e_arg_type argtype) {
+e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
     if(tab == NULL || tab->entries_nr == 0) {
         return E_STATUS_NOINIT;
     }
@@ -55,8 +55,8 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val, e_arg_typ
     e_table_entry new_node;
 
     new_node.idname = strdup(idname);
-    new_node.val = val;
-    new_node.argtype = argtype;
+    new_node.svalue.val = val.val;
+    new_node.svalue.argtype = val.argtype;
     new_node.used = E_TAB_ENTRY_USED;
     
     unsigned int slot_index = 0;
@@ -93,15 +93,15 @@ e_table_memdump(const e_table* tab) {
         if(tab->tab_ptr[r].used == E_TAB_ENTRY_USED) {
             
             printf("USED\t%s:\t", tab->tab_ptr[r].idname);
-            switch(tab->tab_ptr[r].argtype) {
+            switch(tab->tab_ptr[r].svalue.argtype) {
                 case E_ARGT_INT:
-                    printf("%d\n", tab->tab_ptr[r].val.ival);
+                    printf("%d\n", tab->tab_ptr[r].svalue.val.ival);
                     break;
                 case E_ARGT_FLOAT:
-                    printf("%f\n", tab->tab_ptr[r].val.fval);
+                    printf("%f\n", tab->tab_ptr[r].svalue.val.fval);
                     break;
                 default:
-                    printf("%s\n", tab->tab_ptr[r].val.sval);
+                    printf("%s\n", tab->tab_ptr[r].svalue.val.sval);
             }
         } else {
             printf("-FREE-\n");
@@ -111,12 +111,12 @@ e_table_memdump(const e_table* tab) {
 
 e_table_value
 e_table_value_create_int(int val) {
-    return (e_table_value) { .ival = val };
+    return (e_table_value) { .val.ival = val, .argtype = E_ARGT_INT };
 }
 
 e_table_value
 e_table_value_create_float(float val) {
-    return (e_table_value) { .fval = val };
+    return (e_table_value) { .val.fval = val, .argtype = E_ARGT_FLOAT };
 }
 
 e_table_value
@@ -126,5 +126,5 @@ e_table_value_create_string(const char* str) {
     new_str.sval = strdup(str);
     new_str.slen = strlen(str);
     
-    return (e_table_value) { .sval = new_str };
+    return (e_table_value) { .val.sval = new_str, .argtype = E_ARGT_STRING };
 }

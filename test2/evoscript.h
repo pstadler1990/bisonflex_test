@@ -22,10 +22,13 @@ typedef struct {
     int slen;
 } e_str_type;
 
-typedef union {
-    int ival;
-    float fval;
-    e_str_type sval;
+typedef struct {
+    union {
+        int ival;
+        float fval;
+        e_str_type sval;
+    } val;
+    e_arg_type argtype;
 } e_table_value;
 
 #define E_TAB_ENTRY_USED    ((unsigned char)1)
@@ -34,8 +37,7 @@ typedef union {
 typedef struct table_entry {
     unsigned char used;
     char* idname;
-    e_table_value val;
-    e_arg_type argtype;
+    e_table_value svalue;
 } e_table_entry;
 
 #define E_GLOBAL_SYM_TAB_ENTRIES    ((int)32)    
@@ -51,6 +53,6 @@ typedef struct {
 void e_init(void);
 
 // Symbol tables
-int e_table_add_entry(e_table* tab, const char* idname, e_table_value val, e_arg_type argtype);
+int e_table_add_entry(e_table* tab, const char* idname, e_table_value val);
 void e_table_memdump(const e_table* tab);
 #endif
