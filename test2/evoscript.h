@@ -4,6 +4,8 @@
 #define E_VERSION "0.01"
 
 typedef enum {
+    E_STATUS_DATATMIS = -5,
+    E_STATUS_NOTFOUND = -4,
     E_STATUS_ALRDYDEF = -3,
     E_STATUS_NESIZE = -2,
     E_STATUS_NOINIT = -1,
@@ -54,6 +56,7 @@ void e_init(void);
 
 // Symbol tables
 int e_table_add_entry(e_table* tab, const char* idname, e_table_value val);
+e_statusc e_table_change_entry(e_table* tab, const char* idname, e_table_value val);
 void e_table_memdump(const e_table* tab);
 e_table_value e_table_value_create_int(int val);
 e_table_value e_table_value_create_float(float val);

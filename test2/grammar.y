@@ -23,6 +23,7 @@
 %token PLUS MINUS
 %token MULTIPLY DIVIDE
 %token NEWLINE
+%token GL_SYM_DUMP
 
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
@@ -39,9 +40,30 @@ line: NEWLINE
     
 expression: assign
             | int_expression { printf("> %d\n", $1); }
+            | GL_SYM_DUMP { e_table_memdump(&global_sym_table); }
+            ;
             
-assign: ASSIGN IDENTIFIER { printf("Assigning identifier %s\n", $2); }
+assign: ASSIGN IDENTIFIER { 
+            /* Empty declaration, variables are initialized with their default values, let x */
+            e_statusc status = e_table_add_entry(&global_sym_table, $2, e_table_value_create_int(0));
+            if(status != E_STATUS_OK) {
+                /* Error assigning variable */
+                switch(status) {
+                    case E_STATUS_NOINIT:
+                    default:
+                        yyerror("Symbol table not inizialized\n");
+                        break;
+                    case E_STATUS_NESIZE:
+                        yyerror("Symbol table full: too many variables\n");
+                        break;
+                    case E_STATUS_ALRDYDEF:
+                        yyerror("Symbol already defined\n");
+                        break;
+                }
+            }
+        }
         | ASSIGN IDENTIFIER EQUALS int_expression { 
+            /* Integer definition with initialization, let x = 42 */
             e_statusc status = e_table_add_entry(&global_sym_table, $2, e_table_value_create_int($4));
             if(status != E_STATUS_OK) {
                 /* Error assigning variable */
@@ -58,8 +80,18 @@ assign: ASSIGN IDENTIFIER { printf("Assigning identifier %s\n", $2); }
                         break;
                 }
             }
-            
-            //e_table_memdump(&global_sym_table); // TODO: Remove call
+        }
+        | IDENTIFIER EQUALS int_expression {
+            /* change value of variable, a = 3 */
+            e_statusc status = e_table_change_entry(&global_sym_table, $1, e_table_value_create_int($3));
+            if(status != E_STATUS_OK) {
+                switch(status) {
+                    case E_STATUS_NOTFOUND:
+                    default:
+                        yyerror("Trying to assign to unknown identifier\n");
+                        break;
+                }
+            }
         }
         ;
 

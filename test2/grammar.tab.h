@@ -57,7 +57,8 @@ extern int yydebug;
     MINUS = 263,
     MULTIPLY = 264,
     DIVIDE = 265,
-    NEWLINE = 266
+    NEWLINE = 266,
+    GL_SYM_DUMP = 267
   };
 #endif
 
@@ -71,7 +72,7 @@ union YYSTYPE
     int ival;
     char* sname;
 
-#line 75 "grammar.tab.h" /* yacc.c:1921  */
+#line 76 "grammar.tab.h" /* yacc.c:1921  */
 };
 
 typedef union YYSTYPE YYSTYPE;

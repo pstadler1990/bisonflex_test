@@ -28,7 +28,7 @@ e_table_init(e_table* tab, unsigned int entries_nr) {
     tab->entries = 0;
 }
 
-// TODO: e_table_add_entry result needs to be checked within higher wrapping function call (i.e. for duplicates)
+
 e_statusc 
 e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
     if(tab == NULL || tab->entries_nr == 0) {
@@ -47,7 +47,7 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
     new_node.used = E_TAB_ENTRY_USED;
     
     unsigned int slot_index = 0;
-    if(tab->tab_ptr[0].used == 0) {
+    if(tab->tab_ptr[0].used == E_TAB_ENTRY_FREE) {
         slot_index = 0;
     } else {
         unsigned int p = 0, f = 0;
@@ -73,6 +73,48 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
     tab->tab_ptr[slot_index] = new_node;
     return E_STATUS_OK;
 }
+
+
+e_statusc
+e_table_change_entry(e_table* tab, const char* idname, e_table_value val) {
+    if(tab == NULL || tab->entries_nr == 0) {
+        return E_STATUS_NOINIT;
+    }
+    
+    unsigned int slot_index = 0;
+    if(tab->tab_ptr[0].used == E_TAB_ENTRY_FREE) {
+        return E_STATUS_NOTFOUND;
+    } else {
+        unsigned int p = 0;
+        signed int f = -1;
+        do {
+            if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED 
+                && f == -1) {
+                if(strcmp(tab->tab_ptr[p].idname, idname) == 0) {
+                    f = 1;
+                    break;
+                }
+            }
+            p++;
+        } while(p < tab->entries_nr);
+        
+        if(f != -1) {
+            slot_index = p;
+        } else {
+            return E_STATUS_NOTFOUND;
+        }
+        
+    }
+        
+//         if(tab->tab_ptr[slot_index].svalue.argtype != val.argtype) {
+//             /* error, data type mismatch */
+//             return E_STATUS_DATATMIS;
+//         }
+        
+    tab->tab_ptr[slot_index].svalue = val;
+    return E_STATUS_OK;
+}
+
 
 void
 e_table_memdump(const e_table* tab) {
