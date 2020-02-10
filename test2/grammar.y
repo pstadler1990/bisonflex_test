@@ -41,7 +41,26 @@ expression: assign
             | int_expression { printf("> %d\n", $1); }
             
 assign: ASSIGN IDENTIFIER { printf("Assigning identifier %s\n", $2); }
-        | ASSIGN IDENTIFIER EQUALS int_expression { printf("Assigning identifier %s with value %d\n", $2, $4); }
+        | ASSIGN IDENTIFIER EQUALS int_expression { 
+            e_statusc status = e_table_add_entry(&global_sym_table, $2, e_table_value_create_int($4));
+            if(status != E_STATUS_OK) {
+                /* Error assigning variable */
+                switch(status) {
+                    case E_STATUS_NOINIT:
+                    default:
+                        yyerror("Symbol table not inizialized\n");
+                        break;
+                    case E_STATUS_NESIZE:
+                        yyerror("Symbol table full: too many variables\n");
+                        break;
+                    case E_STATUS_ALRDYDEF:
+                        yyerror("Symbol already defined\n");
+                        break;
+                }
+            }
+            
+            //e_table_memdump(&global_sym_table); // TODO: Remove call
+        }
         ;
 
 int_expression: INT 

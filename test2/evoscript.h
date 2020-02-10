@@ -55,4 +55,12 @@ void e_init(void);
 // Symbol tables
 int e_table_add_entry(e_table* tab, const char* idname, e_table_value val);
 void e_table_memdump(const e_table* tab);
+e_table_value e_table_value_create_int(int val);
+e_table_value e_table_value_create_float(float val);
+e_table_value e_table_value_create_string(const char* str);
+
+// Exported definitions
+extern e_table global_sym_table;
+extern e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_SIZE];
+
 #endif

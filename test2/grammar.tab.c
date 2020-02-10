@@ -445,7 +445,7 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    33,    33,    34,    37,    38,    40,    41,    43,    44,
-      47,    48,    49,    50,    51
+      66,    67,    68,    69,    70
 };
 #endif
 
@@ -1251,36 +1251,55 @@ yyreduce:
 
   case 9:
 #line 44 "grammar.y" /* yacc.c:1652  */
-    { printf("Assigning identifier %s with value %d\n", (yyvsp[-2].sname), (yyvsp[0].ival)); }
-#line 1256 "grammar.tab.c" /* yacc.c:1652  */
+    { 
+            e_statusc status = e_table_add_entry(&global_sym_table, (yyvsp[-2].sname), e_table_value_create_int((yyvsp[0].ival)));
+            if(status != E_STATUS_OK) {
+                /* Error assigning variable */
+                switch(status) {
+                    case E_STATUS_NOINIT:
+                    default:
+                        yyerror("Symbol table not inizialized\n");
+                        break;
+                    case E_STATUS_NESIZE:
+                        yyerror("Symbol table full: too many variables\n");
+                        break;
+                    case E_STATUS_ALRDYDEF:
+                        yyerror("Symbol already defined\n");
+                        break;
+                }
+            }
+            
+            //e_table_memdump(&global_sym_table); // TODO: Remove call
+        }
+#line 1275 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 11:
-#line 48 "grammar.y" /* yacc.c:1652  */
+#line 67 "grammar.y" /* yacc.c:1652  */
     { (yyval.ival) = (yyvsp[-2].ival) * (yyvsp[0].ival); }
-#line 1262 "grammar.tab.c" /* yacc.c:1652  */
+#line 1281 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 12:
-#line 49 "grammar.y" /* yacc.c:1652  */
+#line 68 "grammar.y" /* yacc.c:1652  */
     { (yyval.ival) = (yyvsp[-2].ival) / (yyvsp[0].ival); }
-#line 1268 "grammar.tab.c" /* yacc.c:1652  */
+#line 1287 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 13:
-#line 50 "grammar.y" /* yacc.c:1652  */
+#line 69 "grammar.y" /* yacc.c:1652  */
     { (yyval.ival) = (yyvsp[-2].ival) + (yyvsp[0].ival); }
-#line 1274 "grammar.tab.c" /* yacc.c:1652  */
+#line 1293 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 14:
-#line 51 "grammar.y" /* yacc.c:1652  */
+#line 70 "grammar.y" /* yacc.c:1652  */
     { (yyval.ival) = (yyvsp[-2].ival) - (yyvsp[0].ival); }
-#line 1280 "grammar.tab.c" /* yacc.c:1652  */
+#line 1299 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
 
-#line 1284 "grammar.tab.c" /* yacc.c:1652  */
+#line 1303 "grammar.tab.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1511,12 +1530,13 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 53 "grammar.y" /* yacc.c:1918  */
+#line 72 "grammar.y" /* yacc.c:1918  */
 
 
 int main(void) {
     printf("evoScript %s\n", E_VERSION);
     e_init();
+    
     
     yyin = stdin;
     do {

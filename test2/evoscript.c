@@ -4,10 +4,6 @@
 #include <stdio.h>
 
 static void e_table_init(e_table* tab, unsigned int entries_nr);
-static e_table_value e_table_value_create_int(int val);
-static e_table_value e_table_value_create_float(float val);
-e_table_value e_table_value_create_string(const char* str);
-
 
 // Global symbol table (fixed block)
 e_table global_sym_table;
@@ -16,18 +12,9 @@ e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_SIZE];
 
 void
 e_init(void) {
+    /* Initialize the global symbol table */
     global_sym_table.tab_ptr = (e_table_entry*)&global_sym_table_block;
     e_table_init(&global_sym_table, E_GLOBAL_SYM_TAB_ENTRIES);
-    
-    // Remove me
-    e_table_add_entry(&global_sym_table, "x", e_table_value_create_int(42));
-    e_table_add_entry(&global_sym_table, "y", e_table_value_create_string("Hello World"));
-    
-    e_table_memdump(&global_sym_table);
-    
-    e_table_add_entry(&global_sym_table, "x", e_table_value_create_int(99));
-    
-    e_table_memdump(&global_sym_table);
 }
 
 
@@ -48,7 +35,7 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
         return E_STATUS_NOINIT;
     }
     if(tab->entries + 1 >= tab->entries_nr) {
-        /* No more free space in global symbol table */
+        /* Not enough free space */
         return E_STATUS_NESIZE;
     }
     
@@ -84,6 +71,7 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
     }
 
     tab->tab_ptr[slot_index] = new_node;
+    return E_STATUS_OK;
 }
 
 void
