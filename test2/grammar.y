@@ -45,7 +45,7 @@ expression: assign
             
 assign: ASSIGN IDENTIFIER { 
             /* Empty declaration, variables are initialized with their default values, let x */
-            e_statusc status = e_table_add_entry(&global_sym_table, $2, e_table_value_create_int(0));
+            e_statusc status = e_table_add_entry(&global_sym_table, $2, e_create_int(0));
             if(status != E_STATUS_OK) {
                 /* Error assigning variable */
                 switch(status) {
@@ -64,7 +64,7 @@ assign: ASSIGN IDENTIFIER {
         }
         | ASSIGN IDENTIFIER EQUALS int_expression { 
             /* Integer definition with initialization, let x = 42 */
-            e_statusc status = e_table_add_entry(&global_sym_table, $2, e_table_value_create_int($4));
+            e_statusc status = e_table_add_entry(&global_sym_table, $2, e_create_int($4));
             if(status != E_STATUS_OK) {
                 /* Error assigning variable */
                 switch(status) {
@@ -83,7 +83,7 @@ assign: ASSIGN IDENTIFIER {
         }
         | IDENTIFIER EQUALS int_expression {
             /* change value of variable, a = 3 */
-            e_statusc status = e_table_change_entry(&global_sym_table, $1, e_table_value_create_int($3));
+            e_statusc status = e_table_change_entry(&global_sym_table, $1, e_create_int($3));
             if(status != E_STATUS_OK) {
                 switch(status) {
                     case E_STATUS_NOTFOUND:
@@ -95,7 +95,7 @@ assign: ASSIGN IDENTIFIER {
         }
         ;
 
-int_expression: INT 
+int_expression: INT
                 | int_expression MULTIPLY int_expression { $$ = $1 * $3; }
                 | int_expression DIVIDE int_expression { $$ = $1 / $3; }
                 | int_expression PLUS int_expression { $$ = $1 + $3; }

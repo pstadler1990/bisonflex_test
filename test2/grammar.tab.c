@@ -389,16 +389,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   22
+#define YYLAST   24
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  13
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  6
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  16
+#define YYNRULES  17
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  26
+#define YYNSTATES  27
 
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   267
@@ -446,7 +446,7 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    34,    34,    35,    38,    39,    41,    42,    43,    46,
-      65,    84,    98,    99,   100,   101,   102
+      65,    84,    98,    99,   100,   101,   102,   103
 };
 #endif
 
@@ -485,9 +485,9 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -9,     0,    -9,    -9,    11,    15,    -9,    -9,    -9,     9,
-      -9,    -1,    18,    16,    -9,    18,    18,    18,    18,    -1,
-      18,    -8,    -8,    -9,    -9,    -1
+      -9,     0,    -9,    -9,    11,    17,    -9,    -9,    -9,    12,
+      -9,    -1,    19,    18,    -9,    16,    19,    19,    19,    -1,
+      19,    -9,    -8,    -8,    -9,    -9,    -1
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -497,7 +497,7 @@ static const yytype_uint8 yydefact[] =
 {
        2,     0,     1,    12,     0,     0,     4,     8,     3,     0,
        6,     7,     0,     9,     5,     0,     0,     0,     0,    11,
-       0,    15,    16,    13,    14,    10
+       0,    17,    15,    16,    13,    14,    10
 };
 
   /* YYPGOTO[NTERM-NUM].  */
@@ -518,15 +518,15 @@ static const yytype_int8 yydefgoto[] =
 static const yytype_uint8 yytable[] =
 {
        2,    17,    18,     3,     4,     5,    15,    16,    17,    18,
-      19,     6,     7,    21,    22,    23,    24,    12,    25,    13,
-      14,     3,    20
+      19,     6,     7,    22,    23,    24,    25,    12,    26,     3,
+      21,    13,     3,    14,    20
 };
 
 static const yytype_uint8 yycheck[] =
 {
        0,     9,    10,     3,     4,     5,     7,     8,     9,    10,
-      12,    11,    12,    15,    16,    17,    18,     6,    20,     4,
-      11,     3,     6
+      12,    11,    12,    15,    16,    17,    18,     6,    20,     3,
+       4,     4,     3,    11,     6
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -535,21 +535,21 @@ static const yytype_uint8 yystos[] =
 {
        0,    14,     0,     3,     4,     5,    11,    12,    15,    16,
       17,    18,     6,     4,    11,     7,     8,     9,    10,    18,
-       6,    18,    18,    18,    18,    18
+       6,     4,    18,    18,    18,    18,    18
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
        0,    13,    14,    14,    15,    15,    16,    16,    16,    17,
-      17,    17,    18,    18,    18,    18,    18
+      17,    17,    18,    18,    18,    18,    18,    18
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     0,     2,     1,     2,     1,     1,     1,     2,
-       4,     3,     1,     3,     3,     3,     3
+       4,     3,     1,     3,     3,     3,     3,     3
 };
 
 
@@ -1256,7 +1256,7 @@ yyreduce:
 #line 46 "grammar.y" /* yacc.c:1652  */
     { 
             /* Empty declaration, variables are initialized with their default values, let x */
-            e_statusc status = e_table_add_entry(&global_sym_table, (yyvsp[0].sname), e_table_value_create_int(0));
+            e_statusc status = e_table_add_entry(&global_sym_table, (yyvsp[0].sname), e_create_int(0));
             if(status != E_STATUS_OK) {
                 /* Error assigning variable */
                 switch(status) {
@@ -1280,7 +1280,7 @@ yyreduce:
 #line 65 "grammar.y" /* yacc.c:1652  */
     { 
             /* Integer definition with initialization, let x = 42 */
-            e_statusc status = e_table_add_entry(&global_sym_table, (yyvsp[-2].sname), e_table_value_create_int((yyvsp[0].ival)));
+            e_statusc status = e_table_add_entry(&global_sym_table, (yyvsp[-2].sname), e_create_int((yyvsp[0].ival)));
             if(status != E_STATUS_OK) {
                 /* Error assigning variable */
                 switch(status) {
@@ -1304,7 +1304,7 @@ yyreduce:
 #line 84 "grammar.y" /* yacc.c:1652  */
     {
             /* change value of variable, a = 3 */
-            e_statusc status = e_table_change_entry(&global_sym_table, (yyvsp[-2].sname), e_table_value_create_int((yyvsp[0].ival)));
+            e_statusc status = e_table_change_entry(&global_sym_table, (yyvsp[-2].sname), e_create_int((yyvsp[0].ival)));
             if(status != E_STATUS_OK) {
                 switch(status) {
                     case E_STATUS_NOTFOUND:
@@ -1341,8 +1341,14 @@ yyreduce:
 #line 1342 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
+  case 17:
+#line 103 "grammar.y" /* yacc.c:1652  */
+    { printf("adding int plus identifier\n"); }
+#line 1348 "grammar.tab.c" /* yacc.c:1652  */
+    break;
 
-#line 1346 "grammar.tab.c" /* yacc.c:1652  */
+
+#line 1352 "grammar.tab.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1573,7 +1579,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 104 "grammar.y" /* yacc.c:1918  */
+#line 105 "grammar.y" /* yacc.c:1918  */
 
 
 int main(void) {

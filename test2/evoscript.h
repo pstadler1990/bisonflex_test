@@ -58,9 +58,9 @@ void e_init(void);
 int e_table_add_entry(e_table* tab, const char* idname, e_table_value val);
 e_statusc e_table_change_entry(e_table* tab, const char* idname, e_table_value val);
 void e_table_memdump(const e_table* tab);
-e_table_value e_table_value_create_int(int val);
-e_table_value e_table_value_create_float(float val);
-e_table_value e_table_value_create_string(const char* str);
+e_table_value e_create_int(int val);
+e_table_value e_create_float(float val);
+e_table_value e_create_string(const char* str);
 
 // Exported definitions
 extern e_table global_sym_table;

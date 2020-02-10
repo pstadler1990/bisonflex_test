@@ -140,17 +140,17 @@ e_table_memdump(const e_table* tab) {
 }
 
 e_table_value
-e_table_value_create_int(int val) {
+e_create_int(int val) {
     return (e_table_value) { .val.ival = val, .argtype = E_ARGT_INT };
 }
 
 e_table_value
-e_table_value_create_float(float val) {
+e_create_float(float val) {
     return (e_table_value) { .val.fval = val, .argtype = E_ARGT_FLOAT };
 }
 
 e_table_value
-e_table_value_create_string(const char* str) {
+e_create_string(const char* str) {
     e_str_type new_str;
     
     new_str.sval = strdup(str);
