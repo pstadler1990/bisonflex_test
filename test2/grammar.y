@@ -1,7 +1,6 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
-    
     #include "evoscript.h"
     
     extern int yylex();
@@ -10,14 +9,19 @@
     extern FILE* yyin;
     
     void yyerror(const char* s);
+    
+    static void error_pprint(e_statusc error);
 %}
 
+
 %union {
-    int ival;
+    e_number nval;
     char* sname;
 }
 
-%token<ival> INT
+
+%token<nval> INT
+%token<nval> FLOAT
 %token<sname> IDENTIFIER
 %token ASSIGN EQUALS
 %token PLUS MINUS
@@ -28,7 +32,9 @@
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
 
-%type<ival> int_expression
+%type<nval> number
+%type<nval> math_expression
+
 
 %%
 prgm:
@@ -39,99 +45,93 @@ line: NEWLINE
     | expression NEWLINE { printf("ok\n"); }
     
 expression: assign
-            | int_expression { printf("> %d\n", $1); }
+            | math_expression { printf(">\n"); }
             | GL_SYM_DUMP { e_table_memdump(&global_sym_table); }
             ;
             
-assign: ASSIGN IDENTIFIER { 
-            /* Empty declaration, variables are initialized with their default values, let x */
-            e_statusc status = e_table_add_entry(&global_sym_table, $2, e_create_int(0));
-            if(status != E_STATUS_OK) {
-                /* Error assigning variable */
-                switch(status) {
-                    case E_STATUS_NOINIT:
-                    default:
-                        yyerror("Symbol table not inizialized\n");
-                        break;
-                    case E_STATUS_NESIZE:
-                        yyerror("Symbol table full: too many variables\n");
-                        break;
-                    case E_STATUS_ALRDYDEF:
-                        yyerror("Symbol already defined\n");
-                        break;
-                }
+assign: ASSIGN IDENTIFIER EQUALS math_expression { 
+            /* Number type (integer|float) definition with initialization, let x = 42 */
+            e_statusc status;
+            switch($4.type) {
+                case E_INTEGER:
+                    status = e_table_add_entry(&global_sym_table, $2, e_create_int($4.ival));
+                    break;
+                case E_FLOAT:
+                    status = e_table_add_entry(&global_sym_table, $2, e_create_float($4.fval));
+                    break;
+                default:
+                    yyerror("Unsupported number type");
             }
+            error_pprint(status);
         }
-        | ASSIGN IDENTIFIER EQUALS int_expression { 
-            /* Integer definition with initialization, let x = 42 */
-            e_statusc status = e_table_add_entry(&global_sym_table, $2, e_create_int($4));
-            if(status != E_STATUS_OK) {
-                /* Error assigning variable */
-                switch(status) {
-                    case E_STATUS_NOINIT:
-                    default:
-                        yyerror("Symbol table not inizialized\n");
-                        break;
-                    case E_STATUS_NESIZE:
-                        yyerror("Symbol table full: too many variables\n");
-                        break;
-                    case E_STATUS_ALRDYDEF:
-                        yyerror("Symbol already defined\n");
-                        break;
-                }
+        | IDENTIFIER EQUALS math_expression {
+            /* Change value of number type variable, a = 3 */
+            e_statusc status;
+            switch($3.type) {
+                case E_INTEGER:
+                    status = e_table_change_entry(&global_sym_table, $1, e_create_int($3.ival));
+                    break;
+                case E_FLOAT:
+                    status = e_table_change_entry(&global_sym_table, $1, e_create_float($3.fval));
+                    break;
+                default:
+                    yyerror("Unsupported number type");
             }
-        }
-        | IDENTIFIER EQUALS int_expression {
-            /* change value of variable, a = 3 */
-            e_statusc status = e_table_change_entry(&global_sym_table, $1, e_create_int($3));
-            if(status != E_STATUS_OK) {
-                switch(status) {
-                    case E_STATUS_NOTFOUND:
-                    default:
-                        yyerror("Trying to assign to unknown identifier\n");
-                        break;
-                    case E_STATUS_NOINIT:
-                        yyerror("Symbol table not inizialized\n");
-                        break;
-                }
-            }
+            error_pprint(status);
         }
         ;
 
-int_expression: INT
+math_expression: number 
                 | IDENTIFIER { 
                     e_table_entry_ret returned_val = e_table_load_entry(&global_sym_table, $1);
-                    if(returned_val.status != E_STATUS_OK) {
-                        switch(returned_val.status) {
-                            case E_STATUS_NOTFOUND:
-                            default:
-                                yyerror("Trying to assign to unknown identifier\n");
-                                break;
-                            case E_STATUS_NOINIT:
-                                yyerror("Symbol table not inizialized\n");
-                                break;
-                        }
-                    }
+                    error_pprint(returned_val.status);
                     
                     if(returned_val.svalue.argtype == E_ARGT_INT) {
-                        $$ = returned_val.svalue.val.ival;
+                        $$.type = 0;
+                        $$.ival = returned_val.svalue.val.ival;
                     } else if(returned_val.svalue.argtype == E_ARGT_FLOAT) {
-                        $$ = (int)returned_val.svalue.val.fval;
+                        $$.type = 1;
+                        $$.fval = returned_val.svalue.val.fval;
                     } else {
                         // TODO: Implicit cast from string? $$ = atoi();
                         yyerror("Cannot use non-numerical type here\n");
                     }
                 }
-                | int_expression MULTIPLY int_expression { $$ = $1 * $3; }
-                | int_expression DIVIDE int_expression { $$ = $1 / $3; }
-                | int_expression PLUS int_expression { $$ = $1 + $3; }
-                | int_expression MINUS int_expression { $$ = $1 - $3; }
-                | MINUS int_expression { $$ = -$2; }
-                | PLUS int_expression { $$ = $2; }
+                | math_expression MULTIPLY math_expression { $$.ival = $1.ival * $3.ival; }
+                | math_expression DIVIDE math_expression { $$.ival = $1.ival / $3.ival; }
+                | math_expression PLUS math_expression { $$.ival = $1.ival + $3.ival; }
+                | math_expression MINUS math_expression { $$.ival = $1.ival - $3.ival; }
+                | MINUS math_expression { $$.ival = -$2.ival; }
+                | PLUS math_expression { $$.ival = $2.ival; }
                 ;
+                  
+number: INT { $$.ival = (int)$1.ival; }
+        |FLOAT { $$.fval = (float)$1.fval; }
+        ;
 %%
 
 void yyerror(const char* s) {
     printf("Error happend: %s\n", s);
     exit(-1);
+}
+
+void error_pprint(e_statusc error) {
+    if(error != E_STATUS_OK) {
+        switch(error) {
+            case E_STATUS_NOINIT:
+                yyerror("Symbol not inizialized\n");
+                break;
+            case E_STATUS_NESIZE:
+                yyerror("Not enough size\n");
+                break;
+            case E_STATUS_ALRDYDEF:
+                yyerror("Symbol already defined\n");
+                break;
+            case E_STATUS_NOTFOUND:
+                yyerror("Symbol not defined\n");
+                break;
+            default:
+                yyerror("Syntax error");
+        }
+    }
 }

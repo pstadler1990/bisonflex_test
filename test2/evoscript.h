@@ -3,6 +3,15 @@
 
 #define E_VERSION "0.01"
 
+typedef struct {
+    enum { E_INTEGER, E_FLOAT } type;
+    union {
+        int ival;
+        float fval;
+    };
+} e_number;
+
+
 typedef enum {
     E_STATUS_DATATMIS = -5,
     E_STATUS_NOTFOUND = -4,

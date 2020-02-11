@@ -2,6 +2,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+    #include "evoscript.h"
     #include "grammar.tab.h"
     
     extern int yylex();
@@ -15,7 +16,8 @@
 ":"                         { return NEWLINE; }
 "let"                       { return ASSIGN; }
 "gstdump"                   { return GL_SYM_DUMP; }
-[0-9]+                      { yylval.ival = atoi(yytext); return INT; }
+[0-9]+                      { yylval.nval.ival = atoi(yytext); yylval.nval.type = E_INTEGER; return INT; }
+[0-9]*\.[0-9]+              { yylval.nval.fval = atof(yytext); yylval.nval.type = E_FLOAT; return FLOAT; }
 [a-zA-Z_][a-zA-Z_0-9]*      { yylval.sname = strdup(yytext); return IDENTIFIER; } 
 "="                         { return EQUALS; }
 "+"                         { return PLUS; }
