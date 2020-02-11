@@ -131,19 +131,6 @@ int_expression: INT
                 ;
 %%
 
-int main(void) {
-    printf("evoScript %s\n", E_VERSION);
-    e_init();
-    
-    
-    yyin = stdin;
-    do {
-        yyparse();
-    } while(!feof(yyin));
-    
-    return 0;
-}
-
 void yyerror(const char* s) {
     printf("Error happend: %s\n", s);
     exit(-1);
