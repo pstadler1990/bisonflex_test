@@ -12,6 +12,7 @@
 %%
 [ \t]                       ;
 \n                          { return NEWLINE; }
+":"                         { return NEWLINE; }
 "let"                       { return ASSIGN; }
 "gstdump"                   { return GL_SYM_DUMP; }
 [0-9]+                      { yylval.ival = atoi(yytext); return INT; }
