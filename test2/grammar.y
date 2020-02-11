@@ -45,7 +45,13 @@ line: NEWLINE
     | expression NEWLINE { printf("ok\n"); }
     
 expression: assign
-            | math_expression { printf(">\n"); }
+            | math_expression {
+                if($1.type == E_INTEGER) {
+                    printf("%d\n", $1.ival);
+                } else if($1.type == E_FLOAT) {
+                    printf("%f\n", $1.fval);    
+                }
+            }
             | GL_SYM_DUMP { e_table_memdump(&global_sym_table); }
             ;
             
