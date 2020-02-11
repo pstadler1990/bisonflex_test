@@ -126,6 +126,8 @@ int_expression: INT
                 | int_expression DIVIDE int_expression { $$ = $1 / $3; }
                 | int_expression PLUS int_expression { $$ = $1 + $3; }
                 | int_expression MINUS int_expression { $$ = $1 - $3; }
+                | MINUS int_expression { $$ = -$2; }
+                | PLUS int_expression { $$ = $2; }
                 ;
 %%
 
