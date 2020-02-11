@@ -24,13 +24,19 @@
 %token<nval> FLOAT
 %token<sname> IDENTIFIER
 %token ASSIGN EQUALS
+%token AND OR NOT
+%token REL_LT REL_LTEQ REL_NOTEQ REL_GTEQ REL_GT
 %token PLUS MINUS
 %token MULTIPLY DIVIDE
+%token P_OPEN P_CLOSE
 %token NEWLINE
 %token GL_SYM_DUMP
 
+%left AND OR NOT
+%left REL_LT REL_LTEQ REL_NOTEQ REL_GTEQ REL_GT
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
+%left P_OPEN P_CLOSE
 
 %type<nval> number
 %type<nval> math_expression
@@ -102,6 +108,55 @@ math_expression: number
                         // TODO: Implicit cast from string? $$ = atoi();
                         yyerror("Cannot use non-numerical type here\n");
                     }
+                }
+                | math_expression AND math_expression {
+                    $$.type = E_INTEGER;
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = $1.ival & $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = $1.ival & (int)$3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = (int)$1.fval & $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = (int)$1.fval & (int)$3.fval;
+                        }
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+                | math_expression OR math_expression {
+                    $$.type = E_INTEGER;
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = $1.ival | $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = $1.ival | (int)$3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = (int)$1.fval | $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = (int)$1.fval | (int)$3.fval;
+                        }
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+                | NOT math_expression {
+                    $$.type = E_INTEGER;
+                    if($2.type == E_INTEGER) {
+                        $$.ival = !$2.ival;
+                    } else if($2.type == E_FLOAT) {
+                        $$.ival = !$2.fval;
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+                | P_OPEN math_expression P_CLOSE {
+                    $$ = $2;
                 }
                 | math_expression MULTIPLY math_expression { 
                     if($1.type == E_INTEGER) {

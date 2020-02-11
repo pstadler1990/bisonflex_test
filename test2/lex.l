@@ -12,10 +12,12 @@
 
 %%
 [ \t]                       ;
-\n                          { return NEWLINE; }
-":"                         { return NEWLINE; }
+[\n:]                       { return NEWLINE; }
 "let"                       { return ASSIGN; }
 "gstdump"                   { return GL_SYM_DUMP; }
+"and"                       { return AND; }
+"or"                        { return OR; }
+"not"                       { return NOT; }
 [0-9]+                      { yylval.nval.ival = atoi(yytext); yylval.nval.type = E_INTEGER; return INT; }
 [0-9]*\.[0-9]+              { yylval.nval.fval = atof(yytext); yylval.nval.type = E_FLOAT; return FLOAT; }
 [a-zA-Z_][a-zA-Z_0-9]*      { yylval.sname = strdup(yytext); return IDENTIFIER; } 
@@ -24,5 +26,12 @@
 "-"                         { return MINUS; }
 "*"                         { return MULTIPLY; }
 "/"                         { return DIVIDE; }
+"("                         { return P_OPEN; }
+")"                         { return P_CLOSE; }
+"<"                         { return REL_LT; }
+"<="                        { return REL_LTEQ; }
+"<>"                        { return REL_NOTEQ; }
+"=>"                        { return REL_GTEQ; }
+">"                         { return REL_GT; }
 
 %%
