@@ -448,8 +448,8 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    40,    40,    41,    44,    45,    47,    48,    49,    52,
-      67,    84,    85,   100,   101,   102,   103,   104,   105,   108,
-     109
+      67,    84,    85,   100,   121,   142,   163,   184,   195,   208,
+     209
 };
 #endif
 
@@ -1310,10 +1310,10 @@ yyreduce:
                     error_pprint(returned_val.status);
                     
                     if(returned_val.svalue.argtype == E_ARGT_INT) {
-                        (yyval.nval).type = 0;
+                        (yyval.nval).type = E_INTEGER;
                         (yyval.nval).ival = returned_val.svalue.val.ival;
                     } else if(returned_val.svalue.argtype == E_ARGT_FLOAT) {
-                        (yyval.nval).type = 1;
+                        (yyval.nval).type = E_FLOAT;
                         (yyval.nval).fval = returned_val.svalue.val.fval;
                     } else {
                         // TODO: Implicit cast from string? $$ = atoi();
@@ -1325,54 +1325,154 @@ yyreduce:
 
   case 13:
 #line 100 "grammar.y" /* yacc.c:1652  */
-    { (yyval.nval).ival = (yyvsp[-2].nval).ival * (yyvsp[0].nval).ival; }
-#line 1330 "grammar.tab.c" /* yacc.c:1652  */
+    { 
+                    if((yyvsp[-2].nval).type == E_INTEGER) {
+                        if((yyvsp[0].nval).type == E_INTEGER) {
+                            (yyval.nval).type = E_INTEGER;
+                            (yyval.nval).ival = (yyvsp[-2].nval).ival * (yyvsp[0].nval).ival;
+                        } else if((yyvsp[0].nval).type == E_FLOAT) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).ival * (yyvsp[0].nval).fval;
+                        }
+                    } else if((yyvsp[-2].nval).type == E_FLOAT) {
+                        if((yyvsp[0].nval).type == E_INTEGER) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).fval * (yyvsp[0].nval).ival;
+                        } else if((yyvsp[0].nval).type == E_FLOAT) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).fval * (yyvsp[0].nval).fval;
+                        }
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+#line 1350 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 14:
-#line 101 "grammar.y" /* yacc.c:1652  */
-    { (yyval.nval).ival = (yyvsp[-2].nval).ival / (yyvsp[0].nval).ival; }
-#line 1336 "grammar.tab.c" /* yacc.c:1652  */
+#line 121 "grammar.y" /* yacc.c:1652  */
+    { 
+                    if((yyvsp[-2].nval).type == E_INTEGER) {
+                        if((yyvsp[0].nval).type == E_INTEGER) {
+                            (yyval.nval).type = E_INTEGER;
+                            (yyval.nval).ival = (yyvsp[-2].nval).ival / (yyvsp[0].nval).ival;
+                        } else if((yyvsp[0].nval).type == E_FLOAT) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).ival / (yyvsp[0].nval).fval;
+                        }
+                    } else if((yyvsp[-2].nval).type == E_FLOAT) {
+                        if((yyvsp[0].nval).type == E_INTEGER) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).fval / (yyvsp[0].nval).ival;
+                        } else if((yyvsp[0].nval).type == E_FLOAT) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).fval / (yyvsp[0].nval).fval;
+                        }
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+#line 1376 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 15:
-#line 102 "grammar.y" /* yacc.c:1652  */
-    { (yyval.nval).ival = (yyvsp[-2].nval).ival + (yyvsp[0].nval).ival; }
-#line 1342 "grammar.tab.c" /* yacc.c:1652  */
+#line 142 "grammar.y" /* yacc.c:1652  */
+    { 
+                    if((yyvsp[-2].nval).type == E_INTEGER) {
+                        if((yyvsp[0].nval).type == E_INTEGER) {
+                            (yyval.nval).type = E_INTEGER;
+                            (yyval.nval).ival = (yyvsp[-2].nval).ival + (yyvsp[0].nval).ival;
+                        } else if((yyvsp[0].nval).type == E_FLOAT) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).ival + (yyvsp[0].nval).fval;
+                        }
+                    } else if((yyvsp[-2].nval).type == E_FLOAT) {
+                        if((yyvsp[0].nval).type == E_INTEGER) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).fval + (yyvsp[0].nval).ival;
+                        } else if((yyvsp[0].nval).type == E_FLOAT) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).fval + (yyvsp[0].nval).fval;
+                        }
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+#line 1402 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 16:
-#line 103 "grammar.y" /* yacc.c:1652  */
-    { (yyval.nval).ival = (yyvsp[-2].nval).ival - (yyvsp[0].nval).ival; }
-#line 1348 "grammar.tab.c" /* yacc.c:1652  */
+#line 163 "grammar.y" /* yacc.c:1652  */
+    { 
+                    if((yyvsp[-2].nval).type == E_INTEGER) {
+                        if((yyvsp[0].nval).type == E_INTEGER) {
+                            (yyval.nval).type = E_INTEGER;
+                            (yyval.nval).ival = (yyvsp[-2].nval).ival - (yyvsp[0].nval).ival;
+                        } else if((yyvsp[0].nval).type == E_FLOAT) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).ival - (yyvsp[0].nval).fval;
+                        }
+                    } else if((yyvsp[-2].nval).type == E_FLOAT) {
+                        if((yyvsp[0].nval).type == E_INTEGER) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).fval - (yyvsp[0].nval).ival;
+                        } else if((yyvsp[0].nval).type == E_FLOAT) {
+                            (yyval.nval).type = E_FLOAT;
+                            (yyval.nval).fval = (yyvsp[-2].nval).fval - (yyvsp[0].nval).fval;
+                        }
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+#line 1428 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 17:
-#line 104 "grammar.y" /* yacc.c:1652  */
-    { (yyval.nval).ival = -(yyvsp[0].nval).ival; }
-#line 1354 "grammar.tab.c" /* yacc.c:1652  */
+#line 184 "grammar.y" /* yacc.c:1652  */
+    {
+                    if((yyvsp[0].nval).type == E_INTEGER) {
+                        (yyval.nval).type = E_INTEGER; 
+                        (yyval.nval).ival = -(yyvsp[0].nval).ival;
+                    } else if((yyvsp[0].nval).type == E_FLOAT) {
+                        (yyval.nval).type = E_FLOAT; 
+                        (yyval.nval).fval = -(yyvsp[0].nval).fval;
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+#line 1444 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 18:
-#line 105 "grammar.y" /* yacc.c:1652  */
-    { (yyval.nval).ival = (yyvsp[0].nval).ival; }
-#line 1360 "grammar.tab.c" /* yacc.c:1652  */
+#line 195 "grammar.y" /* yacc.c:1652  */
+    { 
+                    if((yyvsp[0].nval).type == E_INTEGER) {
+                        (yyval.nval).type = E_INTEGER; 
+                        (yyval.nval).ival = -(yyvsp[0].nval).ival;
+                    } else if((yyvsp[0].nval).type == E_FLOAT) {
+                        (yyval.nval).type = E_FLOAT; 
+                        (yyval.nval).fval = (yyvsp[0].nval).fval;
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+#line 1460 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 19:
-#line 108 "grammar.y" /* yacc.c:1652  */
+#line 208 "grammar.y" /* yacc.c:1652  */
     { (yyval.nval).ival = (int)(yyvsp[0].nval).ival; }
-#line 1366 "grammar.tab.c" /* yacc.c:1652  */
+#line 1466 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 20:
-#line 109 "grammar.y" /* yacc.c:1652  */
+#line 209 "grammar.y" /* yacc.c:1652  */
     { (yyval.nval).fval = (float)(yyvsp[0].nval).fval; }
-#line 1372 "grammar.tab.c" /* yacc.c:1652  */
+#line 1472 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
 
-#line 1376 "grammar.tab.c" /* yacc.c:1652  */
+#line 1476 "grammar.tab.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1603,7 +1703,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 111 "grammar.y" /* yacc.c:1918  */
+#line 211 "grammar.y" /* yacc.c:1918  */
 
 
 void yyerror(const char* s) {

@@ -87,22 +87,122 @@ math_expression: number
                     error_pprint(returned_val.status);
                     
                     if(returned_val.svalue.argtype == E_ARGT_INT) {
-                        $$.type = 0;
+                        $$.type = E_INTEGER;
                         $$.ival = returned_val.svalue.val.ival;
                     } else if(returned_val.svalue.argtype == E_ARGT_FLOAT) {
-                        $$.type = 1;
+                        $$.type = E_FLOAT;
                         $$.fval = returned_val.svalue.val.fval;
                     } else {
                         // TODO: Implicit cast from string? $$ = atoi();
                         yyerror("Cannot use non-numerical type here\n");
                     }
                 }
-                | math_expression MULTIPLY math_expression { $$.ival = $1.ival * $3.ival; }
-                | math_expression DIVIDE math_expression { $$.ival = $1.ival / $3.ival; }
-                | math_expression PLUS math_expression { $$.ival = $1.ival + $3.ival; }
-                | math_expression MINUS math_expression { $$.ival = $1.ival - $3.ival; }
-                | MINUS math_expression { $$.ival = -$2.ival; }
-                | PLUS math_expression { $$.ival = $2.ival; }
+                | math_expression MULTIPLY math_expression { 
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.type = E_INTEGER;
+                            $$.ival = $1.ival * $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.ival * $3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.fval * $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.fval * $3.fval;
+                        }
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+                | math_expression DIVIDE math_expression { 
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.type = E_INTEGER;
+                            $$.ival = $1.ival / $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.ival / $3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.fval / $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.fval / $3.fval;
+                        }
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+                | math_expression PLUS math_expression { 
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.type = E_INTEGER;
+                            $$.ival = $1.ival + $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.ival + $3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.fval + $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.fval + $3.fval;
+                        }
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+                | math_expression MINUS math_expression { 
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.type = E_INTEGER;
+                            $$.ival = $1.ival - $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.ival - $3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.fval - $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.type = E_FLOAT;
+                            $$.fval = $1.fval - $3.fval;
+                        }
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+                | MINUS math_expression {
+                    if($2.type == E_INTEGER) {
+                        $$.type = E_INTEGER; 
+                        $$.ival = -$2.ival;
+                    } else if($2.type == E_FLOAT) {
+                        $$.type = E_FLOAT; 
+                        $$.fval = -$2.fval;
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
+                | PLUS math_expression { 
+                    if($2.type == E_INTEGER) {
+                        $$.type = E_INTEGER; 
+                        $$.ival = -$2.ival;
+                    } else if($2.type == E_FLOAT) {
+                        $$.type = E_FLOAT; 
+                        $$.fval = $2.fval;
+                    } else {
+                        yyerror("Unsupported number type");
+                    }
+                }
                 ;
                   
 number: INT { $$.ival = (int)$1.ival; }
