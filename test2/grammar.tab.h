@@ -70,7 +70,10 @@ extern int yydebug;
     P_OPEN = 276,
     P_CLOSE = 277,
     NEWLINE = 278,
-    GL_SYM_DUMP = 279
+    BLOCK_IF = 279,
+    BLOCK_THEN = 280,
+    BLOCK_ENDIF = 281,
+    GL_SYM_DUMP = 282
   };
 #endif
 
@@ -84,7 +87,7 @@ union YYSTYPE
     e_number nval;
     char* sname;
 
-#line 88 "grammar.tab.h" /* yacc.c:1921  */
+#line 91 "grammar.tab.h" /* yacc.c:1921  */
 };
 
 typedef union YYSTYPE YYSTYPE;

@@ -13,6 +13,9 @@
 %%
 [ \t]                       ;
 [\n:]                       { return NEWLINE; }
+"if"                        { return BLOCK_IF; }
+"then"                      { return BLOCK_THEN; }
+"endif"                     { return BLOCK_ENDIF; }
 "let"                       { return ASSIGN; }
 "gstdump"                   { return GL_SYM_DUMP; }
 "and"                       { return AND; }
@@ -30,7 +33,7 @@
 ")"                         { return P_CLOSE; }
 "<"                         { return REL_LT; }
 "<="                        { return REL_LTEQ; }
-"<>"                        { return REL_NOTEQ; }
+"!="                        { return REL_NOTEQ; }
 "=="                        { return REL_EQ; }
 "=>"                        { return REL_GTEQ; }
 ">"                         { return REL_GT; }

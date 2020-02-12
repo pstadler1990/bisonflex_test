@@ -30,6 +30,8 @@
 %token MULTIPLY DIVIDE
 %token P_OPEN P_CLOSE
 %token NEWLINE
+%token BLOCK_IF BLOCK_THEN BLOCK_ENDIF
+
 %token GL_SYM_DUMP
 
 %left AND OR NOT
@@ -40,15 +42,16 @@
 
 %type<nval> number
 %type<nval> math_expression
+%type<ival> if_expression
 
 
 %%
-prgm:
-    | prgm line
+prgm: expression_list
     ;   
-    
-line: NEWLINE
-    | expression NEWLINE { printf("ok\n"); }
+
+expression_list: expression_list expression
+                 | expression
+                 ;
     
 expression: assign
             | math_expression {
@@ -58,6 +61,7 @@ expression: assign
                     printf("%f\n", $1.fval);    
                 }
             }
+            | if_expression
             | GL_SYM_DUMP { e_table_memdump(&global_sym_table); }
             ;
             
@@ -110,7 +114,7 @@ math_expression: number
                     }
                 }
                 | math_expression REL_EQ math_expression {
-                    /* a = b */
+                    /* a == b */
                     $$.type = E_INTEGER;
                     if($1.type == E_INTEGER) {
                         if($3.type == E_INTEGER) {
@@ -123,6 +127,91 @@ math_expression: number
                             $$.ival = (int)$1.fval == $3.ival;
                         } else if($3.type == E_FLOAT) {
                             $$.ival = (int)$1.fval == (int)$3.fval;
+                        }
+                    }
+                }
+                | math_expression REL_NOTEQ math_expression {
+                    /* a != b */
+                    $$.type = E_INTEGER;
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = $1.ival != $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = $1.ival != (int)$3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = (int)$1.fval != $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = (int)$1.fval != (int)$3.fval;
+                        }
+                    }
+                }
+                | math_expression REL_LT math_expression {
+                    /* a < b */
+                    $$.type = E_INTEGER;
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = $1.ival < $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = $1.ival < (int)$3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = (int)$1.fval < $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = (int)$1.fval < (int)$3.fval;
+                        }
+                    }
+                }
+                | math_expression REL_GT math_expression {
+                    /* a > b */
+                    $$.type = E_INTEGER;
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = $1.ival > $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = $1.ival > (int)$3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = (int)$1.fval > $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = (int)$1.fval > (int)$3.fval;
+                        }
+                    }
+                }
+                | math_expression REL_LTEQ math_expression {
+                    /* a <= b */
+                    $$.type = E_INTEGER;
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = $1.ival <= $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = $1.ival <= (int)$3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = (int)$1.fval <= $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = (int)$1.fval <= (int)$3.fval;
+                        }
+                    }
+                }
+                | math_expression REL_GTEQ math_expression {
+                    /* a >= b */
+                    $$.type = E_INTEGER;
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = $1.ival >= $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = $1.ival >= (int)$3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = (int)$1.fval >= $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = (int)$1.fval >= (int)$3.fval;
                         }
                     }
                 }
@@ -251,7 +340,21 @@ math_expression: number
                     }
                 }
                 ;
-                  
+                
+if_expression: BLOCK_IF math_expression if_block expression_list BLOCK_ENDIF { 
+                    printf("If statement\n");
+               }
+               ;
+               
+if_block: BLOCK_THEN if_body
+          | BLOCK_THEN NEWLINE if_body
+          ;
+          
+if_body: expression_list BLOCK_ENDIF
+         //| expression
+         //| expression NEWLINE
+         ;
+         
 number: INT { $$.ival = (int)$1.ival; }
         |FLOAT { $$.fval = (float)$1.fval; }
         ;
