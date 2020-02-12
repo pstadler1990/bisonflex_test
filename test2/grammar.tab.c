@@ -139,10 +139,10 @@ extern int yydebug;
     DIVIDE = 275,
     P_OPEN = 276,
     P_CLOSE = 277,
-    NEWLINE = 278,
-    BLOCK_IF = 279,
-    BLOCK_THEN = 280,
-    BLOCK_ENDIF = 281,
+    BLOCK_IF = 278,
+    BLOCK_THEN = 279,
+    BLOCK_ENDIF = 280,
+    NEWLINE = 281,
     GL_SYM_DUMP = 282
   };
 #endif
@@ -403,18 +403,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  9
+#define YYFINAL  22
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   76
+#define YYLAST   109
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  28
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  7
+#define YYNNTS  8
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  27
+#define YYNRULES  29
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  51
+#define YYNSTATES  56
 
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   282
@@ -463,9 +463,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    49,    49,    52,    53,    56,    59,    74,    91,    92,
-     107,   124,   141,   158,   175,   192,   209,   225,   241,   249,
-     252,   267,   283,   299,   315,   324,   349,   350
+       0,    47,    47,    50,    51,    54,    55,    62,    63,    66,
+      81,    98,    99,   114,   131,   148,   165,   182,   199,   216,
+     232,   248,   256,   259,   274,   290,   306,   342,   348,   349
 };
 #endif
 
@@ -477,9 +477,9 @@ static const char *const yytname[] =
   "$end", "error", "$undefined", "INT", "FLOAT", "IDENTIFIER", "ASSIGN",
   "EQUALS", "AND", "OR", "NOT", "REL_LT", "REL_LTEQ", "REL_NOTEQ",
   "REL_EQ", "REL_GTEQ", "REL_GT", "PLUS", "MINUS", "MULTIPLY", "DIVIDE",
-  "P_OPEN", "P_CLOSE", "NEWLINE", "BLOCK_IF", "BLOCK_THEN", "BLOCK_ENDIF",
+  "P_OPEN", "P_CLOSE", "BLOCK_IF", "BLOCK_THEN", "BLOCK_ENDIF", "NEWLINE",
   "GL_SYM_DUMP", "$accept", "prgm", "expression_list", "expression",
-  "assign", "math_expression", "number", YY_NULLPTR
+  "assign", "math_expression", "if_expression", "number", YY_NULLPTR
 };
 #endif
 
@@ -508,12 +508,12 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -1,    21,    24,    32,    -1,   -15,   -15,    20,    26,   -15,
-     -15,   -15,   -15,   -15,    20,    20,    20,    20,    46,   -15,
-      20,    56,     7,     7,    31,    20,    20,    20,    20,    20,
-      20,    20,    20,    20,    20,    20,    20,    46,   -15,    56,
-      56,   -10,   -10,   -10,   -10,   -10,   -10,     7,     7,   -15,
-     -15
+      30,   -15,   -15,     2,     5,    34,    34,    34,   -15,    12,
+     -15,   -13,   -15,    79,   -15,   -15,    34,     7,   -15,    89,
+      64,    50,   -15,    30,    34,    34,    34,    34,    34,    34,
+      34,    34,    34,    34,    34,    34,    79,    34,   -15,    30,
+     -15,    89,    89,   -14,   -14,   -14,   -14,   -14,   -14,   -12,
+     -12,   -15,   -15,    79,    -9,   -15
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -521,24 +521,24 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     2,     4,     5,     0,     0,     1,
-       3,    26,    27,     9,     0,     0,     0,     0,     7,     8,
-       0,    18,    25,    24,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     6,    19,    16,
-      17,    12,    14,    11,    10,    15,    13,    22,    23,    20,
-      21
+       0,    28,    29,    12,     0,     0,     0,     0,     8,     0,
+       2,     4,     5,     6,     7,    11,     0,     0,    12,    21,
+       0,     0,     1,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,    10,     0,    22,     0,
+       3,    19,    20,    15,    17,    14,    13,    18,    16,    25,
+      26,    23,    24,     9,     0,    27
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -15,   -15,   -15,    27,   -15,   -14,   -15
+     -15,   -15,    -8,   -15,   -15,    -5,   -15,   -15
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     3,     4,     5,     6,    18,    19
+      -1,     9,    10,    11,    12,    13,    14,    15
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -546,54 +546,60 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-      21,    22,    23,    24,     1,     2,    37,    33,    34,    35,
-      36,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      48,    49,    50,    11,    12,    13,    35,    36,     7,     8,
-      14,    10,     9,    20,     0,     0,     0,    15,    16,    25,
-      26,    17,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,     0,    38,    25,    26,     0,    27,    28,    29,
-      30,    31,    32,    33,    34,    35,    36,    27,    28,    29,
-      30,    31,    32,    33,    34,    35,    36
+      19,    20,    21,    32,    33,    34,    35,    34,    35,    16,
+      17,    36,    22,    23,    37,    40,    55,     0,     0,    41,
+      42,    43,    44,    45,    46,    47,    48,    49,    50,    51,
+      52,    54,    53,     1,     2,     3,     4,     1,     2,    18,
+       5,     0,     0,     0,     5,     0,     0,     0,     0,     0,
+       0,     6,     0,     7,     0,     6,     0,     8,    24,    25,
+       0,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,     0,    24,    25,    39,    26,    27,    28,    29,    30,
+      31,    32,    33,    34,    35,     0,    38,    24,    25,     0,
+      26,    27,    28,    29,    30,    31,    32,    33,    34,    35,
+      26,    27,    28,    29,    30,    31,    32,    33,    34,    35
 };
 
 static const yytype_int8 yycheck[] =
 {
-      14,    15,    16,    17,     5,     6,    20,    17,    18,    19,
-      20,    25,    26,    27,    28,    29,    30,    31,    32,    33,
-      34,    35,    36,     3,     4,     5,    19,    20,     7,     5,
-      10,     4,     0,     7,    -1,    -1,    -1,    17,    18,     8,
-       9,    21,    11,    12,    13,    14,    15,    16,    17,    18,
-      19,    20,    -1,    22,     8,     9,    -1,    11,    12,    13,
-      14,    15,    16,    17,    18,    19,    20,    11,    12,    13,
-      14,    15,    16,    17,    18,    19,    20
+       5,     6,     7,    17,    18,    19,    20,    19,    20,     7,
+       5,    16,     0,    26,     7,    23,    25,    -1,    -1,    24,
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,    39,    37,     3,     4,     5,     6,     3,     4,     5,
+      10,    -1,    -1,    -1,    10,    -1,    -1,    -1,    -1,    -1,
+      -1,    21,    -1,    23,    -1,    21,    -1,    27,     8,     9,
+      -1,    11,    12,    13,    14,    15,    16,    17,    18,    19,
+      20,    -1,     8,     9,    24,    11,    12,    13,    14,    15,
+      16,    17,    18,    19,    20,    -1,    22,     8,     9,    -1,
+      11,    12,    13,    14,    15,    16,    17,    18,    19,    20,
+      11,    12,    13,    14,    15,    16,    17,    18,    19,    20
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     5,     6,    29,    30,    31,    32,     7,     5,     0,
-      31,     3,     4,     5,    10,    17,    18,    21,    33,    34,
-       7,    33,    33,    33,    33,     8,     9,    11,    12,    13,
-      14,    15,    16,    17,    18,    19,    20,    33,    22,    33,
-      33,    33,    33,    33,    33,    33,    33,    33,    33,    33,
-      33
+       0,     3,     4,     5,     6,    10,    21,    23,    27,    29,
+      30,    31,    32,    33,    34,    35,     7,     5,     5,    33,
+      33,    33,     0,    26,     8,     9,    11,    12,    13,    14,
+      15,    16,    17,    18,    19,    20,    33,     7,    22,    24,
+      30,    33,    33,    33,    33,    33,    33,    33,    33,    33,
+      33,    33,    33,    33,    30,    25
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    28,    29,    30,    30,    31,    32,    32,    33,    33,
-      33,    33,    33,    33,    33,    33,    33,    33,    33,    33,
-      33,    33,    33,    33,    33,    33,    34,    34
+       0,    28,    29,    30,    30,    31,    31,    31,    31,    32,
+      32,    33,    33,    33,    33,    33,    33,    33,    33,    33,
+      33,    33,    33,    33,    33,    33,    33,    34,    35,    35
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     2,     1,     1,     4,     3,     1,     1,
-       3,     3,     3,     3,     3,     3,     3,     3,     2,     3,
-       3,     3,     3,     3,     2,     2,     1,     1
+       0,     2,     1,     3,     1,     1,     1,     1,     1,     4,
+       3,     1,     1,     3,     3,     3,     3,     3,     3,     3,
+       3,     2,     3,     3,     3,     3,     3,     5,     1,     1
 };
 
 
@@ -1279,7 +1285,25 @@ yyreduce:
   switch (yyn)
     {
         case 6:
-#line 59 "grammar.y" /* yacc.c:1652  */
+#line 55 "grammar.y" /* yacc.c:1652  */
+    {
+                if((yyvsp[0].nval).type == E_INTEGER) {
+                    printf("> %d\n", (yyvsp[0].nval).ival);
+                } else if((yyvsp[0].nval).type == E_FLOAT) {
+                    printf("> %f\n", (yyvsp[0].nval).fval);    
+                }
+            }
+#line 1297 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 8:
+#line 63 "grammar.y" /* yacc.c:1652  */
+    { e_table_memdump(&global_sym_table); }
+#line 1303 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 9:
+#line 66 "grammar.y" /* yacc.c:1652  */
     { 
             /* Number type (integer|float) definition with initialization, let x = 42 */
             e_statusc status;
@@ -1295,11 +1319,11 @@ yyreduce:
             }
             error_pprint(status);
         }
-#line 1299 "grammar.tab.c" /* yacc.c:1652  */
+#line 1323 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 7:
-#line 74 "grammar.y" /* yacc.c:1652  */
+  case 10:
+#line 81 "grammar.y" /* yacc.c:1652  */
     {
             /* Change value of number type variable, a = 3 */
             e_statusc status;
@@ -1315,31 +1339,31 @@ yyreduce:
             }
             error_pprint(status);
         }
-#line 1319 "grammar.tab.c" /* yacc.c:1652  */
+#line 1343 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 9:
-#line 92 "grammar.y" /* yacc.c:1652  */
+  case 12:
+#line 99 "grammar.y" /* yacc.c:1652  */
     { 
                     e_table_entry_ret returned_val = e_table_load_entry(&global_sym_table, (yyvsp[0].sname));
                     error_pprint(returned_val.status);
                     
                     if(returned_val.svalue.argtype == E_ARGT_INT) {
                         (yyval.nval).type = E_INTEGER;
-                        (yyval.nval).ival = returned_val.svalue.val.ival;
+                        (yyval.nval).ival = returned_val.svalue.ival;
                     } else if(returned_val.svalue.argtype == E_ARGT_FLOAT) {
                         (yyval.nval).type = E_FLOAT;
-                        (yyval.nval).fval = returned_val.svalue.val.fval;
+                        (yyval.nval).fval = returned_val.svalue.fval;
                     } else {
                         // TODO: Implicit cast from string? $$ = atoi();
                         yyerror("Cannot use non-numerical type here\n");
                     }
                 }
-#line 1339 "grammar.tab.c" /* yacc.c:1652  */
+#line 1363 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 10:
-#line 107 "grammar.y" /* yacc.c:1652  */
+  case 13:
+#line 114 "grammar.y" /* yacc.c:1652  */
     {
                     /* a == b */
                     (yyval.nval).type = E_INTEGER;
@@ -1357,11 +1381,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1361 "grammar.tab.c" /* yacc.c:1652  */
+#line 1385 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 11:
-#line 124 "grammar.y" /* yacc.c:1652  */
+  case 14:
+#line 131 "grammar.y" /* yacc.c:1652  */
     {
                     /* a != b */
                     (yyval.nval).type = E_INTEGER;
@@ -1379,11 +1403,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1383 "grammar.tab.c" /* yacc.c:1652  */
+#line 1407 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 12:
-#line 141 "grammar.y" /* yacc.c:1652  */
+  case 15:
+#line 148 "grammar.y" /* yacc.c:1652  */
     {
                     /* a < b */
                     (yyval.nval).type = E_INTEGER;
@@ -1401,11 +1425,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1405 "grammar.tab.c" /* yacc.c:1652  */
+#line 1429 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 13:
-#line 158 "grammar.y" /* yacc.c:1652  */
+  case 16:
+#line 165 "grammar.y" /* yacc.c:1652  */
     {
                     /* a > b */
                     (yyval.nval).type = E_INTEGER;
@@ -1423,11 +1447,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1427 "grammar.tab.c" /* yacc.c:1652  */
+#line 1451 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 14:
-#line 175 "grammar.y" /* yacc.c:1652  */
+  case 17:
+#line 182 "grammar.y" /* yacc.c:1652  */
     {
                     /* a <= b */
                     (yyval.nval).type = E_INTEGER;
@@ -1445,11 +1469,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1449 "grammar.tab.c" /* yacc.c:1652  */
+#line 1473 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 15:
-#line 192 "grammar.y" /* yacc.c:1652  */
+  case 18:
+#line 199 "grammar.y" /* yacc.c:1652  */
     {
                     /* a >= b */
                     (yyval.nval).type = E_INTEGER;
@@ -1467,11 +1491,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1471 "grammar.tab.c" /* yacc.c:1652  */
+#line 1495 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 16:
-#line 209 "grammar.y" /* yacc.c:1652  */
+  case 19:
+#line 216 "grammar.y" /* yacc.c:1652  */
     {
                     (yyval.nval).type = E_INTEGER;
                     if((yyvsp[-2].nval).type == E_INTEGER) {
@@ -1488,11 +1512,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1492 "grammar.tab.c" /* yacc.c:1652  */
+#line 1516 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 17:
-#line 225 "grammar.y" /* yacc.c:1652  */
+  case 20:
+#line 232 "grammar.y" /* yacc.c:1652  */
     {
                     (yyval.nval).type = E_INTEGER;
                     if((yyvsp[-2].nval).type == E_INTEGER) {
@@ -1509,11 +1533,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1513 "grammar.tab.c" /* yacc.c:1652  */
+#line 1537 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 18:
-#line 241 "grammar.y" /* yacc.c:1652  */
+  case 21:
+#line 248 "grammar.y" /* yacc.c:1652  */
     {
                     (yyval.nval).type = E_INTEGER;
                     if((yyvsp[0].nval).type == E_INTEGER) {
@@ -1522,19 +1546,19 @@ yyreduce:
                         (yyval.nval).ival = !(yyvsp[0].nval).fval;
                     }
                 }
-#line 1526 "grammar.tab.c" /* yacc.c:1652  */
+#line 1550 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 19:
-#line 249 "grammar.y" /* yacc.c:1652  */
+  case 22:
+#line 256 "grammar.y" /* yacc.c:1652  */
     {
                     (yyval.nval) = (yyvsp[-1].nval);
                 }
-#line 1534 "grammar.tab.c" /* yacc.c:1652  */
+#line 1558 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 20:
-#line 252 "grammar.y" /* yacc.c:1652  */
+  case 23:
+#line 259 "grammar.y" /* yacc.c:1652  */
     { 
                     if((yyvsp[-2].nval).type == E_INTEGER && (yyvsp[0].nval).type == E_INTEGER) {
                         (yyval.nval).type = E_INTEGER;
@@ -1550,11 +1574,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1554 "grammar.tab.c" /* yacc.c:1652  */
+#line 1578 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 21:
-#line 267 "grammar.y" /* yacc.c:1652  */
+  case 24:
+#line 274 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 / a */
                     if((yyvsp[-2].nval).type == E_INTEGER && (yyvsp[0].nval).type == E_INTEGER) {
@@ -1571,11 +1595,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1575 "grammar.tab.c" /* yacc.c:1652  */
+#line 1599 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 22:
-#line 283 "grammar.y" /* yacc.c:1652  */
+  case 25:
+#line 290 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 + a */
                     if((yyvsp[-2].nval).type == E_INTEGER && (yyvsp[0].nval).type == E_INTEGER) {
@@ -1592,11 +1616,11 @@ yyreduce:
                         }
                     }
                 }
-#line 1596 "grammar.tab.c" /* yacc.c:1652  */
+#line 1620 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 23:
-#line 299 "grammar.y" /* yacc.c:1652  */
+  case 26:
+#line 306 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 - a */
                     if((yyvsp[-2].nval).type == E_INTEGER && (yyvsp[0].nval).type == E_INTEGER) {
@@ -1613,51 +1637,32 @@ yyreduce:
                         }
                     }
                 }
-#line 1617 "grammar.tab.c" /* yacc.c:1652  */
-    break;
-
-  case 24:
-#line 315 "grammar.y" /* yacc.c:1652  */
-    {
-                    if((yyvsp[0].nval).type == E_INTEGER) {
-                        (yyval.nval).type = E_INTEGER; 
-                        (yyval.nval).ival = -(yyvsp[0].nval).ival;
-                    } else if((yyvsp[0].nval).type == E_FLOAT) {
-                        (yyval.nval).type = E_FLOAT; 
-                        (yyval.nval).fval = -(yyvsp[0].nval).fval;
-                    }
-                }
-#line 1631 "grammar.tab.c" /* yacc.c:1652  */
-    break;
-
-  case 25:
-#line 324 "grammar.y" /* yacc.c:1652  */
-    { 
-                    if((yyvsp[0].nval).type == E_INTEGER) {
-                        (yyval.nval).type = E_INTEGER; 
-                        (yyval.nval).ival = -(yyvsp[0].nval).ival;
-                    } else if((yyvsp[0].nval).type == E_FLOAT) {
-                        (yyval.nval).type = E_FLOAT; 
-                        (yyval.nval).fval = (yyvsp[0].nval).fval;
-                    }
-                }
-#line 1645 "grammar.tab.c" /* yacc.c:1652  */
-    break;
-
-  case 26:
-#line 349 "grammar.y" /* yacc.c:1652  */
-    { (yyval.nval).ival = (int)(yyvsp[0].nval).ival; }
-#line 1651 "grammar.tab.c" /* yacc.c:1652  */
+#line 1641 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 27:
-#line 350 "grammar.y" /* yacc.c:1652  */
+#line 342 "grammar.y" /* yacc.c:1652  */
+    { 
+                    /* if 1 then */
+                    printf("If statement\n");
+               }
+#line 1650 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 28:
+#line 348 "grammar.y" /* yacc.c:1652  */
+    { (yyval.nval).ival = (int)(yyvsp[0].nval).ival; }
+#line 1656 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 29:
+#line 349 "grammar.y" /* yacc.c:1652  */
     { (yyval.nval).fval = (float)(yyvsp[0].nval).fval; }
-#line 1657 "grammar.tab.c" /* yacc.c:1652  */
+#line 1662 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
 
-#line 1661 "grammar.tab.c" /* yacc.c:1652  */
+#line 1666 "grammar.tab.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1888,7 +1893,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 352 "grammar.y" /* yacc.c:1918  */
+#line 351 "grammar.y" /* yacc.c:1918  */
 
 
 void yyerror(const char* s) {

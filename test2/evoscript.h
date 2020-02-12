@@ -38,7 +38,7 @@ typedef struct {
         int ival;
         float fval;
         e_str_type sval;
-    } val;
+    };
     e_arg_type argtype;
 } e_table_value;
 

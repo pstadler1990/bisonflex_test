@@ -29,9 +29,8 @@
 %token PLUS MINUS
 %token MULTIPLY DIVIDE
 %token P_OPEN P_CLOSE
-%token NEWLINE
 %token BLOCK_IF BLOCK_THEN BLOCK_ENDIF
-
+%token NEWLINE
 %token GL_SYM_DUMP
 
 %left AND OR NOT
@@ -42,23 +41,22 @@
 
 %type<nval> number
 %type<nval> math_expression
-%type<ival> if_expression
 
 
 %%
 prgm: expression_list
     ;   
 
-expression_list: expression_list expression
+expression_list: expression NEWLINE expression_list
                  | expression
                  ;
     
 expression: assign
             | math_expression {
                 if($1.type == E_INTEGER) {
-                    printf("%d\n", $1.ival);
+                    printf("> %d\n", $1.ival);
                 } else if($1.type == E_FLOAT) {
-                    printf("%f\n", $1.fval);    
+                    printf("> %f\n", $1.fval);    
                 }
             }
             | if_expression
@@ -104,10 +102,10 @@ math_expression: number
                     
                     if(returned_val.svalue.argtype == E_ARGT_INT) {
                         $$.type = E_INTEGER;
-                        $$.ival = returned_val.svalue.val.ival;
+                        $$.ival = returned_val.svalue.ival;
                     } else if(returned_val.svalue.argtype == E_ARGT_FLOAT) {
                         $$.type = E_FLOAT;
-                        $$.fval = returned_val.svalue.val.fval;
+                        $$.fval = returned_val.svalue.fval;
                     } else {
                         // TODO: Implicit cast from string? $$ = atoi();
                         yyerror("Cannot use non-numerical type here\n");
@@ -321,7 +319,7 @@ math_expression: number
                         }
                     }
                 }
-                | MINUS math_expression {
+                /*| MINUS math_expression {
                     if($2.type == E_INTEGER) {
                         $$.type = E_INTEGER; 
                         $$.ival = -$2.ival;
@@ -333,27 +331,19 @@ math_expression: number
                 | PLUS math_expression { 
                     if($2.type == E_INTEGER) {
                         $$.type = E_INTEGER; 
-                        $$.ival = -$2.ival;
+                        $$.ival = $2.ival;
                     } else if($2.type == E_FLOAT) {
                         $$.type = E_FLOAT; 
                         $$.fval = $2.fval;
                     }
-                }
+                }*/
                 ;
                 
-if_expression: BLOCK_IF math_expression if_block expression_list BLOCK_ENDIF { 
+if_expression: BLOCK_IF math_expression BLOCK_THEN expression_list BLOCK_ENDIF { 
+                    /* if 1 then */
                     printf("If statement\n");
                }
                ;
-               
-if_block: BLOCK_THEN if_body
-          | BLOCK_THEN NEWLINE if_body
-          ;
-          
-if_body: expression_list BLOCK_ENDIF
-         //| expression
-         //| expression NEWLINE
-         ;
          
 number: INT { $$.ival = (int)$1.ival; }
         |FLOAT { $$.fval = (float)$1.fval; }

@@ -69,10 +69,10 @@ extern int yydebug;
     DIVIDE = 275,
     P_OPEN = 276,
     P_CLOSE = 277,
-    NEWLINE = 278,
-    BLOCK_IF = 279,
-    BLOCK_THEN = 280,
-    BLOCK_ENDIF = 281,
+    BLOCK_IF = 278,
+    BLOCK_THEN = 279,
+    BLOCK_ENDIF = 280,
+    NEWLINE = 281,
     GL_SYM_DUMP = 282
   };
 #endif

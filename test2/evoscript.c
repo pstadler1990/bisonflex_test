@@ -43,7 +43,7 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
     e_table_entry new_node;
 
     new_node.idname = strdup(idname);
-    new_node.svalue.val = val.val;
+    new_node.svalue = val;
     new_node.svalue.argtype = val.argtype;
     new_node.used = E_TAB_ENTRY_USED;
     
@@ -148,13 +148,13 @@ e_table_memdump(const e_table* tab) {
             printf("USED\t%s:\t", tab->tab_ptr[r].idname);
             switch(tab->tab_ptr[r].svalue.argtype) {
                 case E_ARGT_INT:
-                    printf("%d\n", tab->tab_ptr[r].svalue.val.ival);
+                    printf("%d\n", tab->tab_ptr[r].svalue.ival);
                     break;
                 case E_ARGT_FLOAT:
-                    printf("%f\n", tab->tab_ptr[r].svalue.val.fval);
+                    printf("%f\n", tab->tab_ptr[r].svalue.fval);
                     break;
                 default:
-                    printf("%s\n", tab->tab_ptr[r].svalue.val.sval);
+                    printf("%s\n", tab->tab_ptr[r].svalue.sval);
             }
         } else {
             printf("-FREE-\n");
@@ -164,12 +164,12 @@ e_table_memdump(const e_table* tab) {
 
 e_table_value
 e_create_int(int val) {
-    return (e_table_value) { .val.ival = val, .argtype = E_ARGT_INT };
+    return (e_table_value) { .ival = val, .argtype = E_ARGT_INT };
 }
 
 e_table_value
 e_create_float(float val) {
-    return (e_table_value) { .val.fval = val, .argtype = E_ARGT_FLOAT };
+    return (e_table_value) { .fval = val, .argtype = E_ARGT_FLOAT };
 }
 
 e_table_value
@@ -179,5 +179,5 @@ e_create_string(const char* str) {
     new_str.sval = strdup(str);
     new_str.slen = strlen(str);
     
-    return (e_table_value) { .val.sval = new_str, .argtype = E_ARGT_STRING };
+    return (e_table_value) { .sval = new_str, .argtype = E_ARGT_STRING };
 }
