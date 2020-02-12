@@ -123,8 +123,6 @@ math_expression: number
                         } else if($3.type == E_FLOAT) {
                             $$.ival = (int)$1.fval & (int)$3.fval;
                         }
-                    } else {
-                        yyerror("Unsupported number type");
                     }
                 }
                 | math_expression OR math_expression {
@@ -141,8 +139,6 @@ math_expression: number
                         } else if($3.type == E_FLOAT) {
                             $$.ival = (int)$1.fval | (int)$3.fval;
                         }
-                    } else {
-                        yyerror("Unsupported number type");
                     }
                 }
                 | NOT math_expression {
@@ -151,95 +147,72 @@ math_expression: number
                         $$.ival = !$2.ival;
                     } else if($2.type == E_FLOAT) {
                         $$.ival = !$2.fval;
-                    } else {
-                        yyerror("Unsupported number type");
                     }
                 }
                 | P_OPEN math_expression P_CLOSE {
                     $$ = $2;
                 }
                 | math_expression MULTIPLY math_expression { 
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.type = E_INTEGER;
-                            $$.ival = $1.ival * $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.type = E_FLOAT;
-                            $$.fval = $1.ival * $3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.type = E_FLOAT;
-                            $$.fval = $1.fval * $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.type = E_FLOAT;
+                    if($1.type == E_INTEGER && $3.type == E_INTEGER) {
+                        $$.type = E_INTEGER;
+                        $$.ival = $1.ival * $3.ival;
+                    } else {
+                        $$.type = E_FLOAT;
+                        if($1.type == E_INTEGER) {
+                           $$.fval = $1.ival * $3.fval; 
+                        } else if($3.type == E_INTEGER) {
+                            $$.fval = $1.fval * $3.ival; 
+                        } else {
                             $$.fval = $1.fval * $3.fval;
                         }
-                    } else {
-                        yyerror("Unsupported number type");
                     }
                 }
                 | math_expression DIVIDE math_expression { 
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.type = E_INTEGER;
-                            $$.ival = $1.ival / $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.type = E_FLOAT;
-                            $$.fval = $1.ival / $3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.type = E_FLOAT;
-                            $$.fval = $1.fval / $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.type = E_FLOAT;
+                    /* 3 / a */
+                    if($1.type == E_INTEGER && $3.type == E_INTEGER) {
+                        $$.type = E_INTEGER;
+                        $$.ival = $1.ival / $3.ival;
+                    } else {
+                        $$.type = E_FLOAT;
+                        if($1.type == E_INTEGER) {
+                           $$.fval = $1.ival / $3.fval; 
+                        } else if($3.type == E_INTEGER) {
+                            $$.fval = $1.fval / $3.ival; 
+                        } else {
                             $$.fval = $1.fval / $3.fval;
                         }
-                    } else {
-                        yyerror("Unsupported number type");
                     }
                 }
                 | math_expression PLUS math_expression { 
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.type = E_INTEGER;
-                            $$.ival = $1.ival + $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.type = E_FLOAT;
-                            $$.fval = $1.ival + $3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.type = E_FLOAT;
-                            $$.fval = $1.fval + $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.type = E_FLOAT;
+                    /* 3 + a */
+                    if($1.type == E_INTEGER && $3.type == E_INTEGER) {
+                        $$.type = E_INTEGER;
+                        $$.ival = $1.ival + $3.ival;
+                    } else {
+                        $$.type = E_FLOAT;
+                        if($1.type == E_INTEGER) {
+                           $$.fval = $1.ival + $3.fval; 
+                        } else if($3.type == E_INTEGER) {
+                            $$.fval = $1.fval + $3.ival; 
+                        } else {
                             $$.fval = $1.fval + $3.fval;
                         }
-                    } else {
-                        yyerror("Unsupported number type");
                     }
                 }
                 | math_expression MINUS math_expression { 
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.type = E_INTEGER;
-                            $$.ival = $1.ival - $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.type = E_FLOAT;
-                            $$.fval = $1.ival - $3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.type = E_FLOAT;
-                            $$.fval = $1.fval - $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.type = E_FLOAT;
+                    /* 3 - a */
+                    if($1.type == E_INTEGER && $3.type == E_INTEGER) {
+                        $$.type = E_INTEGER;
+                        $$.ival = $1.ival - $3.ival;
+                    } else {
+                        $$.type = E_FLOAT;
+                        if($1.type == E_INTEGER) {
+                           $$.fval = $1.ival - $3.fval; 
+                        } else if($3.type == E_INTEGER) {
+                            $$.fval = $1.fval - $3.ival; 
+                        } else {
                             $$.fval = $1.fval - $3.fval;
                         }
-                    } else {
-                        yyerror("Unsupported number type");
                     }
                 }
                 | MINUS math_expression {
@@ -249,8 +222,6 @@ math_expression: number
                     } else if($2.type == E_FLOAT) {
                         $$.type = E_FLOAT; 
                         $$.fval = -$2.fval;
-                    } else {
-                        yyerror("Unsupported number type");
                     }
                 }
                 | PLUS math_expression { 
@@ -260,8 +231,6 @@ math_expression: number
                     } else if($2.type == E_FLOAT) {
                         $$.type = E_FLOAT; 
                         $$.fval = $2.fval;
-                    } else {
-                        yyerror("Unsupported number type");
                     }
                 }
                 ;
