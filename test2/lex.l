@@ -31,6 +31,7 @@
 "<"                         { return REL_LT; }
 "<="                        { return REL_LTEQ; }
 "<>"                        { return REL_NOTEQ; }
+"=="                        { return REL_EQ; }
 "=>"                        { return REL_GTEQ; }
 ">"                         { return REL_GT; }
 

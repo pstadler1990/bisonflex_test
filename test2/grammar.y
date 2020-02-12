@@ -25,7 +25,7 @@
 %token<sname> IDENTIFIER
 %token ASSIGN EQUALS
 %token AND OR NOT
-%token REL_LT REL_LTEQ REL_NOTEQ REL_GTEQ REL_GT
+%token REL_LT REL_LTEQ REL_NOTEQ REL_EQ REL_GTEQ REL_GT
 %token PLUS MINUS
 %token MULTIPLY DIVIDE
 %token P_OPEN P_CLOSE
@@ -33,7 +33,7 @@
 %token GL_SYM_DUMP
 
 %left AND OR NOT
-%left REL_LT REL_LTEQ REL_NOTEQ REL_GTEQ REL_GT
+%left REL_LT REL_LTEQ REL_NOTEQ REL_EQ REL_GTEQ REL_GT
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
 %left P_OPEN P_CLOSE
@@ -107,6 +107,23 @@ math_expression: number
                     } else {
                         // TODO: Implicit cast from string? $$ = atoi();
                         yyerror("Cannot use non-numerical type here\n");
+                    }
+                }
+                | math_expression REL_EQ math_expression {
+                    /* a = b */
+                    $$.type = E_INTEGER;
+                    if($1.type == E_INTEGER) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = $1.ival == $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = $1.ival == (int)$3.fval;
+                        }
+                    } else if($1.type == E_FLOAT) {
+                        if($3.type == E_INTEGER) {
+                            $$.ival = (int)$1.fval == $3.ival;
+                        } else if($3.type == E_FLOAT) {
+                            $$.ival = (int)$1.fval == (int)$3.fval;
+                        }
                     }
                 }
                 | math_expression AND math_expression {

@@ -60,16 +60,17 @@ extern int yydebug;
     REL_LT = 266,
     REL_LTEQ = 267,
     REL_NOTEQ = 268,
-    REL_GTEQ = 269,
-    REL_GT = 270,
-    PLUS = 271,
-    MINUS = 272,
-    MULTIPLY = 273,
-    DIVIDE = 274,
-    P_OPEN = 275,
-    P_CLOSE = 276,
-    NEWLINE = 277,
-    GL_SYM_DUMP = 278
+    REL_EQ = 269,
+    REL_GTEQ = 270,
+    REL_GT = 271,
+    PLUS = 272,
+    MINUS = 273,
+    MULTIPLY = 274,
+    DIVIDE = 275,
+    P_OPEN = 276,
+    P_CLOSE = 277,
+    NEWLINE = 278,
+    GL_SYM_DUMP = 279
   };
 #endif
 
@@ -83,7 +84,7 @@ union YYSTYPE
     e_number nval;
     char* sname;
 
-#line 87 "grammar.tab.h" /* yacc.c:1921  */
+#line 88 "grammar.tab.h" /* yacc.c:1921  */
 };
 
 typedef union YYSTYPE YYSTYPE;
