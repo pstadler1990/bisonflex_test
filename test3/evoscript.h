@@ -11,7 +11,6 @@ typedef struct {
     };
 } e_number;
 
-
 typedef enum {
     E_STATUS_DATATMIS = -5,
     E_STATUS_NOTFOUND = -4,
@@ -56,6 +55,28 @@ typedef struct {
     e_table_value svalue;
 } e_table_entry_ret;
 
+typedef struct {
+    e_statusc status;
+    union {
+        int ival;
+        float fval;
+        e_str_type sval;
+    };
+} e_status_ret;
+
+// VM
+typedef enum {
+    E_OP_PUSHG      /* Push global variable,  PUSHG 3, "a" */,
+    E_OP_POPG,      /* Pop global variable,  POPG "a" */
+} e_opcode;
+
+typedef struct {
+    e_opcode opcode;
+    // 2 args max
+    e_table_value op1;
+    e_table_value op2;
+} e_op;
+
 #define E_GLOBAL_SYM_TAB_ENTRIES    ((int)32)    
 #define E_GLOBAL_SYM_TAB_SIZE   ((int)sizeof(e_table_entry) * E_GLOBAL_SYM_TAB_ENTRIES)
 
@@ -67,9 +88,10 @@ typedef struct {
 
 // Global
 void e_init(void);
+e_op e_create_operation(e_opcode opcode, e_table_value op1, e_table_value op2);
 
 // Symbol tables
-int e_table_add_entry(e_table* tab, const char* idname, e_table_value val);
+e_status_ret e_table_add_entry(e_table* tab, const char* idname, e_table_value val);
 e_table_entry_ret e_table_load_entry(const e_table* tab, const char* idname);
 e_statusc e_table_change_entry(e_table* tab, const char* idname, e_table_value val);
 void e_table_memdump(const e_table* tab);

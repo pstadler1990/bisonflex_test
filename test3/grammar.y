@@ -11,6 +11,7 @@
     void yyerror(const char* s);
     
     static void error_pprint(e_statusc error);
+    static void emit_op(e_op op); 
 %}
 
 
@@ -65,18 +66,25 @@ expression: assign
             
 assign: ASSIGN IDENTIFIER EQUALS math_expression { 
             /* Number type (integer|float) definition with initialization, let x = 42 */
-            e_statusc status;
+            // PUSHG $4, $2  [value, name]
+            e_table_value op1;
             switch($4.type) {
                 case E_INTEGER:
-                    status = e_table_add_entry(&global_sym_table, $2, e_create_int($4.ival));
+                    op1 = e_create_int($4.ival);
                     break;
                 case E_FLOAT:
-                    status = e_table_add_entry(&global_sym_table, $2, e_create_float($4.fval));
+                    op1 = e_create_float($4.fval);
                     break;
-                default:
-                    yyerror("Unsupported number type");
             }
-            error_pprint(status);
+            
+            e_status_ret s = e_table_add_entry(&global_sym_table, $2, op1);
+            
+            if(s.status == E_STATUS_OK) {
+                printf("ival: %d\n", s.ival);
+                emit_op(e_create_operation(E_OP_PUSHG, op1, e_create_int(s.ival)));
+            } else {
+                error_pprint(s.status);
+            }
         }
         | IDENTIFIER EQUALS math_expression {
             /* Change value of number type variable, a = 3 */
@@ -374,4 +382,20 @@ void error_pprint(e_statusc error) {
                 yyerror("Syntax error");
         }
     }
+}
+
+void emit_op(e_op op) {
+    /* Emits (prints) an OP with up to 2 args */
+    switch(op.opcode) {
+        case E_OP_PUSHG:
+            switch(op.op1.argtype) {
+                case E_INTEGER:
+                    printf("PUSHG %d, [%d]\n", op.op1.ival, op.op2.ival);
+                    break;
+                case E_FLOAT:
+                    printf("PUSHG %f, [%d]\n", op.op1.fval, op.op2.ival);
+                    break;
+            }
+            break;
+        }
 }

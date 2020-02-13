@@ -30,14 +30,15 @@ e_table_init(e_table* tab, unsigned int entries_nr) {
 }
 
 
-e_statusc 
+e_status_ret 
 e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
+    //
     if(tab == NULL || tab->entries_nr == 0) {
-        return E_STATUS_NOINIT;
+        return (e_status_ret) { .status = E_STATUS_NOINIT };
     }
     if(tab->entries + 1 >= tab->entries_nr) {
         /* Not enough free space */
-        return E_STATUS_NESIZE;
+        return (e_status_ret) { .status = E_STATUS_NESIZE };
     }
     
     e_table_entry new_node;
@@ -47,18 +48,18 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
     new_node.svalue.argtype = val.argtype;
     new_node.used = E_TAB_ENTRY_USED;
     
-    unsigned int slot_index = 0;
+    int slot_index = 0;
     if(tab->tab_ptr[0].used == E_TAB_ENTRY_FREE) {
         slot_index = 0;
     } else {
-        unsigned int p = 0, f = 0;
+        int p = 0, f = 0;
         do {
             if(tab->tab_ptr[p].used == E_TAB_ENTRY_FREE 
                 && f == 0) {
                 f = p;
             } else if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED) {
                 if(strcmp(tab->tab_ptr[p].idname, idname) == 0) {
-                    return E_STATUS_ALRDYDEF;
+                    return (e_status_ret) { .status = E_STATUS_ALRDYDEF };
                 }
             }
             p++;
@@ -67,12 +68,12 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
         if(f != 0) {
             slot_index = f;
         } else {
-            return E_STATUS_NESIZE;
+            return (e_status_ret) { .status = E_STATUS_NESIZE };
         }
     }
 
     tab->tab_ptr[slot_index] = new_node;
-    return E_STATUS_OK;
+    return (e_status_ret) { .status = E_STATUS_OK, .ival = slot_index };
 }
 
 
@@ -180,4 +181,13 @@ e_create_string(const char* str) {
     new_str.slen = strlen(str);
     
     return (e_table_value) { .sval = new_str, .argtype = E_ARGT_STRING };
+}
+
+e_op
+e_create_operation(e_opcode opcode, e_table_value op1, e_table_value op2) {
+    return (e_op) {
+        .opcode = opcode,
+        .op1 = op1,
+        .op2 = op2
+    };
 }
