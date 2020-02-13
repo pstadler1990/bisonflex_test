@@ -67,7 +67,19 @@ typedef enum {
     E_OP_PUSH,      /* Push variable onto top of stack,         PUSH 3                          */
     E_OP_POP,       /* Pop variable from top of stack,          POP,                s[-1]       */
     
-    E_OP_EQ,        /* Equality check,                          EQ,                 s[-1]==s[-2] */
+    E_OP_EQ,        /* Equal check,                             EQ,                 s[-1]==s[-2] */
+    E_OP_LT,        /* Less than,                               LT,                 s[-1]<s[-2] */    
+    E_OP_GT,        /* Greater than,                            GT,                 s[-1]<s[-2] */ 
+    E_OP_LTEQ,      /* Less than or equal,                      LTEQ,               s[-1]<=s[-2] */ 
+    E_OP_GTEQ,      /* Greater than or equal,                   GTEQ,               s[-1]>=s[-2] */ 
+    
+    E_OP_ADD,
+    E_OP_SUB,
+    E_OP_MUL,
+    E_OP_DIV,
+    E_OP_AND,
+    E_OP_OR,
+    E_OP_NOT,
 } e_opcode;
 
 typedef struct {

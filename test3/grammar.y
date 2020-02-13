@@ -96,57 +96,60 @@ math_expression: number {
                 }
                 | math_expression REL_EQ math_expression {
                     /* a == b */
-                    // PUSH a
-                    // PUSH b
                     // EQ
                     emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
                 }
                 | math_expression REL_NOTEQ math_expression {
                     /* a != b */
-                    
+                    emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
+                    emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
                 }
                 | math_expression REL_LT math_expression {
                     /* a < b */
-                    
+                    // LT
+                    emit_op(e_create_operation(E_OP_LT, e_create_null(), e_create_null()));
                 }
                 | math_expression REL_GT math_expression {
                     /* a > b */
-                    
+                    // GT
+                    emit_op(e_create_operation(E_OP_GT, e_create_null(), e_create_null()));
                 }
                 | math_expression REL_LTEQ math_expression {
                     /* a <= b */
-                   
+                    // LTEQ
+                    emit_op(e_create_operation(E_OP_LTEQ, e_create_null(), e_create_null()));
                 }
                 | math_expression REL_GTEQ math_expression {
                     /* a >= b */
-                    
+                    // GTEQ
+                    emit_op(e_create_operation(E_OP_GTEQ, e_create_null(), e_create_null()));
                 }
                 | math_expression AND math_expression {
-                    
+                    emit_op(e_create_operation(E_OP_AND, e_create_null(), e_create_null()));
                 }
                 | math_expression OR math_expression {
-                    
+                    emit_op(e_create_operation(E_OP_OR, e_create_null(), e_create_null()));
                 }
                 | NOT math_expression {
-                    
+                    emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
                 }
                 | P_OPEN math_expression P_CLOSE {
                     $$ = $2;
                 }
                 | math_expression MULTIPLY math_expression { 
-                    
+                    emit_op(e_create_operation(E_OP_MUL, e_create_null(), e_create_null()));
                 }
                 | math_expression DIVIDE math_expression { 
                     /* 3 / a */
-                    
+                    emit_op(e_create_operation(E_OP_DIV, e_create_null(), e_create_null()));
                 }
                 | math_expression PLUS math_expression { 
                     /* 3 + a */
-                    
+                    emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
                 }
                 | math_expression MINUS math_expression { 
                     /* 3 - a */
-                    
+                    emit_op(e_create_operation(E_OP_SUB, e_create_null(), e_create_null()));
                 }
                 /*| MINUS math_expression {
                     if($2.type == E_INTEGER) {
@@ -222,6 +225,30 @@ void emit_op(e_op op) {
             break;
         case E_OP_EQ:
             printf("EQ\n");
+            break;
+        case E_OP_LT:
+            printf("LT\n");
+            break;
+        case E_OP_GT:
+            printf("GT\n");
+            break;
+        case E_OP_LTEQ:
+            printf("LTEQ\n");
+            break;
+        case E_OP_GTEQ:
+            printf("GTEQ\n");
+            break;
+        case E_OP_ADD:
+            printf("ADD\n");
+            break;
+        case E_OP_SUB:
+            printf("SUB\n");
+            break;
+        case E_OP_MUL:
+            printf("MUL\n");
+            break;
+        case E_OP_DIV:
+            printf("DIV\n");
             break;
         }
 }

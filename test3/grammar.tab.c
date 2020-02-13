@@ -463,8 +463,8 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    45,    45,    48,    49,    52,    53,    54,    57,    68,
-      82,    86,    97,   104,   108,   112,   116,   120,   124,   127,
-     130,   133,   136,   139,   143,   147,   171,   177
+      82,    86,    97,   102,   107,   112,   117,   122,   127,   130,
+     133,   136,   139,   142,   146,   150,   174,   180
 };
 #endif
 
@@ -1345,28 +1345,28 @@ yyreduce:
 #line 97 "grammar.y" /* yacc.c:1652  */
     {
                     /* a == b */
-                    // PUSH a
-                    // PUSH b
                     // EQ
                     emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
                 }
-#line 1354 "grammar.tab.c" /* yacc.c:1652  */
+#line 1352 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 13:
-#line 104 "grammar.y" /* yacc.c:1652  */
+#line 102 "grammar.y" /* yacc.c:1652  */
     {
                     /* a != b */
-                    
+                    emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
+                    emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
                 }
-#line 1363 "grammar.tab.c" /* yacc.c:1652  */
+#line 1362 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 14:
-#line 108 "grammar.y" /* yacc.c:1652  */
+#line 107 "grammar.y" /* yacc.c:1652  */
     {
                     /* a < b */
-                    
+                    // LT
+                    emit_op(e_create_operation(E_OP_LT, e_create_null(), e_create_null()));
                 }
 #line 1372 "grammar.tab.c" /* yacc.c:1652  */
     break;
@@ -1375,113 +1375,116 @@ yyreduce:
 #line 112 "grammar.y" /* yacc.c:1652  */
     {
                     /* a > b */
-                    
+                    // GT
+                    emit_op(e_create_operation(E_OP_GT, e_create_null(), e_create_null()));
                 }
-#line 1381 "grammar.tab.c" /* yacc.c:1652  */
+#line 1382 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 16:
-#line 116 "grammar.y" /* yacc.c:1652  */
+#line 117 "grammar.y" /* yacc.c:1652  */
     {
                     /* a <= b */
-                   
+                    // LTEQ
+                    emit_op(e_create_operation(E_OP_LTEQ, e_create_null(), e_create_null()));
                 }
-#line 1390 "grammar.tab.c" /* yacc.c:1652  */
+#line 1392 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 17:
-#line 120 "grammar.y" /* yacc.c:1652  */
+#line 122 "grammar.y" /* yacc.c:1652  */
     {
                     /* a >= b */
-                    
+                    // GTEQ
+                    emit_op(e_create_operation(E_OP_GTEQ, e_create_null(), e_create_null()));
                 }
-#line 1399 "grammar.tab.c" /* yacc.c:1652  */
+#line 1402 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 18:
-#line 124 "grammar.y" /* yacc.c:1652  */
+#line 127 "grammar.y" /* yacc.c:1652  */
     {
-                    
+                    emit_op(e_create_operation(E_OP_AND, e_create_null(), e_create_null()));
                 }
-#line 1407 "grammar.tab.c" /* yacc.c:1652  */
+#line 1410 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 19:
-#line 127 "grammar.y" /* yacc.c:1652  */
+#line 130 "grammar.y" /* yacc.c:1652  */
     {
-                    
+                    emit_op(e_create_operation(E_OP_OR, e_create_null(), e_create_null()));
                 }
-#line 1415 "grammar.tab.c" /* yacc.c:1652  */
+#line 1418 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 20:
-#line 130 "grammar.y" /* yacc.c:1652  */
+#line 133 "grammar.y" /* yacc.c:1652  */
     {
-                    
+                    emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
                 }
-#line 1423 "grammar.tab.c" /* yacc.c:1652  */
+#line 1426 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 21:
-#line 133 "grammar.y" /* yacc.c:1652  */
+#line 136 "grammar.y" /* yacc.c:1652  */
     {
                     (yyval.nval) = (yyvsp[-1].nval);
                 }
-#line 1431 "grammar.tab.c" /* yacc.c:1652  */
+#line 1434 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 22:
-#line 136 "grammar.y" /* yacc.c:1652  */
+#line 139 "grammar.y" /* yacc.c:1652  */
     { 
-                    
+                    emit_op(e_create_operation(E_OP_MUL, e_create_null(), e_create_null()));
                 }
-#line 1439 "grammar.tab.c" /* yacc.c:1652  */
+#line 1442 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 23:
-#line 139 "grammar.y" /* yacc.c:1652  */
+#line 142 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 / a */
-                    
+                    emit_op(e_create_operation(E_OP_DIV, e_create_null(), e_create_null()));
                 }
-#line 1448 "grammar.tab.c" /* yacc.c:1652  */
+#line 1451 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 24:
-#line 143 "grammar.y" /* yacc.c:1652  */
+#line 146 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 + a */
-                    
+                    emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
                 }
-#line 1457 "grammar.tab.c" /* yacc.c:1652  */
+#line 1460 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 25:
-#line 147 "grammar.y" /* yacc.c:1652  */
+#line 150 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 - a */
-                    
+                    emit_op(e_create_operation(E_OP_SUB, e_create_null(), e_create_null()));
                 }
-#line 1466 "grammar.tab.c" /* yacc.c:1652  */
+#line 1469 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 26:
-#line 171 "grammar.y" /* yacc.c:1652  */
+#line 174 "grammar.y" /* yacc.c:1652  */
     { 
                     /* if 1 then */
                     printf("If statement\n");
                }
-#line 1475 "grammar.tab.c" /* yacc.c:1652  */
+#line 1478 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 27:
-#line 177 "grammar.y" /* yacc.c:1652  */
+#line 180 "grammar.y" /* yacc.c:1652  */
     { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[0].nval).val; }
-#line 1481 "grammar.tab.c" /* yacc.c:1652  */
+#line 1484 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
 
-#line 1485 "grammar.tab.c" /* yacc.c:1652  */
+#line 1488 "grammar.tab.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1712,7 +1715,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 179 "grammar.y" /* yacc.c:1918  */
+#line 182 "grammar.y" /* yacc.c:1918  */
 
 
 void yyerror(const char* s) {
@@ -1759,6 +1762,30 @@ void emit_op(e_op op) {
             break;
         case E_OP_EQ:
             printf("EQ\n");
+            break;
+        case E_OP_LT:
+            printf("LT\n");
+            break;
+        case E_OP_GT:
+            printf("GT\n");
+            break;
+        case E_OP_LTEQ:
+            printf("LTEQ\n");
+            break;
+        case E_OP_GTEQ:
+            printf("GTEQ\n");
+            break;
+        case E_OP_ADD:
+            printf("ADD\n");
+            break;
+        case E_OP_SUB:
+            printf("SUB\n");
+            break;
+        case E_OP_MUL:
+            printf("MUL\n");
+            break;
+        case E_OP_DIV:
+            printf("DIV\n");
             break;
         }
 }
