@@ -4,12 +4,9 @@
 #define E_VERSION "0.01"
 
 typedef struct {
-    enum { E_INTEGER, E_FLOAT } type;
-    union {
-        int ival;
-        float fval;
-    };
-} e_number;
+    enum { E_NUMBER, E_STRING } type;
+    double val;
+} e_type;
 
 typedef enum {
     E_STATUS_DATATMIS = -5,
@@ -23,8 +20,7 @@ typedef enum {
 
 typedef enum {
     E_ARGT_NULL,
-    E_ARGT_INT,
-    E_ARGT_FLOAT,
+    E_ARGT_NUMBER,
     E_ARGT_STRING
 } e_arg_type;
 
@@ -35,8 +31,7 @@ typedef struct {
 
 typedef struct {
     union {
-        int ival;
-        float fval;
+        double val;
         e_str_type sval;
     };
     e_arg_type argtype;
@@ -70,7 +65,9 @@ typedef enum {
     E_OP_PUSHG,     /* Push global variable,                    PUSHG 3, [index] */
     E_OP_POPG,      /* Pop global variable,                     POPG [index] */
     E_OP_PUSH,      /* Push variable onto top of stack,         PUSH 3 */
-    E_OP_POP,       /* Pop variable from top of stack,          POP */
+    E_OP_POP,       /* Pop variable from top of stack,          POP s[-1]*/
+    
+    E_OP_EQ,        /* Equality check,                          EQ s[-1]==s[-2] */
 } e_opcode;
 
 typedef struct {
@@ -97,7 +94,7 @@ e_op e_create_operation(e_opcode opcode, e_table_value op1, e_table_value op2);
 e_status_ret e_table_add_entry(e_table* tab, const char* idname, e_table_value val);
 e_status_ret e_table_find_entry(const e_table* tab, const char* idname);
 e_table_value e_create_null(void);
-e_table_value e_create_int(int val);
+e_table_value e_create_number(double val);
 e_table_value e_create_float(float val);
 e_table_value e_create_string(const char* str);
 

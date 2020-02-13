@@ -43,7 +43,6 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
     e_table_entry new_node;
 
     new_node.idname = strdup(idname);
-    new_node.svalue = val;
     new_node.svalue.argtype = val.argtype;
     new_node.used = E_TAB_ENTRY_USED;
     
@@ -103,17 +102,12 @@ e_table_find_entry(const e_table* tab, const char* idname) {
 
 e_table_value
 e_create_null(void) {
-    return (e_table_value) { .ival = 0, .argtype = E_ARGT_NULL };
+    return (e_table_value) { .val = 0, .argtype = E_ARGT_NULL };
 }
 
 e_table_value
-e_create_int(int val) {
-    return (e_table_value) { .ival = val, .argtype = E_ARGT_INT };
-}
-
-e_table_value
-e_create_float(float val) {
-    return (e_table_value) { .fval = val, .argtype = E_ARGT_FLOAT };
+e_create_number(double val) {
+    return (e_table_value) { .val = val, .argtype = E_ARGT_NUMBER };
 }
 
 e_table_value

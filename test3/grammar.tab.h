@@ -49,30 +49,29 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    INT = 258,
-    FLOAT = 259,
-    IDENTIFIER = 260,
-    ASSIGN = 261,
-    EQUALS = 262,
-    AND = 263,
-    OR = 264,
-    NOT = 265,
-    REL_LT = 266,
-    REL_LTEQ = 267,
-    REL_NOTEQ = 268,
-    REL_EQ = 269,
-    REL_GTEQ = 270,
-    REL_GT = 271,
-    PLUS = 272,
-    MINUS = 273,
-    MULTIPLY = 274,
-    DIVIDE = 275,
-    P_OPEN = 276,
-    P_CLOSE = 277,
-    BLOCK_IF = 278,
-    BLOCK_THEN = 279,
-    BLOCK_ENDIF = 280,
-    NEWLINE = 281
+    NUMBER = 258,
+    IDENTIFIER = 259,
+    ASSIGN = 260,
+    EQUALS = 261,
+    AND = 262,
+    OR = 263,
+    NOT = 264,
+    REL_LT = 265,
+    REL_LTEQ = 266,
+    REL_NOTEQ = 267,
+    REL_EQ = 268,
+    REL_GTEQ = 269,
+    REL_GT = 270,
+    PLUS = 271,
+    MINUS = 272,
+    MULTIPLY = 273,
+    DIVIDE = 274,
+    P_OPEN = 275,
+    P_CLOSE = 276,
+    BLOCK_IF = 277,
+    BLOCK_THEN = 278,
+    BLOCK_ENDIF = 279,
+    NEWLINE = 280
   };
 #endif
 
@@ -83,10 +82,10 @@ union YYSTYPE
 {
 #line 18 "grammar.y" /* yacc.c:1921  */
 
-    e_number nval;
+    e_type nval;
     char* sname;
 
-#line 90 "grammar.tab.h" /* yacc.c:1921  */
+#line 89 "grammar.tab.h" /* yacc.c:1921  */
 };
 
 typedef union YYSTYPE YYSTYPE;

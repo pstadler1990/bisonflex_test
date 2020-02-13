@@ -16,13 +16,11 @@
 
 
 %union {
-    e_number nval;
+    e_type nval;
     char* sname;
 }
 
-
-%token<nval> INT
-%token<nval> FLOAT
+%token<nval> NUMBER
 %token<sname> IDENTIFIER
 %token ASSIGN EQUALS
 %token AND OR NOT
@@ -58,14 +56,12 @@ expression: assign
             
 assign: ASSIGN IDENTIFIER EQUALS math_expression { 
             /* Number type (integer|float) definition with initialization, let x = 42 */
-            // PUSHG $4, $2  (value, index)
+            // PUSH $4
+            // PUSHG [index]
             e_table_value op1;
             switch($4.type) {
-                case E_INTEGER:
-                    op1 = e_create_int($4.ival);
-                    break;
-                case E_FLOAT:
-                    op1 = e_create_float($4.fval);
+                case E_NUMBER:
+                    op1 = e_create_number($4.val);
                     break;
                 default:
                     yyerror("Unsupported number type");
@@ -74,7 +70,8 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
             e_status_ret s = e_table_add_entry(&global_sym_table, $2, op1);
             
             if(s.status == E_STATUS_OK) {
-                emit_op(e_create_operation(E_OP_PUSHG, e_create_int(s.ival), e_create_null()));
+                emit_op(e_create_operation(E_OP_PUSH, op1, e_create_null()));
+                emit_op(e_create_operation(E_OP_PUSHG, e_create_number(s.ival), e_create_null()));
             } else {
                 error_pprint(s.status);
             }
@@ -85,20 +82,18 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
             e_status_ret s = e_table_find_entry(&global_sym_table, $1);
             
             if(s.status == E_STATUS_OK) {
-                e_table_value op1;
                 int gst_index = s.ival;
                 
+                e_table_value op1;
                 switch($3.type) {
-                    case E_INTEGER:
-                        op1 = e_create_int($3.ival);
-                        break;
-                    case E_FLOAT:
-                        op1 = e_create_float($3.fval);
+                    case E_NUMBER:
+                        op1 = e_create_number($3.val);
                         break;
                     default:
                         yyerror("Unsupported number type");
                 }
-                emit_op(e_create_operation(E_OP_PUSHG, e_create_int(gst_index), e_create_null()));
+                emit_op(e_create_operation(E_OP_PUSH, op1, e_create_null()));
+                emit_op(e_create_operation(E_OP_PUSHG, e_create_number(gst_index), e_create_null()));
             } else {
                 error_pprint(s.status);
             }
@@ -107,17 +102,13 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
 
 math_expression: number {
                     // PUSH [number]
-                    e_table_value op1;
-                    
                     switch($1.type) {
-                        case E_INTEGER:
-                            op1 = e_create_int($1.ival);
+                        case E_NUMBER:
+                            emit_op(e_create_operation(E_OP_PUSH, e_create_number($1.val), e_create_null()));
                             break;
-                        case E_FLOAT:
-                            op1 = e_create_float($1.fval);
-                            break;
+                        default:
+                            yyerror("Unsupported number type");
                     }
-                    emit_op(e_create_operation(E_OP_PUSH, op1, e_create_null()));
                 }
                 | IDENTIFIER { 
                     // POPG [index]
@@ -125,219 +116,70 @@ math_expression: number {
                     
                     if(s.status == E_STATUS_OK) {
                         int gst_index = s.ival;
-                        emit_op(e_create_operation(E_OP_POPG, e_create_int(gst_index), e_create_null()));
+                        emit_op(e_create_operation(E_OP_POPG, e_create_number(gst_index), e_create_null()));
                     } else {
                         error_pprint(s.status);
                     }
                 }
                 | math_expression REL_EQ math_expression {
                     /* a == b */
-                    // ADD
-                    $$.type = E_INTEGER;
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = $1.ival == $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = $1.ival == (int)$3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = (int)$1.fval == $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = (int)$1.fval == (int)$3.fval;
-                        }
+                    // PUSH a
+                    // PUSH b
+                    // EQ
+                    if($1.type == E_NUMBER && $3.type == E_NUMBER) {
+                        emit_op(e_create_operation(E_OP_PUSH, e_create_number($1.val), e_create_null()));
+                        emit_op(e_create_operation(E_OP_PUSH, e_create_number($3.val), e_create_null()));
+                        emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
+                    } else {
+                        yyerror("Equality check for unsupported number type(s)");
                     }
                 }
                 | math_expression REL_NOTEQ math_expression {
                     /* a != b */
-                    $$.type = E_INTEGER;
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = $1.ival != $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = $1.ival != (int)$3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = (int)$1.fval != $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = (int)$1.fval != (int)$3.fval;
-                        }
-                    }
+                    
                 }
                 | math_expression REL_LT math_expression {
                     /* a < b */
-                    $$.type = E_INTEGER;
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = $1.ival < $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = $1.ival < (int)$3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = (int)$1.fval < $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = (int)$1.fval < (int)$3.fval;
-                        }
-                    }
+                    
                 }
                 | math_expression REL_GT math_expression {
                     /* a > b */
-                    $$.type = E_INTEGER;
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = $1.ival > $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = $1.ival > (int)$3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = (int)$1.fval > $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = (int)$1.fval > (int)$3.fval;
-                        }
-                    }
+                    
                 }
                 | math_expression REL_LTEQ math_expression {
                     /* a <= b */
-                    $$.type = E_INTEGER;
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = $1.ival <= $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = $1.ival <= (int)$3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = (int)$1.fval <= $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = (int)$1.fval <= (int)$3.fval;
-                        }
-                    }
+                   
                 }
                 | math_expression REL_GTEQ math_expression {
                     /* a >= b */
-                    $$.type = E_INTEGER;
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = $1.ival >= $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = $1.ival >= (int)$3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = (int)$1.fval >= $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = (int)$1.fval >= (int)$3.fval;
-                        }
-                    }
+                    
                 }
                 | math_expression AND math_expression {
-                    $$.type = E_INTEGER;
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = $1.ival & $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = $1.ival & (int)$3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = (int)$1.fval & $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = (int)$1.fval & (int)$3.fval;
-                        }
-                    }
+                    
                 }
                 | math_expression OR math_expression {
-                    $$.type = E_INTEGER;
-                    if($1.type == E_INTEGER) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = $1.ival | $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = $1.ival | (int)$3.fval;
-                        }
-                    } else if($1.type == E_FLOAT) {
-                        if($3.type == E_INTEGER) {
-                            $$.ival = (int)$1.fval | $3.ival;
-                        } else if($3.type == E_FLOAT) {
-                            $$.ival = (int)$1.fval | (int)$3.fval;
-                        }
-                    }
+                    
                 }
                 | NOT math_expression {
-                    $$.type = E_INTEGER;
-                    if($2.type == E_INTEGER) {
-                        $$.ival = !$2.ival;
-                    } else if($2.type == E_FLOAT) {
-                        $$.ival = !$2.fval;
-                    }
+                    
                 }
                 | P_OPEN math_expression P_CLOSE {
                     $$ = $2;
                 }
                 | math_expression MULTIPLY math_expression { 
-                    if($1.type == E_INTEGER && $3.type == E_INTEGER) {
-                        $$.type = E_INTEGER;
-                        $$.ival = $1.ival * $3.ival;
-                    } else {
-                        $$.type = E_FLOAT;
-                        if($1.type == E_INTEGER) {
-                           $$.fval = $1.ival * $3.fval; 
-                        } else if($3.type == E_INTEGER) {
-                            $$.fval = $1.fval * $3.ival; 
-                        } else {
-                            $$.fval = $1.fval * $3.fval;
-                        }
-                    }
+                    
                 }
                 | math_expression DIVIDE math_expression { 
                     /* 3 / a */
-                    if($1.type == E_INTEGER && $3.type == E_INTEGER) {
-                        $$.type = E_INTEGER;
-                        $$.ival = $1.ival / $3.ival;
-                    } else {
-                        $$.type = E_FLOAT;
-                        if($1.type == E_INTEGER) {
-                           $$.fval = $1.ival / $3.fval; 
-                        } else if($3.type == E_INTEGER) {
-                            $$.fval = $1.fval / $3.ival; 
-                        } else {
-                            $$.fval = $1.fval / $3.fval;
-                        }
-                    }
+                    
                 }
                 | math_expression PLUS math_expression { 
                     /* 3 + a */
-                    if($1.type == E_INTEGER && $3.type == E_INTEGER) {
-                        $$.type = E_INTEGER;
-                        $$.ival = $1.ival + $3.ival;
-                    } else {
-                        $$.type = E_FLOAT;
-                        if($1.type == E_INTEGER) {
-                           $$.fval = $1.ival + $3.fval; 
-                        } else if($3.type == E_INTEGER) {
-                            $$.fval = $1.fval + $3.ival; 
-                        } else {
-                            $$.fval = $1.fval + $3.fval;
-                        }
-                    }
+                    
                 }
                 | math_expression MINUS math_expression { 
                     /* 3 - a */
-                    if($1.type == E_INTEGER && $3.type == E_INTEGER) {
-                        $$.type = E_INTEGER;
-                        $$.ival = $1.ival - $3.ival;
-                    } else {
-                        $$.type = E_FLOAT;
-                        if($1.type == E_INTEGER) {
-                           $$.fval = $1.ival - $3.fval; 
-                        } else if($3.type == E_INTEGER) {
-                            $$.fval = $1.fval - $3.ival; 
-                        } else {
-                            $$.fval = $1.fval - $3.fval;
-                        }
-                    }
+                    
                 }
                 /*| MINUS math_expression {
                     if($2.type == E_INTEGER) {
@@ -365,8 +207,7 @@ if_expression: BLOCK_IF math_expression BLOCK_THEN expression_list BLOCK_ENDIF {
                }
                ;
          
-number: INT { $$.type = E_INTEGER; $$.ival = (int)$1.ival; }
-        |FLOAT { $$.type = E_FLOAT; $$.fval = (float)$1.fval; }
+number: NUMBER { $$.type = E_NUMBER; $$.val = $1.val; }
         ;
 %%
 
@@ -400,18 +241,15 @@ void emit_op(e_op op) {
     /* Emits (prints) an OP with up to 2 args */
     switch(op.opcode) {
         case E_OP_PUSHG:
-            printf("PUSHG [%d]\n", op.op1.ival);
+            printf("PUSHG [%d]\n", op.op1.val);
             break;
         case E_OP_POPG:
-            printf("POPG [%d]\n", op.op1.ival);
+            printf("POPG [%d]\n", op.op1.val);
             break;
         case E_OP_PUSH:
             switch(op.op1.argtype) {
-                case E_ARGT_INT:
-                    printf("PUSHi %d\n", op.op1.ival);
-                    break;
-                case E_ARGT_FLOAT:
-                    printf("PUSHf %f\n", op.op1.fval);
+                case E_ARGT_NUMBER:
+                    printf("PUSH %f\n", op.op1.val);
                     break;
                 }
             break;

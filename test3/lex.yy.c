@@ -806,12 +806,12 @@ YY_RULE_SETUP
 case 10:
 YY_RULE_SETUP
 #line 23 "lex.l"
-{ yylval.nval.ival = atoi(yytext); yylval.nval.type = E_INTEGER; return INT; }
+{ yylval.nval.val = atof(yytext); yylval.nval.type = E_NUMBER; return NUMBER; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 24 "lex.l"
-{ yylval.nval.fval = atof(yytext); yylval.nval.type = E_FLOAT; return FLOAT; }
+{ yylval.nval.val = atof(yytext); yylval.nval.type = E_NUMBER; return NUMBER; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
