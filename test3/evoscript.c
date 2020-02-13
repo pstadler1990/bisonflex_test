@@ -102,6 +102,11 @@ e_table_find_entry(const e_table* tab, const char* idname) {
 }
 
 e_table_value
+e_create_null(void) {
+    return (e_table_value) { .ival = 0, .argtype = E_ARGT_NULL };
+}
+
+e_table_value
 e_create_int(int val) {
     return (e_table_value) { .ival = val, .argtype = E_ARGT_INT };
 }

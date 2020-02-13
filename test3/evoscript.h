@@ -22,6 +22,7 @@ typedef enum {
 } e_statusc;
 
 typedef enum {
+    E_ARGT_NULL,
     E_ARGT_INT,
     E_ARGT_FLOAT,
     E_ARGT_STRING
@@ -66,8 +67,10 @@ typedef struct {
 
 // VM
 typedef enum {
-    E_OP_PUSHG      /* Push global variable,  PUSHG 3, "a" */,
-    E_OP_POPG,      /* Pop global variable,  POPG "a" */
+    E_OP_PUSHG,     /* Push global variable,                    PUSHG 3, [index] */
+    E_OP_POPG,      /* Pop global variable,                     POPG [index] */
+    E_OP_PUSH,      /* Push variable onto top of stack,         PUSH 3 */
+    E_OP_POP,       /* Pop variable from top of stack,          POP */
 } e_opcode;
 
 typedef struct {
@@ -93,6 +96,7 @@ e_op e_create_operation(e_opcode opcode, e_table_value op1, e_table_value op2);
 // Symbol tables
 e_status_ret e_table_add_entry(e_table* tab, const char* idname, e_table_value val);
 e_status_ret e_table_find_entry(const e_table* tab, const char* idname);
+e_table_value e_create_null(void);
 e_table_value e_create_int(int val);
 e_table_value e_create_float(float val);
 e_table_value e_create_string(const char* str);

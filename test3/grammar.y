@@ -52,19 +52,13 @@ expression_list: expression NEWLINE expression_list
                  ;
     
 expression: assign
-            | math_expression {
-                if($1.type == E_INTEGER) {
-                    printf("> %d\n", $1.ival);
-                } else if($1.type == E_FLOAT) {
-                    printf("> %f\n", $1.fval);    
-                }
-            }
+            | math_expression
             | if_expression
             ;
             
 assign: ASSIGN IDENTIFIER EQUALS math_expression { 
             /* Number type (integer|float) definition with initialization, let x = 42 */
-            // PUSHG $4, $2  [value, name]
+            // PUSHG $4, $2  (value, index)
             e_table_value op1;
             switch($4.type) {
                 case E_INTEGER:
@@ -80,19 +74,20 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
             e_status_ret s = e_table_add_entry(&global_sym_table, $2, op1);
             
             if(s.status == E_STATUS_OK) {
-                emit_op(e_create_operation(E_OP_PUSHG, op1, e_create_int(s.ival)));
+                emit_op(e_create_operation(E_OP_PUSHG, e_create_int(s.ival), e_create_null()));
             } else {
                 error_pprint(s.status);
             }
         }
         | IDENTIFIER EQUALS math_expression {
             /* Change value of number type variable, a = 3 */
-            // Fetch index $1 from GST
-            // PUSHG $v [index]
+            // PUSHG $3 [index] (value, index)
             e_status_ret s = e_table_find_entry(&global_sym_table, $1);
             
             if(s.status == E_STATUS_OK) {
                 e_table_value op1;
+                int gst_index = s.ival;
+                
                 switch($3.type) {
                     case E_INTEGER:
                         op1 = e_create_int($3.ival);
@@ -103,31 +98,41 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
                     default:
                         yyerror("Unsupported number type");
                 }
-                emit_op(e_create_operation(E_OP_PUSHG, op1, e_create_int(s.ival)));
+                emit_op(e_create_operation(E_OP_PUSHG, e_create_int(gst_index), e_create_null()));
             } else {
                 error_pprint(s.status);
             }
         }
         ;
 
-math_expression: number 
-                | IDENTIFIER { 
-                    //e_table_entry_ret returned_val = e_table_load_entry(&global_sym_table, $1);
-                    //error_pprint(returned_val.status);
+math_expression: number {
+                    // PUSH [number]
+                    e_table_value op1;
                     
-                    //if(returned_val.svalue.argtype == E_ARGT_INT) {
-                    //    $$.type = E_INTEGER;
-                    //    $$.ival = returned_val.svalue.ival;
-                    //} else if(returned_val.svalue.argtype == E_ARGT_FLOAT) {
-                    //    $$.type = E_FLOAT;
-                    //    $$.fval = returned_val.svalue.fval;
-                    //} else {
-                    //    // TODO: Implicit cast from string? $$ = atoi();
-                    //    yyerror("Cannot use non-numerical type here\n");
-                    //}
+                    switch($1.type) {
+                        case E_INTEGER:
+                            op1 = e_create_int($1.ival);
+                            break;
+                        case E_FLOAT:
+                            op1 = e_create_float($1.fval);
+                            break;
+                    }
+                    emit_op(e_create_operation(E_OP_PUSH, op1, e_create_null()));
+                }
+                | IDENTIFIER { 
+                    // POPG [index]
+                    e_status_ret s = e_table_find_entry(&global_sym_table, $1);
+                    
+                    if(s.status == E_STATUS_OK) {
+                        int gst_index = s.ival;
+                        emit_op(e_create_operation(E_OP_POPG, e_create_int(gst_index), e_create_null()));
+                    } else {
+                        error_pprint(s.status);
+                    }
                 }
                 | math_expression REL_EQ math_expression {
                     /* a == b */
+                    // ADD
                     $$.type = E_INTEGER;
                     if($1.type == E_INTEGER) {
                         if($3.type == E_INTEGER) {
@@ -339,7 +344,7 @@ math_expression: number
                         $$.type = E_INTEGER; 
                         $$.ival = -$2.ival;
                     } else if($2.type == E_FLOAT) {
-                        $$.type = E_FLOAT; 
+                        $$.type = E_FLOAT; e_arg_type
                         $$.fval = -$2.fval;
                     }
                 }
@@ -360,8 +365,8 @@ if_expression: BLOCK_IF math_expression BLOCK_THEN expression_list BLOCK_ENDIF {
                }
                ;
          
-number: INT { $$.ival = (int)$1.ival; }
-        |FLOAT { $$.fval = (float)$1.fval; }
+number: INT { $$.type = E_INTEGER; $$.ival = (int)$1.ival; }
+        |FLOAT { $$.type = E_FLOAT; $$.fval = (float)$1.fval; }
         ;
 %%
 
@@ -395,14 +400,20 @@ void emit_op(e_op op) {
     /* Emits (prints) an OP with up to 2 args */
     switch(op.opcode) {
         case E_OP_PUSHG:
+            printf("PUSHG [%d]\n", op.op1.ival);
+            break;
+        case E_OP_POPG:
+            printf("POPG [%d]\n", op.op1.ival);
+            break;
+        case E_OP_PUSH:
             switch(op.op1.argtype) {
-                case E_INTEGER:
-                    printf("PUSHG %d, [%d]\n", op.op1.ival, op.op2.ival);
+                case E_ARGT_INT:
+                    printf("PUSHi %d\n", op.op1.ival);
                     break;
-                case E_FLOAT:
-                    printf("PUSHG %f, [%d]\n", op.op1.fval, op.op2.ival);
+                case E_ARGT_FLOAT:
+                    printf("PUSHf %f\n", op.op1.fval);
                     break;
-            }
+                }
             break;
         }
 }
