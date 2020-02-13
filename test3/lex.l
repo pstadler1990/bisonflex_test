@@ -17,7 +17,6 @@
 "then"                      { return BLOCK_THEN; }
 "endif"                     { return BLOCK_ENDIF; }
 "let"                       { return ASSIGN; }
-"gstdump"                   { return GL_SYM_DUMP; }
 "and"                       { return AND; }
 "or"                        { return OR; }
 "not"                       { return NOT; }

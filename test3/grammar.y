@@ -32,7 +32,6 @@
 %token P_OPEN P_CLOSE
 %token BLOCK_IF BLOCK_THEN BLOCK_ENDIF
 %token NEWLINE
-%token GL_SYM_DUMP
 
 %left AND OR NOT
 %left REL_LT REL_LTEQ REL_NOTEQ REL_EQ REL_GTEQ REL_GT
@@ -61,7 +60,6 @@ expression: assign
                 }
             }
             | if_expression
-            | GL_SYM_DUMP { e_table_memdump(&global_sym_table); }
             ;
             
 assign: ASSIGN IDENTIFIER EQUALS math_expression { 
@@ -75,12 +73,13 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
                 case E_FLOAT:
                     op1 = e_create_float($4.fval);
                     break;
+                default:
+                    yyerror("Unsupported number type");
             }
             
             e_status_ret s = e_table_add_entry(&global_sym_table, $2, op1);
             
             if(s.status == E_STATUS_OK) {
-                printf("ival: %d\n", s.ival);
                 emit_op(e_create_operation(E_OP_PUSHG, op1, e_create_int(s.ival)));
             } else {
                 error_pprint(s.status);
@@ -88,36 +87,44 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
         }
         | IDENTIFIER EQUALS math_expression {
             /* Change value of number type variable, a = 3 */
-            e_statusc status;
-            switch($3.type) {
-                case E_INTEGER:
-                    status = e_table_change_entry(&global_sym_table, $1, e_create_int($3.ival));
-                    break;
-                case E_FLOAT:
-                    status = e_table_change_entry(&global_sym_table, $1, e_create_float($3.fval));
-                    break;
-                default:
-                    yyerror("Unsupported number type");
+            // Fetch index $1 from GST
+            // PUSHG $v [index]
+            e_status_ret s = e_table_find_entry(&global_sym_table, $1);
+            
+            if(s.status == E_STATUS_OK) {
+                e_table_value op1;
+                switch($3.type) {
+                    case E_INTEGER:
+                        op1 = e_create_int($3.ival);
+                        break;
+                    case E_FLOAT:
+                        op1 = e_create_float($3.fval);
+                        break;
+                    default:
+                        yyerror("Unsupported number type");
+                }
+                emit_op(e_create_operation(E_OP_PUSHG, op1, e_create_int(s.ival)));
+            } else {
+                error_pprint(s.status);
             }
-            error_pprint(status);
         }
         ;
 
 math_expression: number 
                 | IDENTIFIER { 
-                    e_table_entry_ret returned_val = e_table_load_entry(&global_sym_table, $1);
-                    error_pprint(returned_val.status);
+                    //e_table_entry_ret returned_val = e_table_load_entry(&global_sym_table, $1);
+                    //error_pprint(returned_val.status);
                     
-                    if(returned_val.svalue.argtype == E_ARGT_INT) {
-                        $$.type = E_INTEGER;
-                        $$.ival = returned_val.svalue.ival;
-                    } else if(returned_val.svalue.argtype == E_ARGT_FLOAT) {
-                        $$.type = E_FLOAT;
-                        $$.fval = returned_val.svalue.fval;
-                    } else {
-                        // TODO: Implicit cast from string? $$ = atoi();
-                        yyerror("Cannot use non-numerical type here\n");
-                    }
+                    //if(returned_val.svalue.argtype == E_ARGT_INT) {
+                    //    $$.type = E_INTEGER;
+                    //    $$.ival = returned_val.svalue.ival;
+                    //} else if(returned_val.svalue.argtype == E_ARGT_FLOAT) {
+                    //    $$.type = E_FLOAT;
+                    //    $$.fval = returned_val.svalue.fval;
+                    //} else {
+                    //    // TODO: Implicit cast from string? $$ = atoi();
+                    //    yyerror("Cannot use non-numerical type here\n");
+                    //}
                 }
                 | math_expression REL_EQ math_expression {
                     /* a == b */

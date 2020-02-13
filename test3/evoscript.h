@@ -92,9 +92,7 @@ e_op e_create_operation(e_opcode opcode, e_table_value op1, e_table_value op2);
 
 // Symbol tables
 e_status_ret e_table_add_entry(e_table* tab, const char* idname, e_table_value val);
-e_table_entry_ret e_table_load_entry(const e_table* tab, const char* idname);
-e_statusc e_table_change_entry(e_table* tab, const char* idname, e_table_value val);
-void e_table_memdump(const e_table* tab);
+e_status_ret e_table_find_entry(const e_table* tab, const char* idname);
 e_table_value e_create_int(int val);
 e_table_value e_create_float(float val);
 e_table_value e_create_string(const char* str);
