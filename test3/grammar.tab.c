@@ -462,9 +462,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    45,    45,    48,    49,    52,    53,    54,    57,    79,
-     103,   113,   124,   137,   141,   145,   149,   153,   157,   160,
-     163,   166,   169,   172,   176,   180,   204,   210
+       0,    45,    45,    48,    49,    52,    53,    54,    57,    68,
+      82,    86,    97,   104,   108,   112,   116,   120,   124,   127,
+     130,   133,   136,   139,   143,   147,   171,   177
 };
 #endif
 
@@ -1287,73 +1287,46 @@ yyreduce:
 #line 57 "grammar.y" /* yacc.c:1652  */
     { 
             /* Number type (integer|float) definition with initialization, let x = 42 */
-            // PUSH $4
             // PUSHG [index]
-            e_table_value op1;
-            switch((yyvsp[0].nval).type) {
-                case E_NUMBER:
-                    op1 = e_create_number((yyvsp[0].nval).val);
-                    break;
-                default:
-                    yyerror("Unsupported number type");
-            }
-            
-            e_status_ret s = e_table_add_entry(&global_sym_table, (yyvsp[-2].sname), op1);
+            e_status_ret s = e_table_add_entry(&global_sym_table, (yyvsp[-2].sname), e_create_number((yyvsp[0].nval).val));
             
             if(s.status == E_STATUS_OK) {
-                emit_op(e_create_operation(E_OP_PUSH, op1, e_create_null()));
                 emit_op(e_create_operation(E_OP_PUSHG, e_create_number(s.ival), e_create_null()));
             } else {
                 error_pprint(s.status);
             }
         }
-#line 1311 "grammar.tab.c" /* yacc.c:1652  */
+#line 1300 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 9:
-#line 79 "grammar.y" /* yacc.c:1652  */
+#line 68 "grammar.y" /* yacc.c:1652  */
     {
             /* Change value of number type variable, a = 3 */
             // PUSHG $3 [index] (value, index)
             e_status_ret s = e_table_find_entry(&global_sym_table, (yyvsp[-2].sname));
             
             if(s.status == E_STATUS_OK) {
-                int gst_index = s.ival;
-                
-                e_table_value op1;
-                switch((yyvsp[0].nval).type) {
-                    case E_NUMBER:
-                        op1 = e_create_number((yyvsp[0].nval).val);
-                        break;
-                    default:
-                        yyerror("Unsupported number type");
-                }
-                emit_op(e_create_operation(E_OP_PUSH, op1, e_create_null()));
+                int gst_index = s.ival;   
                 emit_op(e_create_operation(E_OP_PUSHG, e_create_number(gst_index), e_create_null()));
             } else {
                 error_pprint(s.status);
             }
         }
-#line 1338 "grammar.tab.c" /* yacc.c:1652  */
+#line 1317 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 10:
-#line 103 "grammar.y" /* yacc.c:1652  */
+#line 82 "grammar.y" /* yacc.c:1652  */
     {
                     // PUSH [number]
-                    switch((yyvsp[0].nval).type) {
-                        case E_NUMBER:
-                            emit_op(e_create_operation(E_OP_PUSH, e_create_number((yyvsp[0].nval).val), e_create_null()));
-                            break;
-                        default:
-                            yyerror("Unsupported number type");
-                    }
+                    emit_op(e_create_operation(E_OP_PUSH, e_create_number((yyvsp[0].nval).val), e_create_null()));
                 }
-#line 1353 "grammar.tab.c" /* yacc.c:1652  */
+#line 1326 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 11:
-#line 113 "grammar.y" /* yacc.c:1652  */
+#line 86 "grammar.y" /* yacc.c:1652  */
     { 
                     // POPG [index]
                     e_status_ret s = e_table_find_entry(&global_sym_table, (yyvsp[0].sname));
@@ -1365,156 +1338,150 @@ yyreduce:
                         error_pprint(s.status);
                     }
                 }
-#line 1369 "grammar.tab.c" /* yacc.c:1652  */
+#line 1342 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 12:
-#line 124 "grammar.y" /* yacc.c:1652  */
+#line 97 "grammar.y" /* yacc.c:1652  */
     {
                     /* a == b */
                     // PUSH a
                     // PUSH b
                     // EQ
-                    if((yyvsp[-2].nval).type == E_NUMBER && (yyvsp[0].nval).type == E_NUMBER) {
-                        emit_op(e_create_operation(E_OP_PUSH, e_create_number((yyvsp[-2].nval).val), e_create_null()));
-                        emit_op(e_create_operation(E_OP_PUSH, e_create_number((yyvsp[0].nval).val), e_create_null()));
-                        emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
-                    } else {
-                        yyerror("Equality check for unsupported number type(s)");
-                    }
+                    emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
                 }
-#line 1387 "grammar.tab.c" /* yacc.c:1652  */
+#line 1354 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 13:
-#line 137 "grammar.y" /* yacc.c:1652  */
+#line 104 "grammar.y" /* yacc.c:1652  */
     {
                     /* a != b */
                     
                 }
-#line 1396 "grammar.tab.c" /* yacc.c:1652  */
+#line 1363 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 14:
-#line 141 "grammar.y" /* yacc.c:1652  */
+#line 108 "grammar.y" /* yacc.c:1652  */
     {
                     /* a < b */
                     
                 }
-#line 1405 "grammar.tab.c" /* yacc.c:1652  */
+#line 1372 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 15:
-#line 145 "grammar.y" /* yacc.c:1652  */
+#line 112 "grammar.y" /* yacc.c:1652  */
     {
                     /* a > b */
                     
                 }
-#line 1414 "grammar.tab.c" /* yacc.c:1652  */
+#line 1381 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 16:
-#line 149 "grammar.y" /* yacc.c:1652  */
+#line 116 "grammar.y" /* yacc.c:1652  */
     {
                     /* a <= b */
                    
                 }
-#line 1423 "grammar.tab.c" /* yacc.c:1652  */
+#line 1390 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 17:
-#line 153 "grammar.y" /* yacc.c:1652  */
+#line 120 "grammar.y" /* yacc.c:1652  */
     {
                     /* a >= b */
                     
                 }
-#line 1432 "grammar.tab.c" /* yacc.c:1652  */
+#line 1399 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 18:
-#line 157 "grammar.y" /* yacc.c:1652  */
+#line 124 "grammar.y" /* yacc.c:1652  */
     {
                     
                 }
-#line 1440 "grammar.tab.c" /* yacc.c:1652  */
+#line 1407 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 19:
-#line 160 "grammar.y" /* yacc.c:1652  */
+#line 127 "grammar.y" /* yacc.c:1652  */
     {
+                    
+                }
+#line 1415 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 20:
+#line 130 "grammar.y" /* yacc.c:1652  */
+    {
+                    
+                }
+#line 1423 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 21:
+#line 133 "grammar.y" /* yacc.c:1652  */
+    {
+                    (yyval.nval) = (yyvsp[-1].nval);
+                }
+#line 1431 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 22:
+#line 136 "grammar.y" /* yacc.c:1652  */
+    { 
+                    
+                }
+#line 1439 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 23:
+#line 139 "grammar.y" /* yacc.c:1652  */
+    { 
+                    /* 3 / a */
                     
                 }
 #line 1448 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 20:
-#line 163 "grammar.y" /* yacc.c:1652  */
-    {
-                    
-                }
-#line 1456 "grammar.tab.c" /* yacc.c:1652  */
-    break;
-
-  case 21:
-#line 166 "grammar.y" /* yacc.c:1652  */
-    {
-                    (yyval.nval) = (yyvsp[-1].nval);
-                }
-#line 1464 "grammar.tab.c" /* yacc.c:1652  */
-    break;
-
-  case 22:
-#line 169 "grammar.y" /* yacc.c:1652  */
-    { 
-                    
-                }
-#line 1472 "grammar.tab.c" /* yacc.c:1652  */
-    break;
-
-  case 23:
-#line 172 "grammar.y" /* yacc.c:1652  */
-    { 
-                    /* 3 / a */
-                    
-                }
-#line 1481 "grammar.tab.c" /* yacc.c:1652  */
-    break;
-
   case 24:
-#line 176 "grammar.y" /* yacc.c:1652  */
+#line 143 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 + a */
                     
                 }
-#line 1490 "grammar.tab.c" /* yacc.c:1652  */
+#line 1457 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 25:
-#line 180 "grammar.y" /* yacc.c:1652  */
+#line 147 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 - a */
                     
                 }
-#line 1499 "grammar.tab.c" /* yacc.c:1652  */
+#line 1466 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 26:
-#line 204 "grammar.y" /* yacc.c:1652  */
+#line 171 "grammar.y" /* yacc.c:1652  */
     { 
                     /* if 1 then */
                     printf("If statement\n");
                }
-#line 1508 "grammar.tab.c" /* yacc.c:1652  */
+#line 1475 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 27:
-#line 210 "grammar.y" /* yacc.c:1652  */
+#line 177 "grammar.y" /* yacc.c:1652  */
     { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[0].nval).val; }
-#line 1514 "grammar.tab.c" /* yacc.c:1652  */
+#line 1481 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
 
-#line 1518 "grammar.tab.c" /* yacc.c:1652  */
+#line 1485 "grammar.tab.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1745,7 +1712,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 212 "grammar.y" /* yacc.c:1918  */
+#line 179 "grammar.y" /* yacc.c:1918  */
 
 
 void yyerror(const char* s) {
@@ -1778,10 +1745,10 @@ void emit_op(e_op op) {
     /* Emits (prints) an OP with up to 2 args */
     switch(op.opcode) {
         case E_OP_PUSHG:
-            printf("PUSHG [%d]\n", op.op1.val);
+            printf("PUSHG [%d]\n", (int)op.op1.val);
             break;
         case E_OP_POPG:
-            printf("POPG [%d]\n", op.op1.val);
+            printf("POPG [%d]\n", (int)op.op1.val);
             break;
         case E_OP_PUSH:
             switch(op.op1.argtype) {
@@ -1789,6 +1756,9 @@ void emit_op(e_op op) {
                     printf("PUSH %f\n", op.op1.val);
                     break;
                 }
+            break;
+        case E_OP_EQ:
+            printf("EQ\n");
             break;
         }
 }

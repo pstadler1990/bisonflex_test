@@ -62,12 +62,12 @@ typedef struct {
 
 // VM
 typedef enum {
-    E_OP_PUSHG,     /* Push global variable,                    PUSHG 3, [index] */
-    E_OP_POPG,      /* Pop global variable,                     POPG [index] */
-    E_OP_PUSH,      /* Push variable onto top of stack,         PUSH 3 */
-    E_OP_POP,       /* Pop variable from top of stack,          POP s[-1]*/
+    E_OP_PUSHG,     /* Push global variable,                    PUSHG [index],      s[-1]       */
+    E_OP_POPG,      /* Pop global variable,                     POPG [index]                    */
+    E_OP_PUSH,      /* Push variable onto top of stack,         PUSH 3                          */
+    E_OP_POP,       /* Pop variable from top of stack,          POP,                s[-1]       */
     
-    E_OP_EQ,        /* Equality check,                          EQ s[-1]==s[-2] */
+    E_OP_EQ,        /* Equality check,                          EQ,                 s[-1]==s[-2] */
 } e_opcode;
 
 typedef struct {

@@ -56,21 +56,10 @@ expression: assign
             
 assign: ASSIGN IDENTIFIER EQUALS math_expression { 
             /* Number type (integer|float) definition with initialization, let x = 42 */
-            // PUSH $4
             // PUSHG [index]
-            e_table_value op1;
-            switch($4.type) {
-                case E_NUMBER:
-                    op1 = e_create_number($4.val);
-                    break;
-                default:
-                    yyerror("Unsupported number type");
-            }
-            
-            e_status_ret s = e_table_add_entry(&global_sym_table, $2, op1);
+            e_status_ret s = e_table_add_entry(&global_sym_table, $2, e_create_number($4.val));
             
             if(s.status == E_STATUS_OK) {
-                emit_op(e_create_operation(E_OP_PUSH, op1, e_create_null()));
                 emit_op(e_create_operation(E_OP_PUSHG, e_create_number(s.ival), e_create_null()));
             } else {
                 error_pprint(s.status);
@@ -82,17 +71,7 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
             e_status_ret s = e_table_find_entry(&global_sym_table, $1);
             
             if(s.status == E_STATUS_OK) {
-                int gst_index = s.ival;
-                
-                e_table_value op1;
-                switch($3.type) {
-                    case E_NUMBER:
-                        op1 = e_create_number($3.val);
-                        break;
-                    default:
-                        yyerror("Unsupported number type");
-                }
-                emit_op(e_create_operation(E_OP_PUSH, op1, e_create_null()));
+                int gst_index = s.ival;   
                 emit_op(e_create_operation(E_OP_PUSHG, e_create_number(gst_index), e_create_null()));
             } else {
                 error_pprint(s.status);
@@ -102,13 +81,7 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
 
 math_expression: number {
                     // PUSH [number]
-                    switch($1.type) {
-                        case E_NUMBER:
-                            emit_op(e_create_operation(E_OP_PUSH, e_create_number($1.val), e_create_null()));
-                            break;
-                        default:
-                            yyerror("Unsupported number type");
-                    }
+                    emit_op(e_create_operation(E_OP_PUSH, e_create_number($1.val), e_create_null()));
                 }
                 | IDENTIFIER { 
                     // POPG [index]
@@ -126,13 +99,7 @@ math_expression: number {
                     // PUSH a
                     // PUSH b
                     // EQ
-                    if($1.type == E_NUMBER && $3.type == E_NUMBER) {
-                        emit_op(e_create_operation(E_OP_PUSH, e_create_number($1.val), e_create_null()));
-                        emit_op(e_create_operation(E_OP_PUSH, e_create_number($3.val), e_create_null()));
-                        emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
-                    } else {
-                        yyerror("Equality check for unsupported number type(s)");
-                    }
+                    emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
                 }
                 | math_expression REL_NOTEQ math_expression {
                     /* a != b */
@@ -241,10 +208,10 @@ void emit_op(e_op op) {
     /* Emits (prints) an OP with up to 2 args */
     switch(op.opcode) {
         case E_OP_PUSHG:
-            printf("PUSHG [%d]\n", op.op1.val);
+            printf("PUSHG [%d]\n", (int)op.op1.val);
             break;
         case E_OP_POPG:
-            printf("POPG [%d]\n", op.op1.val);
+            printf("POPG [%d]\n", (int)op.op1.val);
             break;
         case E_OP_PUSH:
             switch(op.op1.argtype) {
@@ -252,6 +219,9 @@ void emit_op(e_op op) {
                     printf("PUSH %f\n", op.op1.val);
                     break;
                 }
+            break;
+        case E_OP_EQ:
+            printf("EQ\n");
             break;
         }
 }
