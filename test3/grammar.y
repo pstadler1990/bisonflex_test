@@ -11,7 +11,10 @@
     void yyerror(const char* s);
     
     static void error_pprint(e_statusc error);
-    static void emit_op(e_op op); 
+    static void emit_op(e_op op);
+    static void inc_cnt(void);
+    
+    static int addr_count = 0;
 %}
 
 
@@ -171,11 +174,22 @@ math_expression: number {
                 }*/
                 ;
                 
-if_expression: BLOCK_IF math_expression BLOCK_THEN expression_list BLOCK_ENDIF { 
+if_expression: if_condition BLOCK_THEN expression_list BLOCK_ENDIF { 
                     /* if 1 then */
-                    printf("If statement\n");
+                    printf("End IF\n");
+                    // TODO: Get instruction count
+                    // TODO: Patch jump dummy_addr from previous jump
                }
                ;
+               
+if_condition: BLOCK_IF math_expression {
+                    printf("Start IF\n");
+                    // TODO: Save IF begin ADDR (instruction count)
+                    // TODO: insert JNE [dummy_addr]
+                    // TODO: copy jmp instruction to a table (to be patched later in the if_expression)
+
+              }
+              ;
          
 number: NUMBER { $$.type = E_NUMBER; $$.val = $1.val; }
         ;
@@ -207,8 +221,15 @@ void error_pprint(e_statusc error) {
     }
 }
 
+void inc_cnt(void) {
+    addr_count++;
+}
+
 void emit_op(e_op op) {
     /* Emits (prints) an OP with up to 2 args */
+    inc_cnt();
+    printf("[%d]", addr_count);
+    
     switch(op.opcode) {
         case E_OP_PUSHG:
             printf("PUSHG [%d]\n", (int)op.op1.val);
