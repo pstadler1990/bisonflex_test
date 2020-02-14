@@ -80,13 +80,12 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 21 "grammar.y" /* yacc.c:1921  */
+#line 22 "grammar.y" /* yacc.c:1921  */
 
     e_type nval;
     char* sname;
-    
 
-#line 90 "grammar.tab.h" /* yacc.c:1921  */
+#line 89 "grammar.tab.h" /* yacc.c:1921  */
 };
 
 typedef union YYSTYPE YYSTYPE;

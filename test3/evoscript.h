@@ -9,6 +9,7 @@ typedef struct {
 } e_type;
 
 typedef enum {
+    E_STATUS_UNDERFLOW = -6,
     E_STATUS_DATATMIS = -5,
     E_STATUS_NOTFOUND = -4,
     E_STATUS_ALRDYDEF = -3,
@@ -28,6 +29,12 @@ typedef struct {
     char* sval;
     int slen;
 } e_str_type;
+
+typedef union {
+    int ival;
+    float fval;
+    e_str_type sval;
+} e_internal_type;
 
 typedef struct {
     union {
@@ -62,16 +69,16 @@ typedef struct {
 
 // VM
 typedef enum {
-    E_OP_PUSHG,     /* Push global variable,                    PUSHG [index],      s[-1]       */
-    E_OP_POPG,      /* Pop global variable,                     POPG [index]                    */
-    E_OP_PUSH,      /* Push variable onto top of stack,         PUSH 3                          */
-    E_OP_POP,       /* Pop variable from top of stack,          POP,                s[-1]       */
+    E_OP_PUSHG,     /* Push global variable,                    PUSHG [index],      s[-1]           */
+    E_OP_POPG,      /* Pop global variable,                     POPG [index]                        */
+    E_OP_PUSH,      /* Push variable onto top of stack,         PUSH 3                              */
+    E_OP_POP,       /* Pop variable from top of stack,          POP,                s[-1]           */
     
-    E_OP_EQ,        /* Equal check,                             EQ,                 s[-1]==s[-2] */
-    E_OP_LT,        /* Less than,                               LT,                 s[-1]<s[-2] */    
-    E_OP_GT,        /* Greater than,                            GT,                 s[-1]<s[-2] */ 
-    E_OP_LTEQ,      /* Less than or equal,                      LTEQ,               s[-1]<=s[-2] */ 
-    E_OP_GTEQ,      /* Greater than or equal,                   GTEQ,               s[-1]>=s[-2] */ 
+    E_OP_EQ,        /* Equal check,                             EQ,                 s[-1]==s[-2]    */
+    E_OP_LT,        /* Less than,                               LT,                 s[-1]<s[-2]     */    
+    E_OP_GT,        /* Greater than,                            GT,                 s[-1]<s[-2]     */ 
+    E_OP_LTEQ,      /* Less than or equal,                      LTEQ,               s[-1]<=s[-2]    */ 
+    E_OP_GTEQ,      /* Greater than or equal,                   GTEQ,               s[-1]>=s[-2]    */ 
     
     E_OP_ADD,
     E_OP_SUB,
@@ -80,6 +87,8 @@ typedef enum {
     E_OP_AND,
     E_OP_OR,
     E_OP_NOT,
+    
+    E_OP_JZ,        /* Jump if zero,                            JZ [addr]                           */
 } e_opcode;
 
 typedef struct {
@@ -89,9 +98,20 @@ typedef struct {
     e_table_value op2;
 } e_op;
 
-#define E_GLOBAL_SYM_TAB_ENTRIES    ((int)32)    
-#define E_GLOBAL_SYM_TAB_SIZE   ((int)sizeof(e_table_entry) * E_GLOBAL_SYM_TAB_ENTRIES)
+#define E_BP_STACK_SIZE     ((int)255)
+typedef struct {
+    e_statusc status;
+    e_internal_type val;
+} e_stack_status_ret;
 
+typedef struct {
+    e_internal_type stack[E_BP_STACK_SIZE];
+    unsigned int entries_nr;
+    unsigned int entries;
+} e_stack;
+
+// Tables
+#define E_GLOBAL_SYM_TAB_ENTRIES    ((int)32)
 typedef struct {
     e_table_entry* tab_ptr;
     unsigned int entries_nr;
@@ -110,8 +130,13 @@ e_table_value e_create_number(double val);
 e_table_value e_create_float(float val);
 e_table_value e_create_string(const char* str);
 
+// Stack
+e_stack_status_ret e_stack_push(e_stack* stack, e_internal_type v);
+e_stack_status_ret e_stack_pop(e_stack* stack);
+
 // Exported definitions
 extern e_table global_sym_table;
-extern e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_SIZE];
+extern e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_ENTRIES];
+extern e_stack bp_stack;
 
 #endif

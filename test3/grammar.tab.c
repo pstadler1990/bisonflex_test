@@ -82,10 +82,11 @@
     static void error_pprint(e_statusc error);
     static void emit_op(e_op op);
     static void inc_cnt(void);
+    static void jmp_patch(unsigned int start_addr, unsigned int end_addr);
     
     static int addr_count = 0;
 
-#line 89 "grammar.tab.c" /* yacc.c:337  */
+#line 90 "grammar.tab.c" /* yacc.c:337  */
 # ifndef YY_NULLPTR
 #  if defined __cplusplus
 #   if 201103L <= __cplusplus
@@ -154,11 +155,10 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 21 "grammar.y" /* yacc.c:352  */
+#line 22 "grammar.y" /* yacc.c:352  */
 
     e_type nval;
     char* sname;
-    
 
 #line 164 "grammar.tab.c" /* yacc.c:352  */
 };
@@ -468,7 +468,7 @@ static const yytype_uint8 yyrline[] =
 {
        0,    49,    49,    52,    53,    56,    57,    58,    61,    72,
       86,    90,   101,   106,   111,   116,   121,   126,   131,   134,
-     137,   140,   143,   146,   150,   154,   178,   186,   195
+     137,   140,   143,   146,   150,   154,   178,   192,   204
 };
 #endif
 
@@ -1475,32 +1475,41 @@ yyreduce:
     { 
                     /* if 1 then */
                     printf("End IF\n");
-                    // TODO: Get instruction count
-                    // TODO: Patch jump dummy_addr from previous jump
+                    // Get instruction count of opening if
+                    e_stack_status_ret s = e_stack_pop(&bp_stack);
+                    if(s.status == E_STATUS_OK) {
+                        // Patch jump dummy_addr from previous jump
+                        jmp_patch(s.val.ival, addr_count + 1);
+                    } else {
+                        error_pprint(s.status);
+                    }
                }
-#line 1482 "grammar.tab.c" /* yacc.c:1652  */
+#line 1488 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 27:
-#line 186 "grammar.y" /* yacc.c:1652  */
+#line 192 "grammar.y" /* yacc.c:1652  */
     {
-                    printf("Start IF\n");
-                    // TODO: Save IF begin ADDR (instruction count)
-                    // TODO: insert JNE [dummy_addr]
-                    // TODO: copy jmp instruction to a table (to be patched later in the if_expression)
-
+                    // Insert JNE [16 bit dummy_addr]
+                    emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFF), e_create_number(0xFF)));
+                    
+                    // Copy jmp instruction to a table (to be patched later in the if_expression)
+                    e_internal_type addr =  { .ival = addr_count };
+                    e_stack_status_ret s = e_stack_push(&bp_stack, addr);
+                    
+                    error_pprint(s.status);
               }
-#line 1494 "grammar.tab.c" /* yacc.c:1652  */
+#line 1503 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 28:
-#line 195 "grammar.y" /* yacc.c:1652  */
+#line 204 "grammar.y" /* yacc.c:1652  */
     { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[0].nval).val; }
-#line 1500 "grammar.tab.c" /* yacc.c:1652  */
+#line 1509 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
 
-#line 1504 "grammar.tab.c" /* yacc.c:1652  */
+#line 1513 "grammar.tab.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1731,7 +1740,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 197 "grammar.y" /* yacc.c:1918  */
+#line 206 "grammar.y" /* yacc.c:1918  */
 
 
 void yyerror(const char* s) {
@@ -1762,6 +1771,11 @@ void error_pprint(e_statusc error) {
 
 void inc_cnt(void) {
     addr_count++;
+}
+
+void jmp_patch(unsigned int start_addr, unsigned int end_addr) {
+    /* Patches a conditional jump dummy 16 bit address with the given end_addr */
+    printf("PATCH jump @%d with new addr: %d\n", start_addr, end_addr);
 }
 
 void emit_op(e_op op) {
@@ -1810,5 +1824,13 @@ void emit_op(e_op op) {
         case E_OP_DIV:
             printf("DIV\n");
             break;
+        case E_OP_AND:
+            printf("AND\n");
+            break;
+        case E_OP_OR:
+            printf("OR\n");
+            break;
+        case E_OP_JZ:
+            printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
         }
 }

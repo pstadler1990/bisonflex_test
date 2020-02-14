@@ -13,6 +13,7 @@
     static void error_pprint(e_statusc error);
     static void emit_op(e_op op);
     static void inc_cnt(void);
+    static void jmp_patch(unsigned int start_addr, unsigned int end_addr);
     
     static int addr_count = 0;
 %}
@@ -177,17 +178,26 @@ math_expression: number {
 if_expression: if_condition BLOCK_THEN expression_list BLOCK_ENDIF { 
                     /* if 1 then */
                     printf("End IF\n");
-                    // TODO: Get instruction count
-                    // TODO: Patch jump dummy_addr from previous jump
+                    // Get instruction count of opening if
+                    e_stack_status_ret s = e_stack_pop(&bp_stack);
+                    if(s.status == E_STATUS_OK) {
+                        // Patch jump dummy_addr from previous jump
+                        jmp_patch(s.val.ival, addr_count + 1);
+                    } else {
+                        error_pprint(s.status);
+                    }
                }
                ;
                
 if_condition: BLOCK_IF math_expression {
-                    printf("Start IF\n");
-                    // TODO: Save IF begin ADDR (instruction count)
-                    // TODO: insert JNE [dummy_addr]
-                    // TODO: copy jmp instruction to a table (to be patched later in the if_expression)
-
+                    // Insert JNE [16 bit dummy_addr]
+                    emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFF), e_create_number(0xFF)));
+                    
+                    // Copy jmp instruction to a table (to be patched later in the if_expression)
+                    e_internal_type addr =  { .ival = addr_count };
+                    e_stack_status_ret s = e_stack_push(&bp_stack, addr);
+                    
+                    error_pprint(s.status);
               }
               ;
          
@@ -223,6 +233,11 @@ void error_pprint(e_statusc error) {
 
 void inc_cnt(void) {
     addr_count++;
+}
+
+void jmp_patch(unsigned int start_addr, unsigned int end_addr) {
+    /* Patches a conditional jump dummy 16 bit address with the given end_addr */
+    printf("PATCH jump @%d with new addr: %d\n", start_addr, end_addr);
 }
 
 void emit_op(e_op op) {
@@ -271,5 +286,13 @@ void emit_op(e_op op) {
         case E_OP_DIV:
             printf("DIV\n");
             break;
+        case E_OP_AND:
+            printf("AND\n");
+            break;
+        case E_OP_OR:
+            printf("OR\n");
+            break;
+        case E_OP_JZ:
+            printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
         }
 }

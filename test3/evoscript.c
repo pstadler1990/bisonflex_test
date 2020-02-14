@@ -4,20 +4,26 @@
 #include <stdio.h>
 
 static void e_table_init(e_table* tab, unsigned int entries_nr);
+static void e_stack_init(e_stack* bp_stack, unsigned int size);
 
 // Global symbol table (fixed block)
 e_table global_sym_table;
-e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_SIZE];
+e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_ENTRIES];
 
+// Backpatch stack
+e_stack bp_stack;
 
 void
 e_init(void) {
     /* Initialize the global symbol table */
     global_sym_table.tab_ptr = (e_table_entry*)&global_sym_table_block;
     e_table_init(&global_sym_table, E_GLOBAL_SYM_TAB_ENTRIES);
+    
+    // Initialize backpatch stack
+    e_stack_init(&bp_stack, E_BP_STACK_SIZE);
 }
 
-
+// Table
 void
 e_table_init(e_table* tab, unsigned int entries_nr) {
     if(tab == NULL) {
@@ -27,7 +33,6 @@ e_table_init(e_table* tab, unsigned int entries_nr) {
     tab->entries_nr = entries_nr;
     tab->entries = 0;
 }
-
 
 e_status_ret 
 e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
@@ -120,6 +125,52 @@ e_create_string(const char* str) {
     return (e_table_value) { .sval = new_str, .argtype = E_ARGT_STRING };
 }
 
+// Stack
+void
+e_stack_init(e_stack* stack, unsigned int size) {
+    if(stack == NULL) {
+        return;
+    }
+    memset(stack->stack, 0, ((int)sizeof(e_table_value) * size));
+    stack->entries_nr = size;
+    stack->entries = 0;
+}
+
+e_stack_status_ret
+e_stack_push(e_stack* stack, e_internal_type v) {
+    if(stack == NULL) {
+        return (e_stack_status_ret) { .status = E_STATUS_NOINIT };
+    }
+    
+    if(stack->entries + 1 >= stack->entries_nr) {
+        /* Not enough free space */
+        return (e_stack_status_ret) { .status = E_STATUS_NESIZE };
+    }
+    
+    
+    stack->stack[stack->entries++] = v;
+    
+    //for(unsigned int i = 0; i < 10; i++) {
+    //    printf("[%d] %d\n", i, stack->stack[i].ival);
+    //}
+    return (e_stack_status_ret) { .status = E_STATUS_OK };
+}
+
+e_stack_status_ret
+e_stack_pop(e_stack* stack) {
+    if(stack == NULL) {
+        return (e_stack_status_ret) { .status = E_STATUS_NOINIT };
+    }
+    
+    if(stack->entries == 0) {
+        /* Stack underflow */
+        return (e_stack_status_ret) { .status = E_STATUS_UNDERFLOW };
+    }
+    return (e_stack_status_ret) { .status = E_STATUS_OK, .val = stack->stack[--stack->entries] };
+}
+
+
+// OP-Code generation
 e_op
 e_create_operation(e_opcode opcode, e_table_value op1, e_table_value op2) {
     return (e_op) {
