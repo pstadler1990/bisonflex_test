@@ -468,7 +468,7 @@ static const yytype_uint8 yyrline[] =
 {
        0,    49,    49,    52,    53,    56,    57,    58,    61,    72,
       86,    90,   101,   106,   111,   116,   121,   126,   131,   134,
-     137,   140,   143,   146,   150,   154,   178,   192,   204
+     137,   140,   143,   146,   150,   154,   178,   189,   201
 };
 #endif
 
@@ -1473,22 +1473,19 @@ yyreduce:
   case 26:
 #line 178 "grammar.y" /* yacc.c:1652  */
     { 
-                    /* if 1 then */
-                    printf("End IF\n");
                     // Get instruction count of opening if
                     e_stack_status_ret s = e_stack_pop(&bp_stack);
                     if(s.status == E_STATUS_OK) {
                         // Patch jump dummy_addr from previous jump
                         jmp_patch(s.val.ival, addr_count + 1);
-                    } else {
-                        error_pprint(s.status);
                     }
+                    error_pprint(s.status);
                }
-#line 1488 "grammar.tab.c" /* yacc.c:1652  */
+#line 1485 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 27:
-#line 192 "grammar.y" /* yacc.c:1652  */
+#line 189 "grammar.y" /* yacc.c:1652  */
     {
                     // Insert JNE [16 bit dummy_addr]
                     emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFF), e_create_number(0xFF)));
@@ -1499,17 +1496,17 @@ yyreduce:
                     
                     error_pprint(s.status);
               }
-#line 1503 "grammar.tab.c" /* yacc.c:1652  */
+#line 1500 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 28:
-#line 204 "grammar.y" /* yacc.c:1652  */
+#line 201 "grammar.y" /* yacc.c:1652  */
     { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[0].nval).val; }
-#line 1509 "grammar.tab.c" /* yacc.c:1652  */
+#line 1506 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
 
-#line 1513 "grammar.tab.c" /* yacc.c:1652  */
+#line 1510 "grammar.tab.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1740,7 +1737,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 206 "grammar.y" /* yacc.c:1918  */
+#line 203 "grammar.y" /* yacc.c:1918  */
 
 
 void yyerror(const char* s) {

@@ -176,16 +176,13 @@ math_expression: number {
                 ;
                 
 if_expression: if_condition BLOCK_THEN expression_list BLOCK_ENDIF { 
-                    /* if 1 then */
-                    printf("End IF\n");
                     // Get instruction count of opening if
                     e_stack_status_ret s = e_stack_pop(&bp_stack);
                     if(s.status == E_STATUS_OK) {
                         // Patch jump dummy_addr from previous jump
                         jmp_patch(s.val.ival, addr_count + 1);
-                    } else {
-                        error_pprint(s.status);
                     }
+                    error_pprint(s.status);
                }
                ;
                
