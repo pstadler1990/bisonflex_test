@@ -18,7 +18,7 @@
     void print_outstream(void);
     
     static int addr_count = 0;
-    static uint8_t out_bytes[99];
+    static uint8_t out_bytes[9999];
     static unsigned int out_b_cnt = 0;
 %}
 
@@ -184,7 +184,7 @@ if_expression: if_condition BLOCK_THEN expression_list BLOCK_ENDIF {
                     e_stack_status_ret s = e_stack_pop(&bp_stack);
                     if(s.status == E_STATUS_OK) {
                         // Patch jump dummy_addr from previous jump
-                        jmp_patch(s.val.ival, addr_count + 1);
+                        jmp_patch(s.val.ival, addr_count);
                     }
                     error_pprint(s.status);
                }
@@ -337,6 +337,8 @@ void emit_op(e_op op) {
             byte_op.op2 = (uint32_t)op.op2.val;
         }
         
+        printf("-----(out_b_cnt: %d)\n", out_b_cnt);
+        
         out_bytes[out_b_cnt++] = (uint8_t)byte_op.opcode;
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op1 >> 24) & 0xFF);
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op1 >> 16) & 0xFF);
@@ -352,7 +354,8 @@ void emit_op(e_op op) {
 }
 
 void print_outstream(void) {
-    for(unsigned int i = 0; i < 99; i++) {
+    printf("print stream *****\n");
+    for(unsigned int i = 0; i < 999; i++) {
         if(i%9 == 0) {
             printf("[%d] ", i / 9);
         }

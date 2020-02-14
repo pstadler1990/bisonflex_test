@@ -108,7 +108,7 @@ typedef struct {
     uint32_t op2;
 } e_byte_op;
 
-#define E_BP_STACK_SIZE     ((int)255)
+#define E_BP_STACK_SIZE     ((int)1024)
 typedef struct {
     e_statusc status;
     e_internal_type val;
@@ -121,7 +121,7 @@ typedef struct {
 } e_stack;
 
 // Tables
-#define E_GLOBAL_SYM_TAB_ENTRIES    ((int)32)
+#define E_GLOBAL_SYM_TAB_ENTRIES    ((int)128)
 typedef struct {
     e_table_entry* tab_ptr;
     unsigned int entries_nr;

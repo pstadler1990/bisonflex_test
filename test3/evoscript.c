@@ -131,7 +131,7 @@ e_stack_init(e_stack* stack, unsigned int size) {
     if(stack == NULL) {
         return;
     }
-    memset(stack->stack, 0, ((int)sizeof(e_table_value) * size));
+    memset(stack->stack, 0, ((int)sizeof(e_internal_type) * size));
     stack->entries_nr = size;
     stack->entries = 0;
 }
