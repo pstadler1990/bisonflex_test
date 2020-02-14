@@ -147,12 +147,7 @@ e_stack_push(e_stack* stack, e_internal_type v) {
         return (e_stack_status_ret) { .status = E_STATUS_NESIZE };
     }
     
-    
     stack->stack[stack->entries++] = v;
-    
-    //for(unsigned int i = 0; i < 10; i++) {
-    //    printf("[%d] %d\n", i, stack->stack[i].ival);
-    //}
     return (e_stack_status_ret) { .status = E_STATUS_OK };
 }
 

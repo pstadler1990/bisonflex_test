@@ -84,9 +84,13 @@
     static void inc_cnt(void);
     static void jmp_patch(unsigned int start_addr, unsigned int end_addr);
     
+    void print_outstream(void);
+    
     static int addr_count = 0;
+    static uint8_t out_bytes[99];
+    static unsigned int out_b_cnt = 0;
 
-#line 90 "grammar.tab.c" /* yacc.c:337  */
+#line 94 "grammar.tab.c" /* yacc.c:337  */
 # ifndef YY_NULLPTR
 #  if defined __cplusplus
 #   if 201103L <= __cplusplus
@@ -155,12 +159,12 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 22 "grammar.y" /* yacc.c:352  */
+#line 26 "grammar.y" /* yacc.c:352  */
 
     e_type nval;
     char* sname;
 
-#line 164 "grammar.tab.c" /* yacc.c:352  */
+#line 168 "grammar.tab.c" /* yacc.c:352  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -466,9 +470,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    49,    49,    52,    53,    56,    57,    58,    61,    72,
-      86,    90,   101,   106,   111,   116,   121,   126,   131,   134,
-     137,   140,   143,   146,   150,   154,   178,   189,   201
+       0,    53,    53,    56,    57,    60,    61,    62,    65,    76,
+      90,    94,   105,   110,   115,   120,   125,   130,   135,   138,
+     141,   144,   147,   150,   154,   158,   182,   193,   205
 };
 #endif
 
@@ -1286,7 +1290,7 @@ yyreduce:
   switch (yyn)
     {
         case 8:
-#line 61 "grammar.y" /* yacc.c:1652  */
+#line 65 "grammar.y" /* yacc.c:1652  */
     { 
             /* Number type (integer|float) definition with initialization, let x = 42 */
             // PUSHG [index]
@@ -1298,11 +1302,11 @@ yyreduce:
                 error_pprint(s.status);
             }
         }
-#line 1302 "grammar.tab.c" /* yacc.c:1652  */
+#line 1306 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 9:
-#line 72 "grammar.y" /* yacc.c:1652  */
+#line 76 "grammar.y" /* yacc.c:1652  */
     {
             /* Change value of number type variable, a = 3 */
             // PUSHG $3 [index] (value, index)
@@ -1315,20 +1319,20 @@ yyreduce:
                 error_pprint(s.status);
             }
         }
-#line 1319 "grammar.tab.c" /* yacc.c:1652  */
+#line 1323 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 10:
-#line 86 "grammar.y" /* yacc.c:1652  */
+#line 90 "grammar.y" /* yacc.c:1652  */
     {
                     // PUSH [number]
                     emit_op(e_create_operation(E_OP_PUSH, e_create_number((yyvsp[0].nval).val), e_create_null()));
                 }
-#line 1328 "grammar.tab.c" /* yacc.c:1652  */
+#line 1332 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 11:
-#line 90 "grammar.y" /* yacc.c:1652  */
+#line 94 "grammar.y" /* yacc.c:1652  */
     { 
                     // POPG [index]
                     e_status_ret s = e_table_find_entry(&global_sym_table, (yyvsp[0].sname));
@@ -1340,138 +1344,138 @@ yyreduce:
                         error_pprint(s.status);
                     }
                 }
-#line 1344 "grammar.tab.c" /* yacc.c:1652  */
+#line 1348 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 12:
-#line 101 "grammar.y" /* yacc.c:1652  */
+#line 105 "grammar.y" /* yacc.c:1652  */
     {
                     /* a == b */
                     // EQ
                     emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
                 }
-#line 1354 "grammar.tab.c" /* yacc.c:1652  */
+#line 1358 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 13:
-#line 106 "grammar.y" /* yacc.c:1652  */
+#line 110 "grammar.y" /* yacc.c:1652  */
     {
                     /* a != b */
                     emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
                     emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
                 }
-#line 1364 "grammar.tab.c" /* yacc.c:1652  */
+#line 1368 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 14:
-#line 111 "grammar.y" /* yacc.c:1652  */
+#line 115 "grammar.y" /* yacc.c:1652  */
     {
                     /* a < b */
                     // LT
                     emit_op(e_create_operation(E_OP_LT, e_create_null(), e_create_null()));
                 }
-#line 1374 "grammar.tab.c" /* yacc.c:1652  */
+#line 1378 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 15:
-#line 116 "grammar.y" /* yacc.c:1652  */
+#line 120 "grammar.y" /* yacc.c:1652  */
     {
                     /* a > b */
                     // GT
                     emit_op(e_create_operation(E_OP_GT, e_create_null(), e_create_null()));
                 }
-#line 1384 "grammar.tab.c" /* yacc.c:1652  */
+#line 1388 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 16:
-#line 121 "grammar.y" /* yacc.c:1652  */
+#line 125 "grammar.y" /* yacc.c:1652  */
     {
                     /* a <= b */
                     // LTEQ
                     emit_op(e_create_operation(E_OP_LTEQ, e_create_null(), e_create_null()));
                 }
-#line 1394 "grammar.tab.c" /* yacc.c:1652  */
+#line 1398 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 17:
-#line 126 "grammar.y" /* yacc.c:1652  */
+#line 130 "grammar.y" /* yacc.c:1652  */
     {
                     /* a >= b */
                     // GTEQ
                     emit_op(e_create_operation(E_OP_GTEQ, e_create_null(), e_create_null()));
                 }
-#line 1404 "grammar.tab.c" /* yacc.c:1652  */
+#line 1408 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 18:
-#line 131 "grammar.y" /* yacc.c:1652  */
+#line 135 "grammar.y" /* yacc.c:1652  */
     {
                     emit_op(e_create_operation(E_OP_AND, e_create_null(), e_create_null()));
                 }
-#line 1412 "grammar.tab.c" /* yacc.c:1652  */
+#line 1416 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 19:
-#line 134 "grammar.y" /* yacc.c:1652  */
+#line 138 "grammar.y" /* yacc.c:1652  */
     {
                     emit_op(e_create_operation(E_OP_OR, e_create_null(), e_create_null()));
                 }
-#line 1420 "grammar.tab.c" /* yacc.c:1652  */
+#line 1424 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 20:
-#line 137 "grammar.y" /* yacc.c:1652  */
+#line 141 "grammar.y" /* yacc.c:1652  */
     {
                     emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
                 }
-#line 1428 "grammar.tab.c" /* yacc.c:1652  */
+#line 1432 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 21:
-#line 140 "grammar.y" /* yacc.c:1652  */
+#line 144 "grammar.y" /* yacc.c:1652  */
     {
                     (yyval.nval) = (yyvsp[-1].nval);
                 }
-#line 1436 "grammar.tab.c" /* yacc.c:1652  */
+#line 1440 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 22:
-#line 143 "grammar.y" /* yacc.c:1652  */
+#line 147 "grammar.y" /* yacc.c:1652  */
     { 
                     emit_op(e_create_operation(E_OP_MUL, e_create_null(), e_create_null()));
                 }
-#line 1444 "grammar.tab.c" /* yacc.c:1652  */
+#line 1448 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 23:
-#line 146 "grammar.y" /* yacc.c:1652  */
+#line 150 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 / a */
                     emit_op(e_create_operation(E_OP_DIV, e_create_null(), e_create_null()));
                 }
-#line 1453 "grammar.tab.c" /* yacc.c:1652  */
+#line 1457 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 24:
-#line 150 "grammar.y" /* yacc.c:1652  */
+#line 154 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 + a */
                     emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
                 }
-#line 1462 "grammar.tab.c" /* yacc.c:1652  */
+#line 1466 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 25:
-#line 154 "grammar.y" /* yacc.c:1652  */
+#line 158 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 - a */
                     emit_op(e_create_operation(E_OP_SUB, e_create_null(), e_create_null()));
                 }
-#line 1471 "grammar.tab.c" /* yacc.c:1652  */
+#line 1475 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 26:
-#line 178 "grammar.y" /* yacc.c:1652  */
+#line 182 "grammar.y" /* yacc.c:1652  */
     { 
                     // Get instruction count of opening if
                     e_stack_status_ret s = e_stack_pop(&bp_stack);
@@ -1481,14 +1485,14 @@ yyreduce:
                     }
                     error_pprint(s.status);
                }
-#line 1485 "grammar.tab.c" /* yacc.c:1652  */
+#line 1489 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 27:
-#line 189 "grammar.y" /* yacc.c:1652  */
+#line 193 "grammar.y" /* yacc.c:1652  */
     {
                     // Insert JNE [16 bit dummy_addr]
-                    emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFF), e_create_number(0xFF)));
+                    emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
                     
                     // Copy jmp instruction to a table (to be patched later in the if_expression)
                     e_internal_type addr =  { .ival = addr_count };
@@ -1496,17 +1500,17 @@ yyreduce:
                     
                     error_pprint(s.status);
               }
-#line 1500 "grammar.tab.c" /* yacc.c:1652  */
+#line 1504 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 28:
-#line 201 "grammar.y" /* yacc.c:1652  */
+#line 205 "grammar.y" /* yacc.c:1652  */
     { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[0].nval).val; }
-#line 1506 "grammar.tab.c" /* yacc.c:1652  */
+#line 1510 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
 
-#line 1510 "grammar.tab.c" /* yacc.c:1652  */
+#line 1514 "grammar.tab.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1737,7 +1741,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 203 "grammar.y" /* yacc.c:1918  */
+#line 207 "grammar.y" /* yacc.c:1918  */
 
 
 void yyerror(const char* s) {
@@ -1773,6 +1777,14 @@ void inc_cnt(void) {
 void jmp_patch(unsigned int start_addr, unsigned int end_addr) {
     /* Patches a conditional jump dummy 16 bit address with the given end_addr */
     printf("PATCH jump @%d with new addr: %d\n", start_addr, end_addr);
+    // TODO: Replace magic numbers with sizeof or defined constant
+    // TODO: This can me a macro!
+    out_bytes[((start_addr - 1) * 9) + 1] = (uint8_t)((end_addr >> 24) & 0xFF);
+    out_bytes[((start_addr - 1) * 9) + 2] = (uint8_t)((end_addr >> 16) & 0xFF);
+    out_bytes[((start_addr - 1) * 9) + 3] = (uint8_t)((end_addr >> 8) & 0xFF);
+    out_bytes[((start_addr - 1) * 9) + 4] = (uint8_t)(end_addr & 0xFF);
+    
+    print_outstream();
 }
 
 void emit_op(e_op op) {
@@ -1780,54 +1792,114 @@ void emit_op(e_op op) {
     inc_cnt();
     printf("[%d]", addr_count);
     
+    e_byte_op byte_op = { .opcode = (uint8_t)op.opcode };
+    
     switch(op.opcode) {
         case E_OP_PUSHG:
             printf("PUSHG [%d]\n", (int)op.op1.val);
+            byte_op.op1 = (uint32_t)op.op1.val;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_POPG:
             printf("POPG [%d]\n", (int)op.op1.val);
+            byte_op.op1 = (uint32_t)op.op1.val;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSH:
             switch(op.op1.argtype) {
                 case E_ARGT_NUMBER:
                     printf("PUSH %f\n", op.op1.val);
+                    byte_op.op1 = (uint32_t)op.op1.val;
+                    byte_op.op2 = (uint32_t)0;
                     break;
                 }
             break;
         case E_OP_EQ:
             printf("EQ\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LT:
             printf("LT\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GT:
             printf("GT\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LTEQ:
             printf("LTEQ\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GTEQ:
             printf("GTEQ\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_ADD:
             printf("ADD\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_SUB:
             printf("SUB\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_MUL:
             printf("MUL\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_DIV:
             printf("DIV\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_AND:
             printf("AND\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_OR:
             printf("OR\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_JZ:
             printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
+            byte_op.op1 = (uint32_t)op.op1.val;
+            byte_op.op2 = (uint32_t)op.op2.val;
         }
+        
+        out_bytes[out_b_cnt++] = (uint8_t)byte_op.opcode;
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op1 >> 24) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op1 >> 16) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op1 >> 8) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)(byte_op.op1 & 0xFF);
+        
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 24) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 16) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 8) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)(byte_op.op2 & 0xFF);
+        
+        print_outstream();
+}
+
+void print_outstream(void) {
+    for(unsigned int i = 0; i < 99; i++) {
+        if(i%9 == 0) {
+            printf("[%d] ", i / 9);
+        }
+    
+        printf("%X ", out_bytes[i]);
+    
+        if(i > 0 && i%17 == 0) {
+            printf("\n");
+        }
+    }
+    printf("\n");
 }

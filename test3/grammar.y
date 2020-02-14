@@ -15,7 +15,11 @@
     static void inc_cnt(void);
     static void jmp_patch(unsigned int start_addr, unsigned int end_addr);
     
+    void print_outstream(void);
+    
     static int addr_count = 0;
+    static uint8_t out_bytes[99];
+    static unsigned int out_b_cnt = 0;
 %}
 
 
@@ -188,7 +192,7 @@ if_expression: if_condition BLOCK_THEN expression_list BLOCK_ENDIF {
                
 if_condition: BLOCK_IF math_expression {
                     // Insert JNE [16 bit dummy_addr]
-                    emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFF), e_create_number(0xFF)));
+                    emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
                     
                     // Copy jmp instruction to a table (to be patched later in the if_expression)
                     e_internal_type addr =  { .ival = addr_count };
@@ -235,6 +239,14 @@ void inc_cnt(void) {
 void jmp_patch(unsigned int start_addr, unsigned int end_addr) {
     /* Patches a conditional jump dummy 16 bit address with the given end_addr */
     printf("PATCH jump @%d with new addr: %d\n", start_addr, end_addr);
+    // TODO: Replace magic numbers with sizeof or defined constant
+    // TODO: This can me a macro!
+    out_bytes[((start_addr - 1) * 9) + 1] = (uint8_t)((end_addr >> 24) & 0xFF);
+    out_bytes[((start_addr - 1) * 9) + 2] = (uint8_t)((end_addr >> 16) & 0xFF);
+    out_bytes[((start_addr - 1) * 9) + 3] = (uint8_t)((end_addr >> 8) & 0xFF);
+    out_bytes[((start_addr - 1) * 9) + 4] = (uint8_t)(end_addr & 0xFF);
+    
+    print_outstream();
 }
 
 void emit_op(e_op op) {
@@ -242,54 +254,114 @@ void emit_op(e_op op) {
     inc_cnt();
     printf("[%d]", addr_count);
     
+    e_byte_op byte_op = { .opcode = (uint8_t)op.opcode };
+    
     switch(op.opcode) {
         case E_OP_PUSHG:
             printf("PUSHG [%d]\n", (int)op.op1.val);
+            byte_op.op1 = (uint32_t)op.op1.val;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_POPG:
             printf("POPG [%d]\n", (int)op.op1.val);
+            byte_op.op1 = (uint32_t)op.op1.val;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSH:
             switch(op.op1.argtype) {
                 case E_ARGT_NUMBER:
                     printf("PUSH %f\n", op.op1.val);
+                    byte_op.op1 = (uint32_t)op.op1.val;
+                    byte_op.op2 = (uint32_t)0;
                     break;
                 }
             break;
         case E_OP_EQ:
             printf("EQ\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LT:
             printf("LT\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GT:
             printf("GT\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LTEQ:
             printf("LTEQ\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GTEQ:
             printf("GTEQ\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_ADD:
             printf("ADD\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_SUB:
             printf("SUB\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_MUL:
             printf("MUL\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_DIV:
             printf("DIV\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_AND:
             printf("AND\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_OR:
             printf("OR\n");
+            byte_op.op1 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_JZ:
             printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
+            byte_op.op1 = (uint32_t)op.op1.val;
+            byte_op.op2 = (uint32_t)op.op2.val;
         }
+        
+        out_bytes[out_b_cnt++] = (uint8_t)byte_op.opcode;
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op1 >> 24) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op1 >> 16) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op1 >> 8) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)(byte_op.op1 & 0xFF);
+        
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 24) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 16) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 8) & 0xFF);
+        out_bytes[out_b_cnt++] = (uint8_t)(byte_op.op2 & 0xFF);
+        
+        print_outstream();
+}
+
+void print_outstream(void) {
+    for(unsigned int i = 0; i < 99; i++) {
+        if(i%9 == 0) {
+            printf("[%d] ", i / 9);
+        }
+    
+        printf("%X ", out_bytes[i]);
+    
+        if(i > 0 && i%17 == 0) {
+            printf("\n");
+        }
+    }
+    printf("\n");
 }

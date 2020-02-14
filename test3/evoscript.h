@@ -1,6 +1,8 @@
 #ifndef __EVOSCRIPT_H
 #define __EVOSCRIPT_H
 
+#include <stdint.h>
+
 #define E_VERSION "0.01"
 
 typedef struct {
@@ -69,34 +71,42 @@ typedef struct {
 
 // VM
 typedef enum {
-    E_OP_PUSHG,     /* Push global variable,                    PUSHG [index],      s[-1]           */
-    E_OP_POPG,      /* Pop global variable,                     POPG [index]                        */
-    E_OP_PUSH,      /* Push variable onto top of stack,         PUSH 3                              */
-    E_OP_POP,       /* Pop variable from top of stack,          POP,                s[-1]           */
+    E_OP_PUSHG = 0x10,     /* Push global variable,                    PUSHG [index],      s[-1]           */
+    E_OP_POPG = 0x11,      /* Pop global variable,                     POPG [index]                        */
+    E_OP_PUSH = 0x12,      /* Push variable onto top of stack,         PUSH 3                              */
+    E_OP_POP = 0x13,       /* Pop variable from top of stack,          POP,                s[-1]           */
     
-    E_OP_EQ,        /* Equal check,                             EQ,                 s[-1]==s[-2]    */
-    E_OP_LT,        /* Less than,                               LT,                 s[-1]<s[-2]     */    
-    E_OP_GT,        /* Greater than,                            GT,                 s[-1]<s[-2]     */ 
-    E_OP_LTEQ,      /* Less than or equal,                      LTEQ,               s[-1]<=s[-2]    */ 
-    E_OP_GTEQ,      /* Greater than or equal,                   GTEQ,               s[-1]>=s[-2]    */ 
+    E_OP_EQ = 0x20,        /* Equal check,                             EQ,                 s[-1]==s[-2]    */
+    E_OP_LT = 0x21,        /* Less than,                               LT,                 s[-1]<s[-2]     */    
+    E_OP_GT = 0x22,        /* Greater than,                            GT,                 s[-1]<s[-2]     */ 
+    E_OP_LTEQ = 0x23,      /* Less than or equal,                      LTEQ,               s[-1]<=s[-2]    */ 
+    E_OP_GTEQ = 0x24,      /* Greater than or equal,                   GTEQ,               s[-1]>=s[-2]    */ 
     
-    E_OP_ADD,
-    E_OP_SUB,
-    E_OP_MUL,
-    E_OP_DIV,
-    E_OP_AND,
-    E_OP_OR,
-    E_OP_NOT,
+    E_OP_ADD = 0x30,
+    E_OP_SUB = 0x32,
+    E_OP_MUL = 0x33,
+    E_OP_DIV = 0x34,
+    E_OP_AND = 0x35,
+    E_OP_OR = 0x36,
+    E_OP_NOT = 0x37,
     
-    E_OP_JZ,        /* Jump if zero,                            JZ [addr]                           */
+    E_OP_JZ = 0x40,        /* Jump if zero,                            JZ [addr]                           */
 } e_opcode;
 
 typedef struct {
+    // Internal representation of an operation
     e_opcode opcode;
     // 2 args max
     e_table_value op1;
     e_table_value op2;
 } e_op;
+
+typedef struct {
+    // Byte (external) representation of an operation
+    uint8_t opcode;
+    uint32_t op1;
+    uint32_t op2;
+} e_byte_op;
 
 #define E_BP_STACK_SIZE     ((int)255)
 typedef struct {
