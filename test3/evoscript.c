@@ -10,17 +10,30 @@ static void e_stack_init(e_stack* bp_stack, unsigned int size);
 e_table global_sym_table;
 e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_ENTRIES];
 
+// Local symbol tables
+unsigned int scope_level;
+e_table local_sym_table[E_LOCAL_SYM_TAB_SCOPES];
+e_table_entry local_sym_table_block[E_LOCAL_SYM_TAB_SCOPES][E_LOCAL_SYM_TAB_ENTRIES];
+
 // Backpatch stack
 e_stack bp_stack;
 
 void
 e_init(void) {
-    /* Initialize the global symbol table */
+    // Initialize the global symbol table
     global_sym_table.tab_ptr = (e_table_entry*)&global_sym_table_block;
     e_table_init(&global_sym_table, E_GLOBAL_SYM_TAB_ENTRIES);
     
     // Initialize backpatch stack
     e_stack_init(&bp_stack, E_BP_STACK_SIZE);
+    
+    // Initialize local scopes
+    scope_level = 0;
+    for(unsigned int s = 0; s < E_LOCAL_SYM_TAB_SCOPES; s++) {
+        // As we won't want to use dynamic memory allocation, there's a hard coded limit of nesting (scopes)
+        local_sym_table[s].tab_ptr = (e_table_entry*)&local_sym_table_block[s];
+        e_table_init(&local_sym_table[s], E_LOCAL_SYM_TAB_ENTRIES);
+    }
 }
 
 // Table
@@ -62,7 +75,8 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
                 f = p;
             } else if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED) {
                 if(strcmp(tab->tab_ptr[p].idname, idname) == 0) {
-                    return (e_status_ret) { .status = E_STATUS_ALRDYDEF };
+                    return (e_status_ret) { .status = E_STATUS_OK };
+                    //return (e_status_ret) { .status = E_STATUS_ALRDYDEF };
                 }
             }
             p++;
@@ -173,4 +187,26 @@ e_create_operation(e_opcode opcode, e_table_value op1, e_table_value op2) {
         .op1 = op1,
         .op2 = op2
     };
+}
+
+// Blocks / Scopes
+e_status_ret
+e_create_scope(void) {
+    if(scope_level + 1 < E_LOCAL_SYM_TAB_SCOPES) {
+        scope_level++;
+    } else {
+        return (e_status_ret) { .status = E_STATUS_NESIZE };
+    }
+    
+    if(scope_level == 1) return (e_status_ret) { .status = E_STATUS_OK }; 
+    // TODO: We are missing the 0th scope block with this approach!
+    
+    // Copy previous scope
+    printf("previous table entries: %d\n", local_sym_table[scope_level - 1].entries);
+    
+    memcpy(&local_sym_table[scope_level], &local_sym_table[scope_level - 1], sizeof(e_table));
+    
+    printf("BLOCK BEGIN, level: %d with %d entries\n", scope_level, local_sym_table[scope_level].entries);
+    
+    return (e_status_ret) { .status = E_STATUS_OK };
 }

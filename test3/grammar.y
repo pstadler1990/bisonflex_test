@@ -67,18 +67,30 @@ expression: assign
             
 assign: ASSIGN IDENTIFIER EQUALS math_expression { 
             /* Number type (integer|float) definition with initialization, let x = 42 */
-            // PUSHG [index]
-            e_status_ret s = e_table_add_entry(&global_sym_table, $2, e_create_number($4.val));
+            e_opcode op;
+            e_status_ret s;
+            
+            if(scope_level == 0) {
+                // PUSHG [index]
+                s = e_table_add_entry(&global_sym_table, $2, e_create_number($4.val));
+                op = E_OP_PUSHG;
+            } else {
+                // PUSHL [index]
+                s = e_table_add_entry(&local_sym_table[scope_level], $2, e_create_number($4.val));
+                op = E_OP_PUSHL;
+            }
             
             if(s.status == E_STATUS_OK) {
-                emit_op(e_create_operation(E_OP_PUSHG, e_create_number(s.ival), e_create_null()));
+                emit_op(e_create_operation(op, e_create_number(s.ival), e_create_null()));
             } else {
+                printf("fuck \n");
                 error_pprint(s.status);
             }
         }
         | IDENTIFIER EQUALS math_expression {
             /* Change value of number type variable, a = 3 */
             // PUSHG $3 [index] (value, index)
+            // PUSHL $3 [index] (value, index)
             e_status_ret s = e_table_find_entry(&global_sym_table, $1);
             
             if(s.status == E_STATUS_OK) {
@@ -95,12 +107,25 @@ math_expression: number {
                     emit_op(e_create_operation(E_OP_PUSH, e_create_number($1.val), e_create_null()));
                 }
                 | IDENTIFIER { 
-                    // POPG [index]
-                    e_status_ret s = e_table_find_entry(&global_sym_table, $1);
+                    /* Find and pop a global or local variable */
+                    e_opcode op;
+                    e_status_ret s;
+                    
+                    if(scope_level > 0) {
+                        // POPL [index]
+                        s = e_table_find_entry(&local_sym_table[scope_level], $1);
+                        op = E_OP_POPL;
+                    }
+                    
+                    if(scope_level == 0 || s.status == E_STATUS_NOTFOUND) {
+                        // POPG [index]
+                        s = e_table_find_entry(&global_sym_table, $1);
+                        op = E_OP_POPG;
+                    }
                     
                     if(s.status == E_STATUS_OK) {
                         int gst_index = s.ival;
-                        emit_op(e_create_operation(E_OP_POPG, e_create_number(gst_index), e_create_null()));
+                        emit_op(e_create_operation(op, e_create_number(gst_index), e_create_null()));
                     } else {
                         error_pprint(s.status);
                     }
@@ -200,8 +225,14 @@ if_condition: BLOCK_IF math_expression {
                     // Copy jmp instruction to a table (to be patched later in the if_expression)
                     e_internal_type addr =  { .ival = addr_count };
                     e_stack_status_ret s = e_stack_push(&bp_stack, addr);
+                     
+                    e_status_ret s_scope = e_create_scope();
+                    if(s_scope.status == E_STATUS_OK) {
+                        printf("created scope\n");
+                    }
                     
                     error_pprint(s.status);
+                    error_pprint(s_scope.status);
               }
               ;
          
@@ -268,6 +299,16 @@ void emit_op(e_op op) {
             break;
         case E_OP_POPG:
             printf("POPG [%d]\n", (int)op.op1.val);
+            byte_op.op1 = (uint32_t)op.op1.val;
+            byte_op.op2 = (uint32_t)0;
+            break;
+        case E_OP_PUSHL:
+            printf("PUSHL [%d]\n", (int)op.op1.val);
+            byte_op.op1 = (uint32_t)op.op1.val;
+            byte_op.op2 = (uint32_t)0;
+            break;
+        case E_OP_POPL:
+            printf("POPL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;

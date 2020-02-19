@@ -75,8 +75,10 @@ typedef struct {
 typedef enum {
     E_OP_PUSHG = 0x10,     /* Push global variable,                    PUSHG [index],      s[-1]           */
     E_OP_POPG = 0x11,      /* Pop global variable,                     POPG [index]                        */
-    E_OP_PUSH = 0x12,      /* Push variable onto top of stack,         PUSH 3                              */
-    E_OP_POP = 0x13,       /* Pop variable from top of stack,          POP,                s[-1]           */
+    E_OP_PUSHL = 0x12,     /* Push local variable,                     PUSHL [index]                       */
+    E_OP_POPL = 0x13,      /* Pop local variable,                      POPG [index]                        */
+    E_OP_PUSH = 0x14,      /* Push variable onto top of stack,         PUSH 3                              */
+    E_OP_POP = 0x15,       /* Pop variable from top of stack,          POP,                s[-1]           */
     
     E_OP_EQ = 0x20,        /* Equal check,                             EQ,                 s[-1]==s[-2]    */
     E_OP_LT = 0x21,        /* Less than,                               LT,                 s[-1]<s[-2]     */    
@@ -130,6 +132,10 @@ typedef struct {
     unsigned int entries;
 } e_table;
 
+// Scopes
+#define E_LOCAL_SYM_TAB_ENTRIES    ((int)128)
+#define E_LOCAL_SYM_TAB_SCOPES     ((int)64)
+
 // Global
 void e_init(void);
 e_op e_create_operation(e_opcode opcode, e_table_value op1, e_table_value op2);
@@ -139,16 +145,21 @@ e_status_ret e_table_add_entry(e_table* tab, const char* idname, e_table_value v
 e_status_ret e_table_find_entry(const e_table* tab, const char* idname);
 e_table_value e_create_null(void);
 e_table_value e_create_number(double val);
-e_table_value e_create_float(float val);
 e_table_value e_create_string(const char* str);
 
 // Stack
 e_stack_status_ret e_stack_push(e_stack* stack, e_internal_type v);
 e_stack_status_ret e_stack_pop(e_stack* stack);
 
+// Scope
+e_status_ret e_create_scope(void);
+
 // Exported definitions
 extern e_table global_sym_table;
 extern e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_ENTRIES];
+extern e_table local_sym_table[E_LOCAL_SYM_TAB_SCOPES];
+extern e_table_entry local_sym_table_block[E_LOCAL_SYM_TAB_SCOPES][E_LOCAL_SYM_TAB_ENTRIES];
 extern e_stack bp_stack;
+extern unsigned int scope_level;
 
 #endif
