@@ -5,6 +5,8 @@
 
 #define E_VERSION "0.01"
 
+#define E_SYS_SIZE_DOUBLE   ((int)sizeof(double))
+
 typedef struct {
     enum { E_NUMBER, E_STRING } type;
     double val;

@@ -2,6 +2,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include "evoscript.h"
+    #include <string.h>
     
     extern int yylex();
     extern int yyparse();
@@ -14,6 +15,8 @@
     static void emit_op(e_op op);
     static void inc_cnt(void);
     static void jmp_patch(unsigned int start_addr, unsigned int end_addr);
+    
+    static void double_to_bytearray(double din, uint8_t bin[]);
     
     void print_outstream(void);
     
@@ -253,6 +256,7 @@ void emit_op(e_op op) {
     /* Emits (prints) an OP with up to 2 args */
     inc_cnt();
     printf("[%d]", addr_count);
+    uint8_t barr[E_SYS_SIZE_DOUBLE];
     
     e_byte_op byte_op = { .opcode = (uint8_t)op.opcode };
     
@@ -271,8 +275,9 @@ void emit_op(e_op op) {
             switch(op.op1.argtype) {
                 case E_ARGT_NUMBER:
                     printf("PUSH %f\n", op.op1.val);
-                    byte_op.op1 = (uint32_t)op.op1.val;
-                    byte_op.op2 = (uint32_t)0;
+                    double_to_bytearray(op.op1.val, barr);
+                    byte_op.op1 = (barr[7] << 24) | (barr[6] << 16) | (barr[5] << 8) | barr[4];
+                    byte_op.op2 = (barr[3] << 24) | (barr[2] << 16) | (barr[1] << 8) | barr[0];
                     break;
                 }
             break;
@@ -351,6 +356,15 @@ void emit_op(e_op op) {
         out_bytes[out_b_cnt++] = (uint8_t)(byte_op.op2 & 0xFF);
         
         print_outstream();
+}
+
+void double_to_bytearray(double din, uint8_t bin[]) {
+    union {
+        double d;
+        uint8_t b[E_SYS_SIZE_DOUBLE];
+    } u;
+    u.d = din;
+    memcpy(bin, u.b, E_SYS_SIZE_DOUBLE);
 }
 
 void print_outstream(void) {

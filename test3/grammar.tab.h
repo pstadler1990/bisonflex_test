@@ -80,7 +80,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 26 "grammar.y" /* yacc.c:1921  */
+#line 29 "grammar.y" /* yacc.c:1921  */
 
     e_type nval;
     char* sname;
