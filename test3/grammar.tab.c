@@ -475,7 +475,7 @@ static const yytype_uint8 yyrline[] =
 {
        0,    56,    56,    59,    60,    63,    64,    65,    68,    90,
      105,   109,   133,   138,   143,   148,   153,   158,   163,   166,
-     169,   172,   175,   178,   182,   186,   210,   221,   239
+     169,   172,   175,   178,   182,   186,   210,   227,   245
 };
 #endif
 
@@ -1305,6 +1305,7 @@ yyreduce:
                 op = E_OP_PUSHG;
             } else {
                 // PUSHL [index]
+                printf("Push local %s into scope %d\n", (yyvsp[-2].sname), scope_level);
                 s = e_table_add_entry(&local_sym_table[scope_level], (yyvsp[-2].sname), e_create_number((yyvsp[0].nval).val));
                 op = E_OP_PUSHL;
             }
@@ -1312,7 +1313,6 @@ yyreduce:
             if(s.status == E_STATUS_OK) {
                 emit_op(e_create_operation(op, e_create_number(s.ival), e_create_null()));
             } else {
-                printf("fuck \n");
                 error_pprint(s.status);
             }
         }
@@ -1511,13 +1511,19 @@ yyreduce:
                         // Patch jump dummy_addr from previous jump
                         jmp_patch(s.val.ival, addr_count);
                     }
+                    
+                    printf("BLOCK END\n");
+                    
+                    e_status_ret s_scope = e_close_scope();
+                    
                     error_pprint(s.status);
+                    error_pprint(s_scope.status);
                }
-#line 1517 "grammar.tab.c" /* yacc.c:1652  */
+#line 1523 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 27:
-#line 221 "grammar.y" /* yacc.c:1652  */
+#line 227 "grammar.y" /* yacc.c:1652  */
     {
                     // Insert JNE [16 bit dummy_addr]
                     emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
@@ -1534,17 +1540,17 @@ yyreduce:
                     error_pprint(s.status);
                     error_pprint(s_scope.status);
               }
-#line 1538 "grammar.tab.c" /* yacc.c:1652  */
-    break;
-
-  case 28:
-#line 239 "grammar.y" /* yacc.c:1652  */
-    { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[0].nval).val; }
 #line 1544 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
+  case 28:
+#line 245 "grammar.y" /* yacc.c:1652  */
+    { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[0].nval).val; }
+#line 1550 "grammar.tab.c" /* yacc.c:1652  */
+    break;
 
-#line 1548 "grammar.tab.c" /* yacc.c:1652  */
+
+#line 1554 "grammar.tab.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1775,7 +1781,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 241 "grammar.y" /* yacc.c:1918  */
+#line 247 "grammar.y" /* yacc.c:1918  */
 
 
 void yyerror(const char* s) {
@@ -1818,7 +1824,7 @@ void jmp_patch(unsigned int start_addr, unsigned int end_addr) {
     out_bytes[((start_addr - 1) * 9) + 3] = (uint8_t)((end_addr >> 8) & 0xFF);
     out_bytes[((start_addr - 1) * 9) + 4] = (uint8_t)(end_addr & 0xFF);
     
-    print_outstream();
+    // print_outstream();
 }
 
 void emit_op(e_op op) {
@@ -1844,6 +1850,13 @@ void emit_op(e_op op) {
             printf("PUSHL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
+            
+            printf("************************ SYMBOL TABLE [%d] **\n", scope_level);
+            for(unsigned int i=0; i < local_sym_table[scope_level].entries; i++) {
+                printf("[%d] %s\n", i, local_sym_table[scope_level].tab_ptr[i].idname);
+            }
+            printf("****************************************\n");
+            
             break;
         case E_OP_POPL:
             printf("POPL [%d]\n", (int)op.op1.val);
@@ -1934,7 +1947,7 @@ void emit_op(e_op op) {
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 8) & 0xFF);
         out_bytes[out_b_cnt++] = (uint8_t)(byte_op.op2 & 0xFF);
         
-        print_outstream();
+        // print_outstream();
 }
 
 void double_to_bytearray(double din, uint8_t bin[]) {

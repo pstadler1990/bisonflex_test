@@ -13,6 +13,7 @@ typedef struct {
 } e_type;
 
 typedef enum {
+    E_STATUS_NESTING = -7,
     E_STATUS_UNDERFLOW = -6,
     E_STATUS_DATATMIS = -5,
     E_STATUS_NOTFOUND = -4,
@@ -153,6 +154,7 @@ e_stack_status_ret e_stack_pop(e_stack* stack);
 
 // Scope
 e_status_ret e_create_scope(void);
+e_status_ret e_close_scope(void);
 
 // Exported definitions
 extern e_table global_sym_table;

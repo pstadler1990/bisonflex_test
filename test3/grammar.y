@@ -76,6 +76,7 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
                 op = E_OP_PUSHG;
             } else {
                 // PUSHL [index]
+                printf("Push local %s into scope %d\n", $2, scope_level);
                 s = e_table_add_entry(&local_sym_table[scope_level], $2, e_create_number($4.val));
                 op = E_OP_PUSHL;
             }
@@ -83,7 +84,6 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
             if(s.status == E_STATUS_OK) {
                 emit_op(e_create_operation(op, e_create_number(s.ival), e_create_null()));
             } else {
-                printf("fuck \n");
                 error_pprint(s.status);
             }
         }
@@ -214,7 +214,13 @@ if_expression: if_condition BLOCK_THEN expression_list BLOCK_ENDIF {
                         // Patch jump dummy_addr from previous jump
                         jmp_patch(s.val.ival, addr_count);
                     }
+                    
+                    printf("BLOCK END\n");
+                    
+                    e_status_ret s_scope = e_close_scope();
+                    
                     error_pprint(s.status);
+                    error_pprint(s_scope.status);
                }
                ;
                
@@ -280,7 +286,7 @@ void jmp_patch(unsigned int start_addr, unsigned int end_addr) {
     out_bytes[((start_addr - 1) * 9) + 3] = (uint8_t)((end_addr >> 8) & 0xFF);
     out_bytes[((start_addr - 1) * 9) + 4] = (uint8_t)(end_addr & 0xFF);
     
-    print_outstream();
+    // print_outstream();
 }
 
 void emit_op(e_op op) {
@@ -306,6 +312,13 @@ void emit_op(e_op op) {
             printf("PUSHL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
+            
+            printf("************************ SYMBOL TABLE [%d] **\n", scope_level);
+            for(unsigned int i=0; i < local_sym_table[scope_level].entries; i++) {
+                printf("[%d] %s\n", i, local_sym_table[scope_level].tab_ptr[i].idname);
+            }
+            printf("****************************************\n");
+            
             break;
         case E_OP_POPL:
             printf("POPL [%d]\n", (int)op.op1.val);
@@ -396,7 +409,7 @@ void emit_op(e_op op) {
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 8) & 0xFF);
         out_bytes[out_b_cnt++] = (uint8_t)(byte_op.op2 & 0xFF);
         
-        print_outstream();
+        // print_outstream();
 }
 
 void double_to_bytearray(double din, uint8_t bin[]) {
