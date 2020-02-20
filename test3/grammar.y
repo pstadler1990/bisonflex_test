@@ -286,7 +286,7 @@ void jmp_patch(unsigned int start_addr, unsigned int end_addr) {
     out_bytes[((start_addr - 1) * 9) + 3] = (uint8_t)((end_addr >> 8) & 0xFF);
     out_bytes[((start_addr - 1) * 9) + 4] = (uint8_t)(end_addr & 0xFF);
     
-    // print_outstream();
+    print_outstream();
 }
 
 void emit_op(e_op op) {
@@ -409,7 +409,7 @@ void emit_op(e_op op) {
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 8) & 0xFF);
         out_bytes[out_b_cnt++] = (uint8_t)(byte_op.op2 & 0xFF);
         
-        // print_outstream();
+        print_outstream();
 }
 
 void double_to_bytearray(double din, uint8_t bin[]) {
