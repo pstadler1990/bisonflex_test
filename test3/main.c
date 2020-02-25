@@ -18,17 +18,19 @@ int main(void) {
     fseek(f, 0, SEEK_END);
     fsize = ftell(f);
     rewind(f);
-    buf = malloc(fsize + 1 * sizeof(char));
+    buf = malloc(fsize + 2 * sizeof(char));
     fread(buf, sizeof(char), fsize, f);
     fclose(f);
-    buf[fsize] = 0;
+    buf[fsize] = '?';
+    buf[fsize+1] = 0;
     
     printf("%s\n", buf);
-  
+    
     
     YY_BUFFER_STATE bs = yy_scan_string(buf);
     
     yyparse();
+    
     yy_delete_buffer(bs);
     free(buf);
     

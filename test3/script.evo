@@ -2,4 +2,12 @@ let a = 42
 let b = 2*a
 if(b > a) then 
     let c = a+b 
+    if(1 < c) then
+        let d = c*2
+    endif
+    c
+    b
+    a
 endif
+a
+b

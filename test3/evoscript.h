@@ -163,7 +163,6 @@ extern e_table local_sym_table[E_LOCAL_SYM_TAB_SCOPES];
 extern e_table_entry local_sym_table_block[E_LOCAL_SYM_TAB_SCOPES][E_LOCAL_SYM_TAB_ENTRIES];
 extern e_stack bp_stack;
 extern unsigned int scope_level;
-
 extern int yylex();
 extern int yyparse();
 extern FILE* yyin;
