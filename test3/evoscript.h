@@ -2,9 +2,9 @@
 #define __EVOSCRIPT_H
 
 #include <stdint.h>
+#include <stdio.h>
 
 #define E_VERSION "0.01"
-
 #define E_SYS_SIZE_DOUBLE   ((int)sizeof(double))
 
 typedef struct {
@@ -163,5 +163,12 @@ extern e_table local_sym_table[E_LOCAL_SYM_TAB_SCOPES];
 extern e_table_entry local_sym_table_block[E_LOCAL_SYM_TAB_SCOPES][E_LOCAL_SYM_TAB_ENTRIES];
 extern e_stack bp_stack;
 extern unsigned int scope_level;
+
+extern int yylex();
+extern int yyparse();
+extern FILE* yyin;
+typedef struct yy_buffer_state* YY_BUFFER_STATE;
+extern YY_BUFFER_STATE yy_scan_string(const char* str);
+extern void yy_delete_buffer(YY_BUFFER_STATE buffer);
 
 #endif

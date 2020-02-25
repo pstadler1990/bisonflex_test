@@ -4,8 +4,6 @@
     #include <string.h>
     #include "evoscript.h"
     #include "grammar.tab.h"
-    
-    extern int yylex();
 %}
 
 %option noyywrap
@@ -13,6 +11,7 @@
 %%
 [ \t]                       ;
 [\n:]                       { return NEWLINE; }
+"?"                         { return PRINT_BYTES; }
 "if"                        { return BLOCK_IF; }
 "then"                      { return BLOCK_THEN; }
 "endif"                     { return BLOCK_ENDIF; }

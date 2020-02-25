@@ -71,7 +71,8 @@ extern int yydebug;
     BLOCK_IF = 277,
     BLOCK_THEN = 278,
     BLOCK_ENDIF = 279,
-    NEWLINE = 280
+    NEWLINE = 280,
+    PRINT_BYTES = 281
   };
 #endif
 
@@ -80,12 +81,12 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 29 "grammar.y" /* yacc.c:1921  */
+#line 31 "grammar.y" /* yacc.c:1921  */
 
     e_type nval;
     char* sname;
 
-#line 89 "grammar.tab.h" /* yacc.c:1921  */
+#line 90 "grammar.tab.h" /* yacc.c:1921  */
 };
 
 typedef union YYSTYPE YYSTYPE;

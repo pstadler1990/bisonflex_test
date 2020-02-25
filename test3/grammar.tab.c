@@ -92,8 +92,10 @@
     static int addr_count = 0;
     static uint8_t out_bytes[9999];
     static unsigned int out_b_cnt = 0;
+    
+    unsigned int lc = 0;
 
-#line 97 "grammar.tab.c" /* yacc.c:337  */
+#line 99 "grammar.tab.c" /* yacc.c:337  */
 # ifndef YY_NULLPTR
 #  if defined __cplusplus
 #   if 201103L <= __cplusplus
@@ -153,7 +155,8 @@ extern int yydebug;
     BLOCK_IF = 277,
     BLOCK_THEN = 278,
     BLOCK_ENDIF = 279,
-    NEWLINE = 280
+    NEWLINE = 280,
+    PRINT_BYTES = 281
   };
 #endif
 
@@ -162,12 +165,12 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 29 "grammar.y" /* yacc.c:352  */
+#line 31 "grammar.y" /* yacc.c:352  */
 
     e_type nval;
     char* sname;
 
-#line 171 "grammar.tab.c" /* yacc.c:352  */
+#line 174 "grammar.tab.c" /* yacc.c:352  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -413,21 +416,21 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  21
+#define YYFINAL  22
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   91
+#define YYLAST   108
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  26
+#define YYNTOKENS  27
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  9
+#define YYNNTS  11
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  28
+#define YYNRULES  33
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  55
+#define YYNSTATES  59
 
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   280
+#define YYMAXUTOK   281
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex, with out-of-bounds checking.  */
@@ -466,16 +469,17 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25
+      25,    26
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
-       0,    56,    56,    59,    60,    63,    64,    65,    68,    90,
-     105,   109,   139,   144,   149,   154,   159,   164,   169,   172,
-     175,   178,   181,   184,   188,   192,   216,   233,   251
+       0,    60,    60,    63,    64,    65,    68,    69,    70,    71,
+      74,    76,    98,   113,   117,   147,   152,   157,   162,   167,
+     172,   177,   180,   183,   186,   189,   192,   196,   200,   224,
+     241,   259,   260,   263
 };
 #endif
 
@@ -488,8 +492,9 @@ static const char *const yytname[] =
   "EQUALS", "AND", "OR", "NOT", "REL_LT", "REL_LTEQ", "REL_NOTEQ",
   "REL_EQ", "REL_GTEQ", "REL_GT", "PLUS", "MINUS", "MULTIPLY", "DIVIDE",
   "P_OPEN", "P_CLOSE", "BLOCK_IF", "BLOCK_THEN", "BLOCK_ENDIF", "NEWLINE",
-  "$accept", "prgm", "expression_list", "expression", "assign",
-  "math_expression", "if_expression", "if_condition", "number", YY_NULLPTR
+  "PRINT_BYTES", "$accept", "prgm", "expression_list", "expression",
+  "line_sep", "assign", "math_expression", "if_expression", "if_condition",
+  "if_blockthen", "number", YY_NULLPTR
 };
 #endif
 
@@ -500,14 +505,14 @@ static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276,   277,   278,   279,   280
+     275,   276,   277,   278,   279,   280,   281
 };
 # endif
 
-#define YYPACT_NINF -20
+#define YYPACT_NINF -25
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-20)))
+  (!!((Yystate) == (-25)))
 
 #define YYTABLE_NINF -1
 
@@ -518,12 +523,12 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      31,   -20,     4,     8,    28,    28,    28,    13,   -20,   -11,
-     -20,    62,   -20,    -8,   -20,    28,    11,   -20,    72,    47,
-      62,   -20,    31,    28,    28,    28,    28,    28,    28,    28,
-      28,    28,    28,    28,    28,    31,    62,    28,   -20,   -20,
-      72,    72,   -12,   -12,   -12,   -12,   -12,   -12,   -10,   -10,
-     -20,   -20,    -6,    62,   -20
+      33,   -25,     2,     6,     0,     0,     0,   -25,    11,   -25,
+     -11,   -25,    79,   -25,    33,   -25,     0,     7,   -25,    89,
+      64,    50,   -25,   -25,    33,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,    -8,    79,     0,
+     -25,   -11,   -25,   -25,    89,    89,    27,    27,    27,    27,
+      27,    27,   -12,   -12,   -25,   -25,   -25,    79,   -25
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -531,24 +536,26 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,    28,    11,     0,     0,     0,     0,     0,     2,     4,
-       5,     6,     7,     0,    10,     0,     0,    11,    20,     0,
-      27,     1,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     9,     0,    21,     3,
-      18,    19,    14,    16,    13,    12,    17,    15,    24,    25,
-      22,    23,     0,     8,    26
+       0,    33,    14,     0,     0,     0,     0,     9,     0,     2,
+       4,     6,     7,     8,     0,    13,     0,     0,    14,    23,
+       0,     0,     1,    10,     5,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,    12,     0,
+      24,    31,    30,     3,    21,    22,    17,    19,    16,    15,
+      20,    18,    27,    28,    25,    26,    29,    11,    32
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -20,   -20,   -19,   -20,   -20,    -4,   -20,   -20,   -20
+     -25,   -25,    -9,   -25,   -24,   -25,    -4,   -25,   -25,   -25,
+     -25
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     7,     8,     9,    10,    11,    12,    13,    14
+      -1,     8,     9,    10,    24,    11,    12,    13,    14,    42,
+      15
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -556,58 +563,62 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-      18,    19,    20,    39,    31,    32,    33,    34,    33,    34,
-      15,    36,    16,    21,    22,    35,    52,    37,    54,    40,
-      41,    42,    43,    44,    45,    46,    47,    48,    49,    50,
-      51,     1,    17,    53,     1,     2,     3,     4,     0,     0,
-       4,     0,     0,     0,     0,     0,     0,     0,     5,     0,
-       0,     5,     0,     6,    23,    24,     0,    25,    26,    27,
-      28,    29,    30,    31,    32,    33,    34,     0,    38,    23,
-      24,     0,    25,    26,    27,    28,    29,    30,    31,    32,
-      33,    34,    25,    26,    27,    28,    29,    30,    31,    32,
-      33,    34
+      19,    20,    21,     1,    18,    37,    35,    36,    16,     4,
+      17,    22,    38,    39,    23,    43,    56,    58,     0,     0,
+       5,    44,    45,    46,    47,    48,    49,    50,    51,    52,
+      53,    54,    55,     0,     0,    57,     1,     2,     3,     0,
+       0,     0,     4,    33,    34,    35,    36,     0,     0,     0,
+       0,     0,     0,     5,     0,     6,     0,    25,    26,     7,
+      27,    28,    29,    30,    31,    32,    33,    34,    35,    36,
+       0,    25,    26,    41,    27,    28,    29,    30,    31,    32,
+      33,    34,    35,    36,     0,    40,    25,    26,     0,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36
 };
 
 static const yytype_int8 yycheck[] =
 {
-       4,     5,     6,    22,    16,    17,    18,    19,    18,    19,
-       6,    15,     4,     0,    25,    23,    35,     6,    24,    23,
-      24,    25,    26,    27,    28,    29,    30,    31,    32,    33,
-      34,     3,     4,    37,     3,     4,     5,     9,    -1,    -1,
-       9,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    20,    -1,
-      -1,    20,    -1,    22,     7,     8,    -1,    10,    11,    12,
-      13,    14,    15,    16,    17,    18,    19,    -1,    21,     7,
-       8,    -1,    10,    11,    12,    13,    14,    15,    16,    17,
-      18,    19,    10,    11,    12,    13,    14,    15,    16,    17,
-      18,    19
+       4,     5,     6,     3,     4,    14,    18,    19,     6,     9,
+       4,     0,    16,     6,    25,    24,    24,    41,    -1,    -1,
+      20,    25,    26,    27,    28,    29,    30,    31,    32,    33,
+      34,    35,    36,    -1,    -1,    39,     3,     4,     5,    -1,
+      -1,    -1,     9,    16,    17,    18,    19,    -1,    -1,    -1,
+      -1,    -1,    -1,    20,    -1,    22,    -1,     7,     8,    26,
+      10,    11,    12,    13,    14,    15,    16,    17,    18,    19,
+      -1,     7,     8,    23,    10,    11,    12,    13,    14,    15,
+      16,    17,    18,    19,    -1,    21,     7,     8,    -1,    10,
+      11,    12,    13,    14,    15,    16,    17,    18,    19,    10,
+      11,    12,    13,    14,    15,    16,    17,    18,    19
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,     4,     5,     9,    20,    22,    27,    28,    29,
-      30,    31,    32,    33,    34,     6,     4,     4,    31,    31,
-      31,     0,    25,     7,     8,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    23,    31,     6,    21,    28,
-      31,    31,    31,    31,    31,    31,    31,    31,    31,    31,
-      31,    31,    28,    31,    24
+       0,     3,     4,     5,     9,    20,    22,    26,    28,    29,
+      30,    32,    33,    34,    35,    37,     6,     4,     4,    33,
+      33,    33,     0,    25,    31,     7,     8,    10,    11,    12,
+      13,    14,    15,    16,    17,    18,    19,    29,    33,     6,
+      21,    23,    36,    29,    33,    33,    33,    33,    33,    33,
+      33,    33,    33,    33,    33,    33,    24,    33,    31
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    26,    27,    28,    28,    29,    29,    29,    30,    30,
-      31,    31,    31,    31,    31,    31,    31,    31,    31,    31,
-      31,    31,    31,    31,    31,    31,    32,    33,    34
+       0,    27,    28,    29,    29,    29,    30,    30,    30,    30,
+      31,    32,    32,    33,    33,    33,    33,    33,    33,    33,
+      33,    33,    33,    33,    33,    33,    33,    33,    33,    34,
+      35,    36,    36,    37
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     3,     1,     1,     1,     1,     4,     3,
-       1,     1,     3,     3,     3,     3,     3,     3,     3,     3,
-       2,     3,     3,     3,     3,     3,     4,     2,     1
+       0,     2,     1,     3,     1,     2,     1,     1,     1,     1,
+       1,     4,     3,     1,     1,     3,     3,     3,     3,     3,
+       3,     3,     3,     2,     3,     3,     3,     3,     3,     3,
+       3,     1,     2,     1
 };
 
 
@@ -1292,8 +1303,20 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 8:
-#line 68 "grammar.y" /* yacc.c:1652  */
+        case 9:
+#line 71 "grammar.y" /* yacc.c:1652  */
+    { print_outstream(); }
+#line 1310 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 10:
+#line 74 "grammar.y" /* yacc.c:1652  */
+    { lc++; printf("new line [%d]\n", lc); }
+#line 1316 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 11:
+#line 76 "grammar.y" /* yacc.c:1652  */
     { 
             /* Number type (integer|float) definition with initialization, let x = 42 */
             e_opcode op;
@@ -1316,11 +1339,11 @@ yyreduce:
                 error_pprint(s.status);
             }
         }
-#line 1320 "grammar.tab.c" /* yacc.c:1652  */
+#line 1343 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 9:
-#line 90 "grammar.y" /* yacc.c:1652  */
+  case 12:
+#line 98 "grammar.y" /* yacc.c:1652  */
     {
             /* Change value of number type variable, a = 3 */
             // PUSHG $3 [index] (value, index)
@@ -1334,20 +1357,20 @@ yyreduce:
                 error_pprint(s.status);
             }
         }
-#line 1338 "grammar.tab.c" /* yacc.c:1652  */
+#line 1361 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 10:
-#line 105 "grammar.y" /* yacc.c:1652  */
+  case 13:
+#line 113 "grammar.y" /* yacc.c:1652  */
     {
                     // PUSH [number]
                     emit_op(e_create_operation(E_OP_PUSH, e_create_number((yyvsp[0].nval).val), e_create_null()));
                 }
-#line 1347 "grammar.tab.c" /* yacc.c:1652  */
+#line 1370 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 11:
-#line 109 "grammar.y" /* yacc.c:1652  */
+  case 14:
+#line 117 "grammar.y" /* yacc.c:1652  */
     { 
                     /* Find and pop a global or local variable */
                     e_opcode op;
@@ -1378,138 +1401,138 @@ yyreduce:
                         error_pprint(s.status);
                     }
                 }
-#line 1382 "grammar.tab.c" /* yacc.c:1652  */
+#line 1405 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 12:
-#line 139 "grammar.y" /* yacc.c:1652  */
+  case 15:
+#line 147 "grammar.y" /* yacc.c:1652  */
     {
                     /* a == b */
                     // EQ
                     emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
                 }
-#line 1392 "grammar.tab.c" /* yacc.c:1652  */
+#line 1415 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 13:
-#line 144 "grammar.y" /* yacc.c:1652  */
+  case 16:
+#line 152 "grammar.y" /* yacc.c:1652  */
     {
                     /* a != b */
                     emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
                     emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
                 }
-#line 1402 "grammar.tab.c" /* yacc.c:1652  */
+#line 1425 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 14:
-#line 149 "grammar.y" /* yacc.c:1652  */
+  case 17:
+#line 157 "grammar.y" /* yacc.c:1652  */
     {
                     /* a < b */
                     // LT
                     emit_op(e_create_operation(E_OP_LT, e_create_null(), e_create_null()));
                 }
-#line 1412 "grammar.tab.c" /* yacc.c:1652  */
+#line 1435 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 15:
-#line 154 "grammar.y" /* yacc.c:1652  */
+  case 18:
+#line 162 "grammar.y" /* yacc.c:1652  */
     {
                     /* a > b */
                     // GT
                     emit_op(e_create_operation(E_OP_GT, e_create_null(), e_create_null()));
                 }
-#line 1422 "grammar.tab.c" /* yacc.c:1652  */
+#line 1445 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 16:
-#line 159 "grammar.y" /* yacc.c:1652  */
+  case 19:
+#line 167 "grammar.y" /* yacc.c:1652  */
     {
                     /* a <= b */
                     // LTEQ
                     emit_op(e_create_operation(E_OP_LTEQ, e_create_null(), e_create_null()));
                 }
-#line 1432 "grammar.tab.c" /* yacc.c:1652  */
+#line 1455 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 17:
-#line 164 "grammar.y" /* yacc.c:1652  */
+  case 20:
+#line 172 "grammar.y" /* yacc.c:1652  */
     {
                     /* a >= b */
                     // GTEQ
                     emit_op(e_create_operation(E_OP_GTEQ, e_create_null(), e_create_null()));
                 }
-#line 1442 "grammar.tab.c" /* yacc.c:1652  */
-    break;
-
-  case 18:
-#line 169 "grammar.y" /* yacc.c:1652  */
-    {
-                    emit_op(e_create_operation(E_OP_AND, e_create_null(), e_create_null()));
-                }
-#line 1450 "grammar.tab.c" /* yacc.c:1652  */
-    break;
-
-  case 19:
-#line 172 "grammar.y" /* yacc.c:1652  */
-    {
-                    emit_op(e_create_operation(E_OP_OR, e_create_null(), e_create_null()));
-                }
-#line 1458 "grammar.tab.c" /* yacc.c:1652  */
-    break;
-
-  case 20:
-#line 175 "grammar.y" /* yacc.c:1652  */
-    {
-                    emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
-                }
-#line 1466 "grammar.tab.c" /* yacc.c:1652  */
+#line 1465 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 21:
-#line 178 "grammar.y" /* yacc.c:1652  */
+#line 177 "grammar.y" /* yacc.c:1652  */
     {
-                    (yyval.nval) = (yyvsp[-1].nval);
+                    emit_op(e_create_operation(E_OP_AND, e_create_null(), e_create_null()));
                 }
-#line 1474 "grammar.tab.c" /* yacc.c:1652  */
+#line 1473 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 22:
-#line 181 "grammar.y" /* yacc.c:1652  */
-    { 
-                    emit_op(e_create_operation(E_OP_MUL, e_create_null(), e_create_null()));
+#line 180 "grammar.y" /* yacc.c:1652  */
+    {
+                    emit_op(e_create_operation(E_OP_OR, e_create_null(), e_create_null()));
                 }
-#line 1482 "grammar.tab.c" /* yacc.c:1652  */
+#line 1481 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
   case 23:
-#line 184 "grammar.y" /* yacc.c:1652  */
+#line 183 "grammar.y" /* yacc.c:1652  */
+    {
+                    emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
+                }
+#line 1489 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 24:
+#line 186 "grammar.y" /* yacc.c:1652  */
+    {
+                    (yyval.nval) = (yyvsp[-1].nval);
+                }
+#line 1497 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 25:
+#line 189 "grammar.y" /* yacc.c:1652  */
+    { 
+                    emit_op(e_create_operation(E_OP_MUL, e_create_null(), e_create_null()));
+                }
+#line 1505 "grammar.tab.c" /* yacc.c:1652  */
+    break;
+
+  case 26:
+#line 192 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 / a */
                     emit_op(e_create_operation(E_OP_DIV, e_create_null(), e_create_null()));
                 }
-#line 1491 "grammar.tab.c" /* yacc.c:1652  */
+#line 1514 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 24:
-#line 188 "grammar.y" /* yacc.c:1652  */
+  case 27:
+#line 196 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 + a */
                     emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
                 }
-#line 1500 "grammar.tab.c" /* yacc.c:1652  */
+#line 1523 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 25:
-#line 192 "grammar.y" /* yacc.c:1652  */
+  case 28:
+#line 200 "grammar.y" /* yacc.c:1652  */
     { 
                     /* 3 - a */
                     emit_op(e_create_operation(E_OP_SUB, e_create_null(), e_create_null()));
                 }
-#line 1509 "grammar.tab.c" /* yacc.c:1652  */
+#line 1532 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 26:
-#line 216 "grammar.y" /* yacc.c:1652  */
+  case 29:
+#line 224 "grammar.y" /* yacc.c:1652  */
     { 
                     // Get instruction count of opening if
                     e_stack_status_ret s = e_stack_pop(&bp_stack);
@@ -1525,11 +1548,11 @@ yyreduce:
                     error_pprint(s.status);
                     error_pprint(s_scope.status);
                }
-#line 1529 "grammar.tab.c" /* yacc.c:1652  */
+#line 1552 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 27:
-#line 233 "grammar.y" /* yacc.c:1652  */
+  case 30:
+#line 241 "grammar.y" /* yacc.c:1652  */
     {
                     // Insert JNE [16 bit dummy_addr]
                     emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
@@ -1546,17 +1569,17 @@ yyreduce:
                     error_pprint(s.status);
                     error_pprint(s_scope.status);
               }
-#line 1550 "grammar.tab.c" /* yacc.c:1652  */
+#line 1573 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
-  case 28:
-#line 251 "grammar.y" /* yacc.c:1652  */
+  case 33:
+#line 263 "grammar.y" /* yacc.c:1652  */
     { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[0].nval).val; }
-#line 1556 "grammar.tab.c" /* yacc.c:1652  */
+#line 1579 "grammar.tab.c" /* yacc.c:1652  */
     break;
 
 
-#line 1560 "grammar.tab.c" /* yacc.c:1652  */
+#line 1583 "grammar.tab.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1787,11 +1810,11 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 253 "grammar.y" /* yacc.c:1918  */
+#line 265 "grammar.y" /* yacc.c:1918  */
 
 
 void yyerror(const char* s) {
-    printf("Error happend: %s\n", s);
+    printf("Error happend in line [%d]: %s\n", lc, s);
     exit(-1);
 }
 
@@ -1829,31 +1852,29 @@ void jmp_patch(unsigned int start_addr, unsigned int end_addr) {
     out_bytes[((start_addr - 1) * 9) + 2] = (uint8_t)((end_addr >> 16) & 0xFF);
     out_bytes[((start_addr - 1) * 9) + 3] = (uint8_t)((end_addr >> 8) & 0xFF);
     out_bytes[((start_addr - 1) * 9) + 4] = (uint8_t)(end_addr & 0xFF);
-    
-    print_outstream();
 }
 
 void emit_op(e_op op) {
     /* Emits (prints) an OP with up to 2 args */
     inc_cnt();
-    printf("[%d]", addr_count);
+    //printf("[%d]", addr_count);
     uint8_t barr[E_SYS_SIZE_DOUBLE];
     
     e_byte_op byte_op = { .opcode = (uint8_t)op.opcode };
     
     switch(op.opcode) {
         case E_OP_PUSHG:
-            printf("PUSHG [%d]\n", (int)op.op1.val);
+            //printf("PUSHG [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_POPG:
-            printf("POPG [%d]\n", (int)op.op1.val);
+            //printf("POPG [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSHL:
-            printf("PUSHL [%d]\n", (int)op.op1.val);
+            //printf("PUSHL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             
@@ -1865,14 +1886,14 @@ void emit_op(e_op op) {
             
             break;
         case E_OP_POPL:
-            printf("POPL [%d]\n", (int)op.op1.val);
+            //printf("POPL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSH:
             switch(op.op1.argtype) {
                 case E_ARGT_NUMBER:
-                    printf("PUSH %f\n", op.op1.val);
+                    //printf("PUSH %f\n", op.op1.val);
                     double_to_bytearray(op.op1.val, barr);
                     byte_op.op1 = (barr[7] << 24) | (barr[6] << 16) | (barr[5] << 8) | barr[4];
                     byte_op.op2 = (barr[3] << 24) | (barr[2] << 16) | (barr[1] << 8) | barr[0];
@@ -1880,67 +1901,67 @@ void emit_op(e_op op) {
                 }
             break;
         case E_OP_EQ:
-            printf("EQ\n");
+            //printf("EQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LT:
-            printf("LT\n");
+            //printf("LT\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GT:
-            printf("GT\n");
+            //printf("GT\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LTEQ:
-            printf("LTEQ\n");
+            //printf("LTEQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GTEQ:
-            printf("GTEQ\n");
+            //printf("GTEQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_ADD:
-            printf("ADD\n");
+            //printf("ADD\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_SUB:
-            printf("SUB\n");
+            //printf("SUB\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_MUL:
-            printf("MUL\n");
+            //printf("MUL\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_DIV:
-            printf("DIV\n");
+            //printf("DIV\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_AND:
-            printf("AND\n");
+            //printf("AND\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_OR:
-            printf("OR\n");
+            //printf("OR\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_JZ:
-            printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
+            //printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)op.op2.val;
         }
         
-        printf("-----(out_b_cnt: %d)\n", out_b_cnt);
+        //printf("-----(out_b_cnt: %d)\n", out_b_cnt);
         
         out_bytes[out_b_cnt++] = (uint8_t)byte_op.opcode;
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op1 >> 24) & 0xFF);
@@ -1952,8 +1973,6 @@ void emit_op(e_op op) {
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 16) & 0xFF);
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 8) & 0xFF);
         out_bytes[out_b_cnt++] = (uint8_t)(byte_op.op2 & 0xFF);
-        
-        print_outstream();
 }
 
 void double_to_bytearray(double din, uint8_t bin[]) {
@@ -1967,16 +1986,25 @@ void double_to_bytearray(double din, uint8_t bin[]) {
 
 void print_outstream(void) {
     printf("print stream *****\n");
+    unsigned int r = 0;
     for(unsigned int i = 0; i < 999; i++) {
         if(i%9 == 0) {
             printf("[%d] ", i / 9);
         }
     
-        printf("%X ", out_bytes[i]);
-    
-        if(i > 0 && i%17 == 0) {
-            printf("\n");
+        printf("0x%02X ", out_bytes[i]);
+        
+        if(r == 0 && out_bytes[i] == 0x00) {
+            // Opcode 0x00, end
+            break;
         }
+    
+        if(++r == 9) {
+            printf("\n");
+            r = 0;
+        }
+        
+        
     }
     printf("\n");
 }

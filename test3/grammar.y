@@ -23,6 +23,8 @@
     static int addr_count = 0;
     static uint8_t out_bytes[9999];
     static unsigned int out_b_cnt = 0;
+    
+    unsigned int lc = 0;
 %}
 
 
@@ -42,6 +44,8 @@
 %token BLOCK_IF BLOCK_THEN BLOCK_ENDIF
 %token NEWLINE
 
+%token PRINT_BYTES
+
 %left AND OR NOT
 %left REL_LT REL_LTEQ REL_NOTEQ REL_EQ REL_GTEQ REL_GT
 %left PLUS MINUS
@@ -56,14 +60,18 @@
 prgm: expression_list
     ;   
 
-expression_list: expression NEWLINE expression_list
+expression_list: expression line_sep expression_list
                  | expression
+                 | expression line_sep
                  ;
     
 expression: assign
             | math_expression
             | if_expression
+            | PRINT_BYTES { print_outstream(); }
             ;
+            
+line_sep: NEWLINE { lc++; printf("new line [%d]\n", lc); };
             
 assign: ASSIGN IDENTIFIER EQUALS math_expression { 
             /* Number type (integer|float) definition with initialization, let x = 42 */
@@ -213,7 +221,7 @@ math_expression: number {
                 }*/
                 ;
                 
-if_expression: if_condition BLOCK_THEN expression_list BLOCK_ENDIF { 
+if_expression: if_condition expression_list BLOCK_ENDIF { 
                     // Get instruction count of opening if
                     e_stack_status_ret s = e_stack_pop(&bp_stack);
                     if(s.status == E_STATUS_OK) {
@@ -230,7 +238,7 @@ if_expression: if_condition BLOCK_THEN expression_list BLOCK_ENDIF {
                }
                ;
                
-if_condition: BLOCK_IF math_expression {
+if_condition: BLOCK_IF math_expression if_blockthen {
                     // Insert JNE [16 bit dummy_addr]
                     emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
                     
@@ -247,13 +255,17 @@ if_condition: BLOCK_IF math_expression {
                     error_pprint(s_scope.status);
               }
               ;
+              
+if_blockthen: BLOCK_THEN
+              | BLOCK_THEN line_sep
+              ;
          
 number: NUMBER { $$.type = E_NUMBER; $$.val = $1.val; }
         ;
 %%
 
 void yyerror(const char* s) {
-    printf("Error happend: %s\n", s);
+    printf("Error happend in line [%d]: %s\n", lc, s);
     exit(-1);
 }
 
@@ -291,31 +303,29 @@ void jmp_patch(unsigned int start_addr, unsigned int end_addr) {
     out_bytes[((start_addr - 1) * 9) + 2] = (uint8_t)((end_addr >> 16) & 0xFF);
     out_bytes[((start_addr - 1) * 9) + 3] = (uint8_t)((end_addr >> 8) & 0xFF);
     out_bytes[((start_addr - 1) * 9) + 4] = (uint8_t)(end_addr & 0xFF);
-    
-    print_outstream();
 }
 
 void emit_op(e_op op) {
     /* Emits (prints) an OP with up to 2 args */
     inc_cnt();
-    printf("[%d]", addr_count);
+    //printf("[%d]", addr_count);
     uint8_t barr[E_SYS_SIZE_DOUBLE];
     
     e_byte_op byte_op = { .opcode = (uint8_t)op.opcode };
     
     switch(op.opcode) {
         case E_OP_PUSHG:
-            printf("PUSHG [%d]\n", (int)op.op1.val);
+            //printf("PUSHG [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_POPG:
-            printf("POPG [%d]\n", (int)op.op1.val);
+            //printf("POPG [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSHL:
-            printf("PUSHL [%d]\n", (int)op.op1.val);
+            //printf("PUSHL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             
@@ -327,14 +337,14 @@ void emit_op(e_op op) {
             
             break;
         case E_OP_POPL:
-            printf("POPL [%d]\n", (int)op.op1.val);
+            //printf("POPL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSH:
             switch(op.op1.argtype) {
                 case E_ARGT_NUMBER:
-                    printf("PUSH %f\n", op.op1.val);
+                    //printf("PUSH %f\n", op.op1.val);
                     double_to_bytearray(op.op1.val, barr);
                     byte_op.op1 = (barr[7] << 24) | (barr[6] << 16) | (barr[5] << 8) | barr[4];
                     byte_op.op2 = (barr[3] << 24) | (barr[2] << 16) | (barr[1] << 8) | barr[0];
@@ -342,67 +352,67 @@ void emit_op(e_op op) {
                 }
             break;
         case E_OP_EQ:
-            printf("EQ\n");
+            //printf("EQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LT:
-            printf("LT\n");
+            //printf("LT\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GT:
-            printf("GT\n");
+            //printf("GT\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LTEQ:
-            printf("LTEQ\n");
+            //printf("LTEQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GTEQ:
-            printf("GTEQ\n");
+            //printf("GTEQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_ADD:
-            printf("ADD\n");
+            //printf("ADD\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_SUB:
-            printf("SUB\n");
+            //printf("SUB\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_MUL:
-            printf("MUL\n");
+            //printf("MUL\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_DIV:
-            printf("DIV\n");
+            //printf("DIV\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_AND:
-            printf("AND\n");
+            //printf("AND\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_OR:
-            printf("OR\n");
+            //printf("OR\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_JZ:
-            printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
+            //printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)op.op2.val;
         }
         
-        printf("-----(out_b_cnt: %d)\n", out_b_cnt);
+        //printf("-----(out_b_cnt: %d)\n", out_b_cnt);
         
         out_bytes[out_b_cnt++] = (uint8_t)byte_op.opcode;
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op1 >> 24) & 0xFF);
@@ -414,8 +424,6 @@ void emit_op(e_op op) {
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 16) & 0xFF);
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op2 >> 8) & 0xFF);
         out_bytes[out_b_cnt++] = (uint8_t)(byte_op.op2 & 0xFF);
-        
-        print_outstream();
 }
 
 void double_to_bytearray(double din, uint8_t bin[]) {
@@ -429,16 +437,25 @@ void double_to_bytearray(double din, uint8_t bin[]) {
 
 void print_outstream(void) {
     printf("print stream *****\n");
+    unsigned int r = 0;
     for(unsigned int i = 0; i < 999; i++) {
         if(i%9 == 0) {
             printf("[%d] ", i / 9);
         }
     
-        printf("%X ", out_bytes[i]);
-    
-        if(i > 0 && i%17 == 0) {
-            printf("\n");
+        printf("0x%02X ", out_bytes[i]);
+        
+        if(r == 0 && out_bytes[i] == 0x00) {
+            // Opcode 0x00, end
+            break;
         }
+    
+        if(++r == 9) {
+            printf("\n");
+            r = 0;
+        }
+        
+        
     }
     printf("\n");
 }
