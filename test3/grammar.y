@@ -41,9 +41,11 @@
 %token PLUS MINUS
 %token MULTIPLY DIVIDE
 %token P_OPEN P_CLOSE
-%token BLOCK_IF BLOCK_THEN BLOCK_ENDIF
-%token NEWLINE
 
+%token BLOCK_IF BLOCK_THEN BLOCK_ENDIF
+%token LOOP_REPEAT LOOP_FOREVER
+
+%token NEWLINE
 %token PRINT_BYTES
 
 %left AND OR NOT
@@ -68,6 +70,7 @@ expression_list: expression line_sep expression_list
 expression: assign
             | math_expression
             | if_expression
+            | loop_expression
             | PRINT_BYTES { print_outstream(); }
             ;
             
@@ -259,6 +262,42 @@ if_condition: BLOCK_IF math_expression if_blockthen {
 if_blockthen: BLOCK_THEN
               | BLOCK_THEN line_sep
               ;
+              
+loop_expression: loop_begin expression_list LOOP_FOREVER {
+                    printf("LOOP END\n");
+                    
+                    // Get instruction count of opening if
+                    e_stack_status_ret s = e_stack_pop(&bp_stack);
+                    if(s.status == E_STATUS_OK) {
+                        printf("Patching loop address: %d\n", s.val.ival);
+                        // Add unconditional jump (jmp) to previously stored address
+                        // TODO: Support 64bit address
+                        emit_op(e_create_operation(E_OP_JMP, e_create_number(s.val.ival), e_create_number(0xFFFFFFFF)));
+                    }
+                    
+                    error_pprint(s.status);
+                 }
+                 ;
+
+loop_begin: loop_repeat { 
+                // Loop creates a new scope
+                e_status_ret s_scope = e_create_scope();
+                if(s_scope.status == E_STATUS_OK) {
+                    printf("created scope\n");
+                }
+                
+                // Store the line counter of the opening loop block to patch in the closing block
+                e_internal_type addr =  { .ival = addr_count };
+                e_stack_status_ret s = e_stack_push(&bp_stack, addr);
+                
+                error_pprint(s.status);
+                error_pprint(s_scope.status);
+            }
+            ;
+                 
+loop_repeat: LOOP_REPEAT 
+            | LOOP_REPEAT line_sep
+            ;
          
 number: NUMBER { $$.type = E_NUMBER; $$.val = $1.val; }
         ;
@@ -410,6 +449,11 @@ void emit_op(e_op op) {
             //printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)op.op2.val;
+            break;
+        case E_OP_JMP:
+            byte_op.op1 = (uint32_t)op.op1.val;
+            byte_op.op2 = (uint32_t)op.op2.val;
+            break;
         }
         
         //printf("-----(out_b_cnt: %d)\n", out_b_cnt);
