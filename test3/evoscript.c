@@ -230,7 +230,6 @@ e_close_scope(void) {
         return (e_status_ret) { .status = E_STATUS_NESTING };
     }
     
-    e_clear_table(&local_sym_table[scope_level]);
     scope_level--;
     
     return (e_status_ret) { .status = E_STATUS_OK };

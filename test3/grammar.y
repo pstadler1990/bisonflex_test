@@ -113,11 +113,13 @@ math_expression: number {
                     
                     if(scope_level > 0) {
                         // POPL [index]
+                        printf("Finding local %s in scope %d\n", $1, scope_level);
                         s = e_table_find_entry(&local_sym_table[scope_level], $1);
                         op = E_OP_POPL;
                     }
                     
                     if(scope_level == 0 || s.status == E_STATUS_NOTFOUND) {
+                        printf("Finding global %s\n", $1);
                         // POPG [index]
                         s = e_table_find_entry(&global_sym_table, $1);
                         op = E_OP_POPG;
@@ -127,6 +129,10 @@ math_expression: number {
                         int gst_index = s.ival;
                         emit_op(e_create_operation(op, e_create_number(gst_index), e_create_null()));
                     } else {
+                        for(int i = 0; i < local_sym_table[scope_level].entries; i++) {
+                            printf("\t%s\t%f\n", local_sym_table[scope_level].tab_ptr[i].idname, local_sym_table[scope_level].tab_ptr[i].svalue.val);
+                        }
+                    
                         error_pprint(s.status);
                     }
                 }
