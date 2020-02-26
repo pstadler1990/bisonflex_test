@@ -73,8 +73,9 @@ extern int yydebug;
     BLOCK_ENDIF = 279,
     LOOP_REPEAT = 280,
     LOOP_FOREVER = 281,
-    NEWLINE = 282,
-    PRINT_BYTES = 283
+    LOOP_BREAK = 282,
+    NEWLINE = 283,
+    PRINT_BYTES = 284
   };
 #endif
 
@@ -83,12 +84,12 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 31 "grammar.y" /* yacc.c:1921  */
+#line 34 "grammar.y" /* yacc.c:1921  */
 
     e_type nval;
     char* sname;
 
-#line 92 "grammar.tab.h" /* yacc.c:1921  */
+#line 93 "grammar.tab.h" /* yacc.c:1921  */
 };
 
 typedef union YYSTYPE YYSTYPE;

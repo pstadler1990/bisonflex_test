@@ -1,6 +1,7 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
+    #include <stdbool.h>
     #include "evoscript.h"
     #include <string.h>
     
@@ -25,6 +26,8 @@
     static unsigned int out_b_cnt = 0;
     
     unsigned int lc = 0;
+    
+    bool loop_has_break[99];
 %}
 
 
@@ -43,7 +46,7 @@
 %token P_OPEN P_CLOSE
 
 %token BLOCK_IF BLOCK_THEN BLOCK_ENDIF
-%token LOOP_REPEAT LOOP_FOREVER
+%token LOOP_REPEAT LOOP_FOREVER LOOP_BREAK
 
 %token NEWLINE
 %token PRINT_BYTES
@@ -71,6 +74,21 @@ expression: assign
             | math_expression
             | if_expression
             | loop_expression
+            | LOOP_BREAK { 
+                if(loop_level == 0) {
+                    yyerror("Break without proper loop");
+                }
+                printf("BREAK at level %d -> [%d]!\n", loop_level, addr_count   );
+                
+                loop_has_break[loop_level] = true;
+                
+                // Insert JMP [64 bit dummy_addr]
+                emit_op(e_create_operation(E_OP_JMP, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
+                
+                // Copy jmp instruction to a table (to be patched later in the loop expression)
+                e_internal_type addr =  { .ival = addr_count };
+                e_stack_status_ret s = e_stack_push(&bp_stack, addr);
+            }
             | PRINT_BYTES { print_outstream(); }
             ;
             
@@ -273,8 +291,25 @@ loop_expression: loop_begin expression_list LOOP_FOREVER {
                         // Add unconditional jump (jmp) to previously stored address
                         // TODO: Support 64bit address
                         emit_op(e_create_operation(E_OP_JMP, e_create_number(s.val.ival), e_create_number(0xFFFFFFFF)));
+                        
+                        // Patch break (if any)
+                        if(loop_has_break[loop_level]) {
+                            // Get instruction count of opening if
+                            e_stack_status_ret s = e_stack_pop(&bp_stack);
+                            printf("patch loop break @%d\n", s.val.ival);
+                            if(s.status == E_STATUS_OK) {
+                                // Patch jump dummy_addr from previous jump
+                                jmp_patch(s.val.ival, addr_count);
+                            }
+                            loop_has_break[loop_level] = false;
+                        }
+                        
+                        e_status_ret s_scope = e_close_scope();
+                        loop_level = scope_level;
+                        
+                        error_pprint(s_scope.status);
                     }
-                    
+                
                     error_pprint(s.status);
                  }
                  ;
@@ -284,13 +319,16 @@ loop_begin: loop_repeat {
                 e_status_ret s_scope = e_create_scope();
                 if(s_scope.status == E_STATUS_OK) {
                     printf("created scope\n");
+                    
+                    loop_level = scope_level;
+                    loop_has_break[loop_level] = false;
+                    
+                    // Store the line counter of the opening loop block to patch in the closing block
+                    e_internal_type addr =  { .ival = addr_count };
+                    e_stack_status_ret s = e_stack_push(&bp_stack, addr);
+                    
+                    error_pprint(s.status);
                 }
-                
-                // Store the line counter of the opening loop block to patch in the closing block
-                e_internal_type addr =  { .ival = addr_count };
-                e_stack_status_ret s = e_stack_push(&bp_stack, addr);
-                
-                error_pprint(s.status);
                 error_pprint(s_scope.status);
             }
             ;

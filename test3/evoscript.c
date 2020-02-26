@@ -13,6 +13,7 @@ e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_ENTRIES];
 
 // Local symbol tables
 unsigned int scope_level;
+unsigned int loop_level;
 e_table local_sym_table[E_LOCAL_SYM_TAB_SCOPES];
 e_table_entry local_sym_table_block[E_LOCAL_SYM_TAB_SCOPES][E_LOCAL_SYM_TAB_ENTRIES];
 
@@ -30,6 +31,7 @@ e_init(void) {
     
     // Initialize local scopes
     scope_level = 0;
+    loop_level = 0;
     for(unsigned int s = 0; s < E_LOCAL_SYM_TAB_SCOPES; s++) {
         // As we won't want to use dynamic memory allocation, there's a hard coded limit of nesting (scopes)
         local_sym_table[s].tab_ptr = (e_table_entry*)&local_sym_table_block[s];

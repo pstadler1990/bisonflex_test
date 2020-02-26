@@ -1,5 +1,7 @@
 let i = 1
 repeat
     i = i+1
-    i
+    if(i >= 1000) then
+        break
+    endif
 forever
