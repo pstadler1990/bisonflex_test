@@ -163,6 +163,7 @@ extern e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_ENTRIES];
 extern e_table local_sym_table[E_LOCAL_SYM_TAB_SCOPES];
 extern e_table_entry local_sym_table_block[E_LOCAL_SYM_TAB_SCOPES][E_LOCAL_SYM_TAB_ENTRIES];
 extern e_stack bp_stack;
+extern e_stack loop_stack;
 extern unsigned int scope_level;
 extern unsigned int loop_level;
 

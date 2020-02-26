@@ -78,16 +78,14 @@ expression: assign
                 if(loop_level == 0) {
                     yyerror("Break without proper loop");
                 }
-                printf("BREAK at level %d -> [%d]!\n", loop_level, addr_count   );
-                
-                loop_has_break[loop_level] = true;
-                
-                // Insert JMP [64 bit dummy_addr]
+                printf("BREAK at level %d -> [%d]!\n", loop_level, addr_count);
+
+				// Insert JMP [64 bit dummy_addr] to be patched later
                 emit_op(e_create_operation(E_OP_JMP, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
-                
-                // Copy jmp instruction to a table (to be patched later in the loop expression)
-                e_internal_type addr =  { .ival = addr_count };
-                e_stack_status_ret s = e_stack_push(&bp_stack, addr);
+
+				e_internal_type addr =  { .ival = addr_count };
+				e_stack_status_ret s = e_stack_push(&loop_stack, addr);
+				loop_has_break[loop_level] = true;
             }
             | PRINT_BYTES { print_outstream(); }
             ;
@@ -291,19 +289,17 @@ loop_expression: loop_begin expression_list LOOP_FOREVER {
                         // Add unconditional jump (jmp) to previously stored address
                         // TODO: Support 64bit address
                         emit_op(e_create_operation(E_OP_JMP, e_create_number(s.val.ival), e_create_number(0xFFFFFFFF)));
-                        
-                        // Patch break (if any)
-                        if(loop_has_break[loop_level]) {
-                            // Get instruction count of opening if
-                            e_stack_status_ret s = e_stack_pop(&bp_stack);
-                            printf("patch loop break @%d\n", s.val.ival);
-                            if(s.status == E_STATUS_OK) {
-                                // Patch jump dummy_addr from previous jump
-                                jmp_patch(s.val.ival, addr_count);
-                            }
-                            loop_has_break[loop_level] = false;
-                        }
-                        
+
+						if(loop_has_break[loop_level]) {
+							// Patch break
+							// Get instruction count of opening if
+							e_stack_status_ret s = e_stack_pop(&loop_stack);
+							if(s.status == E_STATUS_OK) {
+								jmp_patch(s.val.ival, addr_count);
+								printf("patched loop break @%d with new address: %d\n", s.val.ival, addr_count);
+							}
+						}
+
                         e_status_ret s_scope = e_close_scope();
                         loop_level = scope_level;
                         
@@ -326,7 +322,7 @@ loop_begin: loop_repeat {
                     // Store the line counter of the opening loop block to patch in the closing block
                     e_internal_type addr =  { .ival = addr_count };
                     e_stack_status_ret s = e_stack_push(&bp_stack, addr);
-                    
+
                     error_pprint(s.status);
                 }
                 error_pprint(s_scope.status);

@@ -19,6 +19,8 @@ e_table_entry local_sym_table_block[E_LOCAL_SYM_TAB_SCOPES][E_LOCAL_SYM_TAB_ENTR
 
 // Backpatch stack
 e_stack bp_stack;
+// Loop patch stack
+e_stack loop_stack;
 
 void
 e_init(void) {
@@ -28,6 +30,7 @@ e_init(void) {
     
     // Initialize backpatch stack
     e_stack_init(&bp_stack, E_BP_STACK_SIZE);
+    e_stack_init(&loop_stack, E_BP_STACK_SIZE);
     
     // Initialize local scopes
     scope_level = 0;
@@ -114,8 +117,7 @@ e_table_find_entry(const e_table* tab, const char* idname) {
     unsigned int p = 0;
     signed int f = -1;
     do {
-        if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED 
-            && f == -1) {
+        if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED) {
             if(strcmp(tab->tab_ptr[p].idname, idname) == 0) {
                 f = 1;
                 break;
