@@ -18,16 +18,18 @@
     static void jmp_patch(unsigned int start_addr, unsigned int end_addr);
     
     static void double_to_bytearray(double din, uint8_t bin[]);
+    static int ds_store_string(const char* str);
     
     void print_outstream(void);
     
     static int addr_count = 0;
-    static uint8_t out_bytes[9999];
+    static uint8_t out_bytes[E_OUT_TOTAL_SIZE];
     static unsigned int out_b_cnt = 0;
+    static unsigned int out_ds_cnt = E_OUT_SIZE + 1;
     
     unsigned int lc = 0;
     
-    bool loop_has_break[99];
+    bool loop_has_break[E_LOCAL_SYM_TAB_SCOPES];
 %}
 
 
@@ -36,7 +38,7 @@
     char* sname;
 }
 
-%token<nval> NUMBER
+%token<nval> NUMBER STRING
 %token<sname> IDENTIFIER
 %token ASSIGN EQUALS
 %token AND OR NOT
@@ -92,7 +94,31 @@ expression: assign
             
 line_sep: NEWLINE { lc++; printf("new line [%d]\n", lc); };
             
-assign: ASSIGN IDENTIFIER EQUALS math_expression { 
+assign: ASSIGN IDENTIFIER EQUALS STRING {
+        	e_opcode op;
+            e_status_ret s;
+
+            // Add string data to data segment (bytecode section)
+            int str_index = ds_store_string($4.str.sval);
+            // This is totally independent from the variable's scope (both, global and local strings are stored in the
+            // data section, only the variable's visibility is scope bound
+            emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
+
+            if(scope_level == 0) {
+            	s = e_table_add_entry(&global_sym_table, $2, e_create_string($4.str.sval));
+            	op = E_OP_PUSHG;
+            } else {
+            	s = e_table_add_entry(&local_sym_table[scope_level], $2, e_create_string($4.str.sval));
+                op = E_OP_PUSHL;
+            }
+
+        	if(s.status == E_STATUS_OK) {
+				emit_op(e_create_operation(op, e_create_number(s.ival), e_create_number(E_ARGT_STRING)));
+			} else {
+				error_pprint(s.status);
+			}
+        }
+		| ASSIGN IDENTIFIER EQUALS math_expression {
             /* Number type (integer|float) definition with initialization, let x = 42 */
             e_opcode op;
             e_status_ret s;
@@ -107,9 +133,9 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
                 s = e_table_add_entry(&local_sym_table[scope_level], $2, e_create_number($4.val));
                 op = E_OP_PUSHL;
             }
-            
+
             if(s.status == E_STATUS_OK) {
-                emit_op(e_create_operation(op, e_create_number(s.ival), e_create_null()));
+                emit_op(e_create_operation(op, e_create_number(s.ival), e_create_number(E_ARGT_NUMBER)));
             } else {
                 error_pprint(s.status);
             }
@@ -131,7 +157,7 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
 
             if(s.status == E_STATUS_OK) {
                 int gst_index = s.ival;   
-                emit_op(e_create_operation(op, e_create_number(gst_index), e_create_null()));
+                emit_op(e_create_operation(op, e_create_number(gst_index), e_create_number(E_ARGT_NUMBER)));
             } else {
                 error_pprint(s.status);
             }
@@ -399,7 +425,7 @@ void emit_op(e_op op) {
         case E_OP_PUSHG:
             printf("PUSHG [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
-            byte_op.op2 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)op.op2.val;
             break;
         case E_OP_POPG:
             printf("POPG [%d]\n", (int)op.op1.val);
@@ -409,7 +435,7 @@ void emit_op(e_op op) {
         case E_OP_PUSHL:
             printf("PUSHL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
-            byte_op.op2 = (uint32_t)0;
+            byte_op.op2 = (uint32_t)op.op2.val;
             
             printf("************************ SYMBOL TABLE [%d] **\n", scope_level);
             for(unsigned int i=0; i < local_sym_table[scope_level].entries; i++) {
@@ -500,6 +526,9 @@ void emit_op(e_op op) {
         }
         
         //printf("-----(out_b_cnt: %d)\n", out_b_cnt);
+        if(out_b_cnt + E_OP_BSIZE >= E_OUT_TOTAL_SIZE) {
+        	yyerror("Program space exhausted");
+        }
         
         out_bytes[out_b_cnt++] = (uint8_t)byte_op.opcode;
         out_bytes[out_b_cnt++] = (uint8_t)((byte_op.op1 >> 24) & 0xFF);
@@ -522,11 +551,31 @@ void double_to_bytearray(double din, uint8_t bin[]) {
     memcpy(bin, u.b, E_SYS_SIZE_DOUBLE);
 }
 
+int ds_store_string(const char* str) {
+    // Stores a string in the required format [LENGTH, 2 Bytes][<str data>]
+    uint32_t r_len = strlen(str);
+    if(r_len > UINT16_MAX || out_ds_cnt + 1 > E_OUT_TOTAL_SIZE) {
+    	yyerror("String literal is too large");
+    } else {
+    	uint32_t start_index = out_ds_cnt;
+    	uint16_t len = (uint16_t)r_len;
+
+    	out_bytes[out_ds_cnt++] = (uint8_t)((len >> 8) & 0xFF);
+    	out_bytes[out_ds_cnt++] = (uint8_t)(len & 0xFF);
+    	for(uint16_t i = 0; i < len; i++) {
+    		out_bytes[out_ds_cnt++] = (uint8_t)str[i];
+    	}
+    	return start_index;
+    }
+    return -1;
+}
+
 void print_outstream(void) {
     printf("print stream *****\n");
     unsigned int r = 0;
-    for(unsigned int i = 0; i < 999; i++) {
-        if(i%9 == 0) {
+    unsigned int print_out = 0;
+    for(unsigned int i = 0; i < E_OUT_TOTAL_SIZE; i++) {
+        if(i%9 == 0 && !print_out) {
             printf("[%d] ", i / 9);
         }
     
@@ -534,7 +583,11 @@ void print_outstream(void) {
         
         if(r == 0 && out_bytes[i] == 0x00) {
             // Opcode 0x00, end
-            break;
+            if(!print_out) {
+				printf("\n -- DATA SEGMENT -- \n");
+				i = E_OUT_SIZE;
+				print_out = 1;
+			}
         }
     
         if(++r == 9) {

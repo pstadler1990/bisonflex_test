@@ -40,32 +40,33 @@
       know about them.  */
    enum yytokentype {
      NUMBER = 258,
-     IDENTIFIER = 259,
-     ASSIGN = 260,
-     EQUALS = 261,
-     AND = 262,
-     OR = 263,
-     NOT = 264,
-     REL_LT = 265,
-     REL_LTEQ = 266,
-     REL_NOTEQ = 267,
-     REL_EQ = 268,
-     REL_GTEQ = 269,
-     REL_GT = 270,
-     PLUS = 271,
-     MINUS = 272,
-     MULTIPLY = 273,
-     DIVIDE = 274,
-     P_OPEN = 275,
-     P_CLOSE = 276,
-     BLOCK_IF = 277,
-     BLOCK_THEN = 278,
-     BLOCK_ENDIF = 279,
-     LOOP_REPEAT = 280,
-     LOOP_FOREVER = 281,
-     LOOP_BREAK = 282,
-     NEWLINE = 283,
-     PRINT_BYTES = 284
+     STRING = 259,
+     IDENTIFIER = 260,
+     ASSIGN = 261,
+     EQUALS = 262,
+     AND = 263,
+     OR = 264,
+     NOT = 265,
+     REL_LT = 266,
+     REL_LTEQ = 267,
+     REL_NOTEQ = 268,
+     REL_EQ = 269,
+     REL_GTEQ = 270,
+     REL_GT = 271,
+     PLUS = 272,
+     MINUS = 273,
+     MULTIPLY = 274,
+     DIVIDE = 275,
+     P_OPEN = 276,
+     P_CLOSE = 277,
+     BLOCK_IF = 278,
+     BLOCK_THEN = 279,
+     BLOCK_ENDIF = 280,
+     LOOP_REPEAT = 281,
+     LOOP_FOREVER = 282,
+     LOOP_BREAK = 283,
+     NEWLINE = 284,
+     PRINT_BYTES = 285
    };
 #endif
 
@@ -76,7 +77,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 34 "grammar.y"
+#line 36 "grammar.y"
 
     e_type nval;
     char* sname;
@@ -84,7 +85,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 88 "grammar.tab.h"
+#line 89 "grammar.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -24,7 +24,14 @@
 "break"                     { return LOOP_BREAK; }
 [0-9]+                      { yylval.nval.val = atof(yytext); yylval.nval.type = E_NUMBER; return NUMBER; }
 [0-9]*\.[0-9]+              { yylval.nval.val = atof(yytext); yylval.nval.type = E_NUMBER; return NUMBER; }
-[a-zA-Z_][a-zA-Z_0-9]*      { yylval.sname = strdup(yytext); return IDENTIFIER; } 
+[a-zA-Z_][a-zA-Z_0-9]*      { yylval.sname = strdup(yytext); return IDENTIFIER; }
+\"([^\\\"]|\\.)*\"          {
+                                yylval.nval.type = E_STRING;
+                                yylval.nval.str.slen = strlen(yytext);
+                                yylval.nval.str.sval = strdup(yytext);
+                                //printf("Lex string END! %s\n", yytext);
+                                return STRING;
+                            }
 "="                         { return EQUALS; }
 "+"                         { return PLUS; }
 "-"                         { return MINUS; }
