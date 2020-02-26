@@ -6,11 +6,10 @@
 
 #define E_VERSION "0.01"
 #define E_SYS_SIZE_DOUBLE   ((int)sizeof(double))
-
-typedef struct {
-    enum { E_NUMBER, E_STRING } type;
-    double val;
-} e_type;
+#define E_OUT_DS_SIZE       ((int)500)
+#define E_OUT_SIZE          ((int)2000)
+#define E_OUT_TOTAL_SIZE    ((int)E_OUT_DS_SIZE + E_OUT_SIZE)
+#define E_OP_BSIZE          ((int)9)
 
 typedef enum {
     E_STATUS_NESTING = -7,
@@ -34,6 +33,12 @@ typedef struct {
     char* sval;
     int slen;
 } e_str_type;
+
+typedef struct {
+    enum { E_NUMBER, E_STRING } type;
+    double val;
+    e_str_type str;
+} e_type;
 
 typedef union {
     int ival;
@@ -78,8 +83,7 @@ typedef enum {
     E_OP_POPG = 0x11,      /* Pop global variable,                     POPG [index]                        */
     E_OP_PUSHL = 0x12,     /* Push local variable,                     PUSHL [index]                       */
     E_OP_POPL = 0x13,      /* Pop local variable,                      POPG [index]                        */
-    E_OP_PUSH = 0x14,      /* Push variable onto top of stack,         PUSH 3                              */
-    E_OP_POP = 0x15,       /* Pop variable from top of stack,          POP,                s[-1]           */
+    E_OP_PUSH = 0x14,      /* Push variable onto stack,                PUSH 3                              */
     
     E_OP_EQ = 0x20,        /* Equal check,                             EQ,                 s[-1]==s[-2]    */
     E_OP_LT = 0x21,        /* Less than,                               LT,                 s[-1]<s[-2]     */    
