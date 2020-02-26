@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "evoscript.h"
-#include "grammar.tab.h"
 
 
 int main(void) {
@@ -10,7 +9,7 @@ int main(void) {
     char* buf;
     long fsize;
     
-    FILE* f = fopen("script.evo", "r");
+    FILE* f = fopen("script.evo", "rb");
     if(!f) {
         printf("File not found\n");
         return 0;
@@ -18,11 +17,10 @@ int main(void) {
     fseek(f, 0, SEEK_END);
     fsize = ftell(f);
     rewind(f);
-    buf = malloc(fsize + 2 * sizeof(char));
+    buf = malloc(fsize * sizeof(char));
     fread(buf, sizeof(char), fsize, f);
     fclose(f);
-    buf[fsize] = '?';
-    buf[fsize+1] = 0;
+    buf[fsize] = 0;
     
     printf("%s\n", buf);
     

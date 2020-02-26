@@ -13,11 +13,14 @@ e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_ENTRIES];
 
 // Local symbol tables
 unsigned int scope_level;
+unsigned int loop_level;
 e_table local_sym_table[E_LOCAL_SYM_TAB_SCOPES];
 e_table_entry local_sym_table_block[E_LOCAL_SYM_TAB_SCOPES][E_LOCAL_SYM_TAB_ENTRIES];
 
 // Backpatch stack
 e_stack bp_stack;
+// Loop patch stack
+e_stack loop_stack;
 
 void
 e_init(void) {
@@ -27,9 +30,11 @@ e_init(void) {
     
     // Initialize backpatch stack
     e_stack_init(&bp_stack, E_BP_STACK_SIZE);
+    e_stack_init(&loop_stack, E_BP_STACK_SIZE);
     
     // Initialize local scopes
     scope_level = 0;
+    loop_level = 0;
     for(unsigned int s = 0; s < E_LOCAL_SYM_TAB_SCOPES; s++) {
         // As we won't want to use dynamic memory allocation, there's a hard coded limit of nesting (scopes)
         local_sym_table[s].tab_ptr = (e_table_entry*)&local_sym_table_block[s];
@@ -51,7 +56,7 @@ e_table_init(e_table* tab, unsigned int entries_nr) {
 
 void 
 e_clear_table(e_table* tab) {
-    memset(tab->tab_ptr, 0, ((int)sizeof(e_table_entry) * tab->entries_nr));
+    memset(tab->tab_ptr, 0, ((int)sizeof(e_table_entry) * tab->entries));
     tab->entries = 0;
 }
 
@@ -108,12 +113,17 @@ e_table_find_entry(const e_table* tab, const char* idname) {
     if(tab == NULL || tab->entries_nr == 0) {
         return (e_status_ret) { .status = E_STATUS_NOINIT };
     }
+
+    printf("------ FINDTABLE -------\n");
+    for(int i = 0; i < tab->entries; i++) {
+        printf("[%d] %s\n", i, tab->tab_ptr[i].idname);
+    }
+    printf("-------------------\n");
     
     unsigned int p = 0;
     signed int f = -1;
     do {
-        if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED 
-            && f == -1) {
+        if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED) {
             if(strcmp(tab->tab_ptr[p].idname, idname) == 0) {
                 f = 1;
                 break;
@@ -208,17 +218,28 @@ e_create_scope(void) {
         return (e_status_ret) { .status = E_STATUS_NESIZE };
     }
     
-    e_clear_table(&local_sym_table[scope_level]);
+    // e_clear_table(&local_sym_table[scope_level]);
     
     if(scope_level == 1) return (e_status_ret) { .status = E_STATUS_OK }; 
     // TODO: We are missing the 0th scope block with this approach!
     
     // Copy previous scope
     printf("previous table entries: %d\n", local_sym_table[scope_level - 1].entries);
-    
-    memcpy(&local_sym_table[scope_level], &local_sym_table[scope_level - 1], sizeof(e_table));
+
+    // Copy previous table into new one
+    for(unsigned int i = 0; i < local_sym_table[scope_level - 1].entries; i++) {
+        local_sym_table[scope_level].tab_ptr[i] = local_sym_table[scope_level - 1].tab_ptr[i];
+    }
+    local_sym_table[scope_level].entries = local_sym_table[scope_level - 1].entries;
+
     
     printf("BLOCK BEGIN, level: %d with %d entries\n", scope_level, local_sym_table[scope_level].entries);
+
+    printf("------ SCOPE -------\n");
+    for(int i = 0; i < local_sym_table[scope_level].entries; i++) {
+        printf("[%d] %s\n", i, local_sym_table[scope_level].tab_ptr[i].idname);
+    }
+    printf("-------------------\n");
     
     return (e_status_ret) { .status = E_STATUS_OK };
 }
@@ -229,7 +250,8 @@ e_close_scope(void) {
     if(scope_level == 0) {
         return (e_status_ret) { .status = E_STATUS_NESTING };
     }
-    
+    printf("/// CLOSING SCOPE %d ///\n", scope_level);
+    e_clear_table(&local_sym_table[scope_level]);
     scope_level--;
     
     return (e_status_ret) { .status = E_STATUS_OK };

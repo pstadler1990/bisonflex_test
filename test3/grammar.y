@@ -1,6 +1,7 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
+    #include <stdbool.h>
     #include "evoscript.h"
     #include <string.h>
     
@@ -25,6 +26,8 @@
     static unsigned int out_b_cnt = 0;
     
     unsigned int lc = 0;
+    
+    bool loop_has_break[99];
 %}
 
 
@@ -41,9 +44,11 @@
 %token PLUS MINUS
 %token MULTIPLY DIVIDE
 %token P_OPEN P_CLOSE
-%token BLOCK_IF BLOCK_THEN BLOCK_ENDIF
-%token NEWLINE
 
+%token BLOCK_IF BLOCK_THEN BLOCK_ENDIF
+%token LOOP_REPEAT LOOP_FOREVER LOOP_BREAK
+
+%token NEWLINE
 %token PRINT_BYTES
 
 %left AND OR NOT
@@ -68,6 +73,20 @@ expression_list: expression line_sep expression_list
 expression: assign
             | math_expression
             | if_expression
+            | loop_expression
+            | LOOP_BREAK { 
+                if(loop_level == 0) {
+                    yyerror("Break without proper loop");
+                }
+                printf("BREAK at level %d -> [%d]!\n", loop_level, addr_count);
+
+				// Insert JMP [64 bit dummy_addr] to be patched later
+                emit_op(e_create_operation(E_OP_JMP, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
+
+				e_internal_type addr =  { .ival = addr_count };
+				e_stack_status_ret s = e_stack_push(&loop_stack, addr);
+				loop_has_break[loop_level] = true;
+            }
             | PRINT_BYTES { print_outstream(); }
             ;
             
@@ -99,11 +118,20 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
             /* Change value of number type variable, a = 3 */
             // PUSHG $3 [index] (value, index)
             // PUSHL $3 [index] (value, index)
-            e_status_ret s = e_table_find_entry(&global_sym_table, $1);
-            
+            e_opcode op;
+            e_status_ret s;
+
+            s = e_table_find_entry(&global_sym_table, $1);
+            op = E_OP_PUSHG;
+
+            if(s.status != E_STATUS_OK) {
+				s = e_table_find_entry(&local_sym_table[scope_level], $1);
+				op = E_OP_PUSHL;
+            }
+
             if(s.status == E_STATUS_OK) {
                 int gst_index = s.ival;   
-                emit_op(e_create_operation(E_OP_PUSHG, e_create_number(gst_index), e_create_null()));
+                emit_op(e_create_operation(op, e_create_number(gst_index), e_create_null()));
             } else {
                 error_pprint(s.status);
             }
@@ -259,6 +287,60 @@ if_condition: BLOCK_IF math_expression if_blockthen {
 if_blockthen: BLOCK_THEN
               | BLOCK_THEN line_sep
               ;
+              
+loop_expression: loop_begin expression_list LOOP_FOREVER {
+                    printf("LOOP END\n");
+                    
+                    // Get instruction count of opening if
+                    e_stack_status_ret s = e_stack_pop(&bp_stack);
+                    if(s.status == E_STATUS_OK) {
+                        printf("Patching loop address: %d\n", s.val.ival);
+                        // Add unconditional jump (jmp) to previously stored address
+                        // TODO: Support 64bit address
+                        emit_op(e_create_operation(E_OP_JMP, e_create_number(s.val.ival), e_create_number(0xFFFFFFFF)));
+
+						if(loop_has_break[loop_level]) {
+							// Patch break
+							// Get instruction count of opening if
+							e_stack_status_ret s = e_stack_pop(&loop_stack);
+							if(s.status == E_STATUS_OK) {
+								jmp_patch(s.val.ival, addr_count);
+								printf("patched loop break @%d with new address: %d\n", s.val.ival, addr_count);
+							}
+						}
+
+                        e_status_ret s_scope = e_close_scope();
+                        loop_level = scope_level;
+                        
+                        error_pprint(s_scope.status);
+                    }
+                
+                    error_pprint(s.status);
+                 }
+                 ;
+
+loop_begin: loop_repeat { 
+                // Loop creates a new scope
+                e_status_ret s_scope = e_create_scope();
+                if(s_scope.status == E_STATUS_OK) {
+                    printf("created scope\n");
+                    
+                    loop_level = scope_level;
+                    loop_has_break[loop_level] = false;
+                    
+                    // Store the line counter of the opening loop block to patch in the closing block
+                    e_internal_type addr =  { .ival = addr_count };
+                    e_stack_status_ret s = e_stack_push(&bp_stack, addr);
+
+                    error_pprint(s.status);
+                }
+                error_pprint(s_scope.status);
+            }
+            ;
+                 
+loop_repeat: LOOP_REPEAT 
+            | LOOP_REPEAT line_sep
+            ;
          
 number: NUMBER { $$.type = E_NUMBER; $$.val = $1.val; }
         ;
@@ -315,17 +397,17 @@ void emit_op(e_op op) {
     
     switch(op.opcode) {
         case E_OP_PUSHG:
-            //printf("PUSHG [%d]\n", (int)op.op1.val);
+            printf("PUSHG [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_POPG:
-            //printf("POPG [%d]\n", (int)op.op1.val);
+            printf("POPG [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSHL:
-            //printf("PUSHL [%d]\n", (int)op.op1.val);
+            printf("PUSHL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             
@@ -337,14 +419,14 @@ void emit_op(e_op op) {
             
             break;
         case E_OP_POPL:
-            //printf("POPL [%d]\n", (int)op.op1.val);
+            printf("POPL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSH:
             switch(op.op1.argtype) {
                 case E_ARGT_NUMBER:
-                    //printf("PUSH %f\n", op.op1.val);
+                    printf("PUSH %f\n", op.op1.val);
                     double_to_bytearray(op.op1.val, barr);
                     byte_op.op1 = (barr[7] << 24) | (barr[6] << 16) | (barr[5] << 8) | barr[4];
                     byte_op.op2 = (barr[3] << 24) | (barr[2] << 16) | (barr[1] << 8) | barr[0];
@@ -352,64 +434,69 @@ void emit_op(e_op op) {
                 }
             break;
         case E_OP_EQ:
-            //printf("EQ\n");
+            printf("EQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LT:
-            //printf("LT\n");
+            printf("LT\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GT:
-            //printf("GT\n");
+            printf("GT\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LTEQ:
-            //printf("LTEQ\n");
+            printf("LTEQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GTEQ:
-            //printf("GTEQ\n");
+            printf("GTEQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_ADD:
-            //printf("ADD\n");
+            printf("ADD\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_SUB:
-            //printf("SUB\n");
+            printf("SUB\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_MUL:
-            //printf("MUL\n");
+            printf("MUL\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_DIV:
-            //printf("DIV\n");
+            printf("DIV\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_AND:
-            //printf("AND\n");
+            printf("AND\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_OR:
-            //printf("OR\n");
+            printf("OR\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_JZ:
-            //printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
+            printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)op.op2.val;
+            break;
+        case E_OP_JMP:
+            byte_op.op1 = (uint32_t)op.op1.val;
+            byte_op.op2 = (uint32_t)op.op2.val;
+            break;
         }
         
         //printf("-----(out_b_cnt: %d)\n", out_b_cnt);

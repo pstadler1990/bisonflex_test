@@ -96,6 +96,7 @@ typedef enum {
     E_OP_NOT = 0x37,
     
     E_OP_JZ = 0x40,        /* Jump if zero,                            JZ [addr]                           */
+    E_OP_JMP = 0x41,       /* Unconditional jump,                      JMP [addr]                          */
 } e_opcode;
 
 typedef struct {
@@ -162,7 +163,11 @@ extern e_table_entry global_sym_table_block[E_GLOBAL_SYM_TAB_ENTRIES];
 extern e_table local_sym_table[E_LOCAL_SYM_TAB_SCOPES];
 extern e_table_entry local_sym_table_block[E_LOCAL_SYM_TAB_SCOPES][E_LOCAL_SYM_TAB_ENTRIES];
 extern e_stack bp_stack;
+extern e_stack loop_stack;
 extern unsigned int scope_level;
+extern unsigned int loop_level;
+
+// Flex / bison exports
 extern int yylex();
 extern int yyparse();
 extern FILE* yyin;
