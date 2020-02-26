@@ -56,7 +56,7 @@ e_table_init(e_table* tab, unsigned int entries_nr) {
 
 void 
 e_clear_table(e_table* tab) {
-    memset(tab->tab_ptr, 0, ((int)sizeof(e_table_entry) * tab->entries_nr));
+    memset(tab->tab_ptr, 0, ((int)sizeof(e_table_entry) * tab->entries));
     tab->entries = 0;
 }
 
@@ -113,6 +113,12 @@ e_table_find_entry(const e_table* tab, const char* idname) {
     if(tab == NULL || tab->entries_nr == 0) {
         return (e_status_ret) { .status = E_STATUS_NOINIT };
     }
+
+    printf("------ FINDTABLE -------\n");
+    for(int i = 0; i < tab->entries; i++) {
+        printf("[%d] %s\n", i, tab->tab_ptr[i].idname);
+    }
+    printf("-------------------\n");
     
     unsigned int p = 0;
     signed int f = -1;
@@ -212,17 +218,28 @@ e_create_scope(void) {
         return (e_status_ret) { .status = E_STATUS_NESIZE };
     }
     
-    e_clear_table(&local_sym_table[scope_level]);
+    // e_clear_table(&local_sym_table[scope_level]);
     
     if(scope_level == 1) return (e_status_ret) { .status = E_STATUS_OK }; 
     // TODO: We are missing the 0th scope block with this approach!
     
     // Copy previous scope
     printf("previous table entries: %d\n", local_sym_table[scope_level - 1].entries);
-    
-    memcpy(&local_sym_table[scope_level], &local_sym_table[scope_level - 1], sizeof(e_table));
+
+    // Copy previous table into new one
+    for(unsigned int i = 0; i < local_sym_table[scope_level - 1].entries; i++) {
+        local_sym_table[scope_level].tab_ptr[i] = local_sym_table[scope_level - 1].tab_ptr[i];
+    }
+    local_sym_table[scope_level].entries = local_sym_table[scope_level - 1].entries;
+
     
     printf("BLOCK BEGIN, level: %d with %d entries\n", scope_level, local_sym_table[scope_level].entries);
+
+    printf("------ SCOPE -------\n");
+    for(int i = 0; i < local_sym_table[scope_level].entries; i++) {
+        printf("[%d] %s\n", i, local_sym_table[scope_level].tab_ptr[i].idname);
+    }
+    printf("-------------------\n");
     
     return (e_status_ret) { .status = E_STATUS_OK };
 }
@@ -233,7 +250,8 @@ e_close_scope(void) {
     if(scope_level == 0) {
         return (e_status_ret) { .status = E_STATUS_NESTING };
     }
-    
+    printf("/// CLOSING SCOPE %d ///\n", scope_level);
+    e_clear_table(&local_sym_table[scope_level]);
     scope_level--;
     
     return (e_status_ret) { .status = E_STATUS_OK };

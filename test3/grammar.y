@@ -118,11 +118,20 @@ assign: ASSIGN IDENTIFIER EQUALS math_expression {
             /* Change value of number type variable, a = 3 */
             // PUSHG $3 [index] (value, index)
             // PUSHL $3 [index] (value, index)
-            e_status_ret s = e_table_find_entry(&global_sym_table, $1);
-            
+            e_opcode op;
+            e_status_ret s;
+
+            s = e_table_find_entry(&global_sym_table, $1);
+            op = E_OP_PUSHG;
+
+            if(s.status != E_STATUS_OK) {
+				s = e_table_find_entry(&local_sym_table[scope_level], $1);
+				op = E_OP_PUSHL;
+            }
+
             if(s.status == E_STATUS_OK) {
                 int gst_index = s.ival;   
-                emit_op(e_create_operation(E_OP_PUSHG, e_create_number(gst_index), e_create_null()));
+                emit_op(e_create_operation(op, e_create_number(gst_index), e_create_null()));
             } else {
                 error_pprint(s.status);
             }
@@ -388,17 +397,17 @@ void emit_op(e_op op) {
     
     switch(op.opcode) {
         case E_OP_PUSHG:
-            //printf("PUSHG [%d]\n", (int)op.op1.val);
+            printf("PUSHG [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_POPG:
-            //printf("POPG [%d]\n", (int)op.op1.val);
+            printf("POPG [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSHL:
-            //printf("PUSHL [%d]\n", (int)op.op1.val);
+            printf("PUSHL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             
@@ -410,14 +419,14 @@ void emit_op(e_op op) {
             
             break;
         case E_OP_POPL:
-            //printf("POPL [%d]\n", (int)op.op1.val);
+            printf("POPL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSH:
             switch(op.op1.argtype) {
                 case E_ARGT_NUMBER:
-                    //printf("PUSH %f\n", op.op1.val);
+                    printf("PUSH %f\n", op.op1.val);
                     double_to_bytearray(op.op1.val, barr);
                     byte_op.op1 = (barr[7] << 24) | (barr[6] << 16) | (barr[5] << 8) | barr[4];
                     byte_op.op2 = (barr[3] << 24) | (barr[2] << 16) | (barr[1] << 8) | barr[0];
@@ -425,62 +434,62 @@ void emit_op(e_op op) {
                 }
             break;
         case E_OP_EQ:
-            //printf("EQ\n");
+            printf("EQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LT:
-            //printf("LT\n");
+            printf("LT\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GT:
-            //printf("GT\n");
+            printf("GT\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LTEQ:
-            //printf("LTEQ\n");
+            printf("LTEQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GTEQ:
-            //printf("GTEQ\n");
+            printf("GTEQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_ADD:
-            //printf("ADD\n");
+            printf("ADD\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_SUB:
-            //printf("SUB\n");
+            printf("SUB\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_MUL:
-            //printf("MUL\n");
+            printf("MUL\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_DIV:
-            //printf("DIV\n");
+            printf("DIV\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_AND:
-            //printf("AND\n");
+            printf("AND\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_OR:
-            //printf("OR\n");
+            printf("OR\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_JZ:
-            //printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
+            printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)op.op2.val;
             break;

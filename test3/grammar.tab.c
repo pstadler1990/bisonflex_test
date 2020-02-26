@@ -486,9 +486,9 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint16 yyrline[] =
 {
        0,    65,    65,    68,    69,    70,    73,    74,    75,    76,
-      77,    90,    93,    95,   117,   132,   136,   166,   171,   176,
-     181,   186,   191,   196,   199,   202,   205,   208,   211,   215,
-     219,   243,   260,   278,   279,   282,   313,   332,   333,   336
+      77,    90,    93,    95,   117,   141,   145,   175,   180,   185,
+     190,   195,   200,   205,   208,   211,   214,   217,   220,   224,
+     228,   252,   269,   287,   288,   291,   322,   341,   342,   345
 };
 #endif
 
@@ -1508,11 +1508,20 @@ yyreduce:
             /* Change value of number type variable, a = 3 */
             // PUSHG $3 [index] (value, index)
             // PUSHL $3 [index] (value, index)
-            e_status_ret s = e_table_find_entry(&global_sym_table, (yyvsp[(1) - (3)].sname));
-            
+            e_opcode op;
+            e_status_ret s;
+
+            s = e_table_find_entry(&global_sym_table, (yyvsp[(1) - (3)].sname));
+            op = E_OP_PUSHG;
+
+            if(s.status != E_STATUS_OK) {
+				s = e_table_find_entry(&local_sym_table[scope_level], (yyvsp[(1) - (3)].sname));
+				op = E_OP_PUSHL;
+            }
+
             if(s.status == E_STATUS_OK) {
                 int gst_index = s.ival;   
-                emit_op(e_create_operation(E_OP_PUSHG, e_create_number(gst_index), e_create_null()));
+                emit_op(e_create_operation(op, e_create_number(gst_index), e_create_null()));
             } else {
                 error_pprint(s.status);
             }
@@ -1522,7 +1531,7 @@ yyreduce:
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 132 "grammar.y"
+#line 141 "grammar.y"
     {
                     // PUSH [number]
                     emit_op(e_create_operation(E_OP_PUSH, e_create_number((yyvsp[(1) - (1)].nval).val), e_create_null()));
@@ -1532,7 +1541,7 @@ yyreduce:
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 136 "grammar.y"
+#line 145 "grammar.y"
     { 
                     /* Find and pop a global or local variable */
                     e_opcode op;
@@ -1568,7 +1577,7 @@ yyreduce:
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 166 "grammar.y"
+#line 175 "grammar.y"
     {
                     /* a == b */
                     // EQ
@@ -1579,7 +1588,7 @@ yyreduce:
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 171 "grammar.y"
+#line 180 "grammar.y"
     {
                     /* a != b */
                     emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
@@ -1590,7 +1599,7 @@ yyreduce:
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 176 "grammar.y"
+#line 185 "grammar.y"
     {
                     /* a < b */
                     // LT
@@ -1601,7 +1610,7 @@ yyreduce:
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 181 "grammar.y"
+#line 190 "grammar.y"
     {
                     /* a > b */
                     // GT
@@ -1612,7 +1621,7 @@ yyreduce:
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 186 "grammar.y"
+#line 195 "grammar.y"
     {
                     /* a <= b */
                     // LTEQ
@@ -1623,7 +1632,7 @@ yyreduce:
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 191 "grammar.y"
+#line 200 "grammar.y"
     {
                     /* a >= b */
                     // GTEQ
@@ -1634,7 +1643,7 @@ yyreduce:
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 196 "grammar.y"
+#line 205 "grammar.y"
     {
                     emit_op(e_create_operation(E_OP_AND, e_create_null(), e_create_null()));
                 ;}
@@ -1643,7 +1652,7 @@ yyreduce:
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 199 "grammar.y"
+#line 208 "grammar.y"
     {
                     emit_op(e_create_operation(E_OP_OR, e_create_null(), e_create_null()));
                 ;}
@@ -1652,7 +1661,7 @@ yyreduce:
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 202 "grammar.y"
+#line 211 "grammar.y"
     {
                     emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
                 ;}
@@ -1661,7 +1670,7 @@ yyreduce:
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 205 "grammar.y"
+#line 214 "grammar.y"
     {
                     (yyval.nval) = (yyvsp[(2) - (3)].nval);
                 ;}
@@ -1670,7 +1679,7 @@ yyreduce:
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 208 "grammar.y"
+#line 217 "grammar.y"
     { 
                     emit_op(e_create_operation(E_OP_MUL, e_create_null(), e_create_null()));
                 ;}
@@ -1679,7 +1688,7 @@ yyreduce:
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 211 "grammar.y"
+#line 220 "grammar.y"
     { 
                     /* 3 / a */
                     emit_op(e_create_operation(E_OP_DIV, e_create_null(), e_create_null()));
@@ -1689,7 +1698,7 @@ yyreduce:
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 215 "grammar.y"
+#line 224 "grammar.y"
     { 
                     /* 3 + a */
                     emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
@@ -1699,7 +1708,7 @@ yyreduce:
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 219 "grammar.y"
+#line 228 "grammar.y"
     { 
                     /* 3 - a */
                     emit_op(e_create_operation(E_OP_SUB, e_create_null(), e_create_null()));
@@ -1709,7 +1718,7 @@ yyreduce:
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 243 "grammar.y"
+#line 252 "grammar.y"
     { 
                     // Get instruction count of opening if
                     e_stack_status_ret s = e_stack_pop(&bp_stack);
@@ -1730,7 +1739,7 @@ yyreduce:
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 260 "grammar.y"
+#line 269 "grammar.y"
     {
                     // Insert JNE [16 bit dummy_addr]
                     emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
@@ -1752,7 +1761,7 @@ yyreduce:
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 282 "grammar.y"
+#line 291 "grammar.y"
     {
                     printf("LOOP END\n");
                     
@@ -1787,7 +1796,7 @@ yyreduce:
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 313 "grammar.y"
+#line 322 "grammar.y"
     { 
                 // Loop creates a new scope
                 e_status_ret s_scope = e_create_scope();
@@ -1810,14 +1819,14 @@ yyreduce:
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 336 "grammar.y"
+#line 345 "grammar.y"
     { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[(1) - (1)].nval).val; ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1821 "grammar.tab.c"
+#line 1830 "grammar.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2029,7 +2038,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 338 "grammar.y"
+#line 347 "grammar.y"
 
 
 void yyerror(const char* s) {
@@ -2083,17 +2092,17 @@ void emit_op(e_op op) {
     
     switch(op.opcode) {
         case E_OP_PUSHG:
-            //printf("PUSHG [%d]\n", (int)op.op1.val);
+            printf("PUSHG [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_POPG:
-            //printf("POPG [%d]\n", (int)op.op1.val);
+            printf("POPG [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSHL:
-            //printf("PUSHL [%d]\n", (int)op.op1.val);
+            printf("PUSHL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             
@@ -2105,14 +2114,14 @@ void emit_op(e_op op) {
             
             break;
         case E_OP_POPL:
-            //printf("POPL [%d]\n", (int)op.op1.val);
+            printf("POPL [%d]\n", (int)op.op1.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_PUSH:
             switch(op.op1.argtype) {
                 case E_ARGT_NUMBER:
-                    //printf("PUSH %f\n", op.op1.val);
+                    printf("PUSH %f\n", op.op1.val);
                     double_to_bytearray(op.op1.val, barr);
                     byte_op.op1 = (barr[7] << 24) | (barr[6] << 16) | (barr[5] << 8) | barr[4];
                     byte_op.op2 = (barr[3] << 24) | (barr[2] << 16) | (barr[1] << 8) | barr[0];
@@ -2120,62 +2129,62 @@ void emit_op(e_op op) {
                 }
             break;
         case E_OP_EQ:
-            //printf("EQ\n");
+            printf("EQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LT:
-            //printf("LT\n");
+            printf("LT\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GT:
-            //printf("GT\n");
+            printf("GT\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_LTEQ:
-            //printf("LTEQ\n");
+            printf("LTEQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_GTEQ:
-            //printf("GTEQ\n");
+            printf("GTEQ\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_ADD:
-            //printf("ADD\n");
+            printf("ADD\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_SUB:
-            //printf("SUB\n");
+            printf("SUB\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_MUL:
-            //printf("MUL\n");
+            printf("MUL\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_DIV:
-            //printf("DIV\n");
+            printf("DIV\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_AND:
-            //printf("AND\n");
+            printf("AND\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_OR:
-            //printf("OR\n");
+            printf("OR\n");
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
         case E_OP_JZ:
-            //printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
+            printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)op.op2.val;
             break;
