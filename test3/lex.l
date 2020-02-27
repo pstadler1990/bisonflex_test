@@ -28,7 +28,8 @@
 \"([^\\\"]|\\.)*\"          {
                                 yylval.nval.type = E_STRING;
                                 yylval.nval.str.slen = strlen(yytext);
-                                yylval.nval.str.sval = strdup(yytext);
+                                yylval.nval.str.sval = strdup(yytext+1);
+                                yylval.nval.str.sval[yylval.nval.str.slen-2] = 0;
                                 return STRING;
                             }
 "="                         { return EQUALS; }
