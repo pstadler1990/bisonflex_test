@@ -100,6 +100,9 @@ assign: IDENTIFIER EQUALS math_expression {
                     // PUSHL $3 [index] (value, index)
                     e_opcode op;
                     e_status_ret s;
+					e_table_value v;
+					e_table_value opv;
+					e_table* tab = &global_sym_table;
 
                     s = e_table_find_entry(&global_sym_table, $1);
                     op = E_OP_PUSHG;
@@ -107,11 +110,32 @@ assign: IDENTIFIER EQUALS math_expression {
                     if(s.status != E_STATUS_OK) {
         				s = e_table_find_entry(&local_sym_table[scope_level], $1);
         				op = E_OP_PUSHL;
+        				tab = &local_sym_table[scope_level];
                     }
 
                     if(s.status == E_STATUS_OK) {
                         int gst_index = s.ival;
-                        emit_op(e_create_operation(op, e_create_number(gst_index), e_create_number(E_ARGT_NUMBER)));
+
+                        printf("reassign -> argtype expr: %d\n", $3.type);
+						if($3.type == E_NUMBER) {
+							printf("is number \n");
+							v = e_create_number($3.val);
+							opv = e_create_number(E_ARGT_NUMBER);
+						} else if($3.type == E_STRING) {
+							printf("is string \n");
+							v = e_create_string($3.str.sval, $3.str.str_index);
+							opv = e_create_number(E_ARGT_STRING);
+						}
+
+						printf("changing entry %s\n", $1);
+						s = e_table_add_entry(tab, $1, v);
+
+						if(s.status == E_STATUS_OK) {
+							printf("------ OK -------\n");
+                        	emit_op(e_create_operation(op, e_create_number(gst_index), opv));
+                        } else {
+					  		error_pprint(s.status);
+					  	}
                     } else {
                         error_pprint(s.status);
                     }

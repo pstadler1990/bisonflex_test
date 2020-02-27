@@ -70,7 +70,9 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
         /* Not enough free space */
         return (e_status_ret) { .status = E_STATUS_NESIZE };
     }
-    
+
+    int used = 0;
+
     e_table_entry new_node;
 
     new_node.idname = strdup(idname);
@@ -88,6 +90,11 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
                 f = p;
             } else if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED) {
                 if(strcmp(tab->tab_ptr[p].idname, idname) == 0) {
+                    used = 1;
+                    tab->tab_ptr[slot_index] = new_node;
+                    if(used) {
+                        printf("overriding slot index %d (%s) with argtype: %d\n", slot_index, idname, new_node.svalue.argtype);
+                    }
                     return (e_status_ret) { .status = E_STATUS_OK };
                     //return (e_status_ret) { .status = E_STATUS_ALRDYDEF };
                 }
@@ -116,11 +123,9 @@ e_table_find_entry(const e_table* tab, const char* idname) {
 
     printf("------ FINDTABLE -------\n");
     for(int i = 0; i < tab->entries; i++) {
-        printf("[%d] %s\t(type: %d)", i, tab->tab_ptr[i].idname, tab->tab_ptr[i].svalue.argtype);
+        printf("[%d] %s\t(type: %d)\t(used: %d)", i, tab->tab_ptr[i].idname, tab->tab_ptr[i].svalue.argtype, tab->tab_ptr[i].used);
         if(tab->tab_ptr[i].svalue.argtype == E_ARGT_STRING) {
             printf("\tIndex: %d\n", tab->tab_ptr[i].svalue.sval.str_index);
-        } else if(tab->tab_ptr[i].svalue.argtype == E_ARGT_NUMBER) {
-            printf("\tValue: %f\n", tab->tab_ptr[i].svalue.val);
         }
     }
     printf("-------------------\n");
