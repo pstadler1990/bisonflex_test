@@ -144,22 +144,31 @@ assign: ASSIGN IDENTIFIER EQUALS string_expression {
             /* Number type (integer|float) definition with initialization, let x = 42 */
             e_opcode op;
             e_status_ret s;
+            e_table_value v;
+            e_table_value opv;
 
             printf("argtype expr: %d\n", $4.type);
+            if($4.type == E_NUMBER) {
+				v = e_create_number($4.val);
+				opv = e_create_number(E_ARGT_NUMBER);
+			} else if($4.type == E_NUMBER) {
+				v = e_create_string($4.str.sval);
+                opv = e_create_number(E_ARGT_STRING);
+			}
 
             if(scope_level == 0) {
                 // PUSHG [index]
-                s = e_table_add_entry(&global_sym_table, $2, e_create_number($4.val));
+                s = e_table_add_entry(&global_sym_table, $2, v);
                 op = E_OP_PUSHG;
             } else {
                 // PUSHL [index]
                 printf("Push local %s into scope %d\n", $2, scope_level);
-                s = e_table_add_entry(&local_sym_table[scope_level], $2, e_create_number($4.val));
+                s = e_table_add_entry(&local_sym_table[scope_level], $2, v);
                 op = E_OP_PUSHL;
             }
 
             if(s.status == E_STATUS_OK) {
-                emit_op(e_create_operation(op, e_create_number(s.ival), e_create_number(E_ARGT_NUMBER)));
+                emit_op(e_create_operation(op, e_create_number(s.ival), opv));
             } else {
                 error_pprint(s.status);
             }
@@ -263,27 +272,25 @@ math_expression: number {
                     printf("OP1 type is %d\n", $1.type);
                     printf("OP2 type is %d\n", $3.type);
 
-                    // Both math_expressions are of type string:
-					// ADD ends in:
-					// Result type is string
-					// Concatenate both strings and store the new string in the ds
 					if($1.type == E_ARGT_STRING && $3.type == E_ARGT_STRING) {
+						// Result type is string
+                        // Concatenate both strings and store the new string in the ds
 						char buf[E_MAX_STRLEN];
 						unsigned int slen1 = strlen($1.str.sval);
 						unsigned int slen2 = strlen($3.str.sval);
-						printf("len1: %d len2: %d\n", slen1, slen2);
+
 						if(slen1 + slen2 > E_MAX_STRLEN) {
-							yyerror("String too long");
+							yyerror("Resulting string too long");
 						} else {
 							strcpy(buf, $1.str.sval);
 							strcat(buf, $3.str.sval);
-							printf("New - string %s\n", buf);
 
 							// Add string data to data segment (bytecode section)
 							int str_index = ds_store_string(buf);
 							emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
 
 							$$.type = E_STRING;
+							$$.str.sval = strdup(buf);
 						}
 					} else {
 						// Numbers result in an add operation
