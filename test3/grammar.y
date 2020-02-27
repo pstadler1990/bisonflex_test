@@ -94,31 +94,7 @@ expression: assign
             
 line_sep: NEWLINE { lc++; };
             
-assign: ASSIGN IDENTIFIER EQUALS string_expression {
-        	e_opcode op;
-            e_status_ret s;
-
-            // Add string data to data segment (bytecode section)
-            int str_index = ds_store_string($4.str.sval);
-            // This is totally independent from the variable's scope (both, global and local strings are stored in the
-            // data section, only the variable's visibility is scope bound
-            emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
-
-            if(scope_level == 0) {
-            	s = e_table_add_entry(&global_sym_table, $2, e_create_string($4.str.sval, str_index));
-            	op = E_OP_PUSHG;
-            } else {
-            	s = e_table_add_entry(&local_sym_table[scope_level], $2, e_create_string($4.str.sval, str_index));
-                op = E_OP_PUSHL;
-            }
-
-        	if(s.status == E_STATUS_OK) {
-				emit_op(e_create_operation(op, e_create_number(s.ival), e_create_number(E_ARGT_STRING)));
-			} else {
-				error_pprint(s.status);
-			}
-        }
-        | IDENTIFIER EQUALS math_expression {
+assign: IDENTIFIER EQUALS math_expression {
                     /* Change value of number type variable, a = 3 */
                     // PUSHG $3 [index] (value, index)
                     // PUSHL $3 [index] (value, index)
@@ -211,6 +187,17 @@ math_expression: number {
 
                         error_pprint(s.status);
                     }
+                }
+                | string_expression {
+                	// Add string data to data segment (bytecode section)
+					int str_index = ds_store_string($1.str.sval);
+					// This is totally independent from the variable's scope (both, global and local strings are stored in the
+					// data section, only the variable's visibility is scope bound
+					emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
+
+					$$.type = E_STRING;
+					$$.str.sval = strdup($1.str.sval);
+					$$.str.str_index = str_index;
                 }
                 | math_expression REL_EQ math_expression {
                     /* a == b */
