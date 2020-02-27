@@ -31,6 +31,7 @@ typedef enum {
 } e_arg_type;
 
 typedef struct {
+    int str_index; /* string index in .ds */
     char* sval;
     int slen;
 } e_str_type;
@@ -152,7 +153,7 @@ e_status_ret e_table_add_entry(e_table* tab, const char* idname, e_table_value v
 e_status_ret e_table_find_entry(const e_table* tab, const char* idname);
 e_table_value e_create_null(void);
 e_table_value e_create_number(double val);
-e_table_value e_create_string(const char* str);
+e_table_value e_create_string(const char* str, int ds_index);
 
 // Stack
 e_stack_status_ret e_stack_push(e_stack* stack, e_internal_type v);

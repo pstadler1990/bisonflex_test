@@ -118,7 +118,7 @@ e_table_find_entry(const e_table* tab, const char* idname) {
     for(int i = 0; i < tab->entries; i++) {
         printf("[%d] %s\t(type: %d)", i, tab->tab_ptr[i].idname, tab->tab_ptr[i].svalue.argtype);
         if(tab->tab_ptr[i].svalue.argtype == E_ARGT_STRING) {
-            printf("\tStr: %s\n", tab->tab_ptr[i].svalue.sval.sval);
+            printf("\tIndex: %d\n", tab->tab_ptr[i].svalue.sval.str_index);
         } else if(tab->tab_ptr[i].svalue.argtype == E_ARGT_NUMBER) {
             printf("\tValue: %f\n", tab->tab_ptr[i].svalue.val);
         }
@@ -162,12 +162,13 @@ e_create_number(double val) {
 }
 
 e_table_value
-e_create_string(const char* str) {
+e_create_string(const char* str, int ds_index) {
     e_str_type new_str;
-    
+
     new_str.sval = strdup(str);
+    new_str.str_index = ds_index;
     new_str.slen = strlen(str);
-    
+
     return (e_table_value) { .sval = new_str, .argtype = E_ARGT_STRING };
 }
 

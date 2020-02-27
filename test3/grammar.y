@@ -105,10 +105,10 @@ assign: ASSIGN IDENTIFIER EQUALS string_expression {
             emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
 
             if(scope_level == 0) {
-            	s = e_table_add_entry(&global_sym_table, $2, e_create_string($4.str.sval));
+            	s = e_table_add_entry(&global_sym_table, $2, e_create_string($4.str.sval, str_index));
             	op = E_OP_PUSHG;
             } else {
-            	s = e_table_add_entry(&local_sym_table[scope_level], $2, e_create_string($4.str.sval));
+            	s = e_table_add_entry(&local_sym_table[scope_level], $2, e_create_string($4.str.sval, str_index));
                 op = E_OP_PUSHL;
             }
 
@@ -152,7 +152,7 @@ assign: ASSIGN IDENTIFIER EQUALS string_expression {
 				v = e_create_number($4.val);
 				opv = e_create_number(E_ARGT_NUMBER);
 			} else if($4.type == E_STRING) {
-				v = e_create_string($4.str.sval);
+				v = e_create_string($4.str.sval, $4.str.str_index);
                 opv = e_create_number(E_ARGT_STRING);
 			}
 
@@ -203,13 +203,7 @@ math_expression: number {
                         emit_op(e_create_operation(op, e_create_number(gst_index), e_create_null()));
 
                         $$.type = s.argtype;
-                        if(s.argtype == E_ARGT_NUMBER) {
-                        	$$.val = s.fval;
-                        } else if(s.argtype == E_ARGT_STRING) {
-                        	$$.str.sval = strdup(s.sval.sval);
-                        	printf("--> STR: %s\n", $$.str.sval);
-                        }
-
+                        printf("identifier arg type: %d\n", s.argtype);
                     } else {
                         for(int i = 0; i < local_sym_table[scope_level].entries; i++) {
                             printf("\t%s\t%f\n", local_sym_table[scope_level].tab_ptr[i].idname, local_sym_table[scope_level].tab_ptr[i].svalue.val);
