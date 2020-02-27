@@ -272,26 +272,34 @@ math_expression: number {
                     printf("OP1 type is %d\n", $1.type);
                     printf("OP2 type is %d\n", $3.type);
 
-					if($1.type == E_ARGT_STRING && $3.type == E_ARGT_STRING) {
+					if($1.type == E_ARGT_STRING || $3.type == E_ARGT_STRING) {
 						// Result type is string
-                        // Concatenate both strings and store the new string in the ds
 						char buf[E_MAX_STRLEN];
-						unsigned int slen1 = strlen($1.str.sval);
-						unsigned int slen2 = strlen($3.str.sval);
 
-						if(slen1 + slen2 > E_MAX_STRLEN) {
-							yyerror("Resulting string too long");
-						} else {
-							strcpy(buf, $1.str.sval);
-							strcat(buf, $3.str.sval);
+						if($3.type == E_ARGT_STRING && $1.type == E_ARGT_STRING) {
+                        	// Concatenate both strings and store the new string in the ds
+							unsigned int slen1 = strlen($1.str.sval);
+							unsigned int slen2 = strlen($3.str.sval);
+
+							if(slen1 + slen2 > E_MAX_STRLEN) {
+								yyerror("Resulting string too long");
+							} else {
+								strcpy(buf, $1.str.sval);
+								strcat(buf, $3.str.sval);
+							}
 
 							// Add string data to data segment (bytecode section)
 							int str_index = ds_store_string(buf);
 							emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
-
-							$$.type = E_STRING;
-							$$.str.sval = strdup(buf);
+						} else {
+							// If one expression is of type number, we can't create a new string while compiling,
+							// as number values are not stored in the compiling process!
+							// So the VM needs to build the string while runtime
+							emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_null()));
 						}
+
+						$$.type = E_STRING;
+						$$.str.sval = strdup(buf);
 					} else {
 						// Numbers result in an add operation
 						emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
@@ -299,6 +307,10 @@ math_expression: number {
                 }
                 | math_expression MINUS math_expression { 
                     /* 3 - a */
+                    if($1.type == E_ARGT_STRING || $3.type == E_ARGT_STRING) {
+                    	yyerror("Cannot substract string(s)");
+                    }
+
                     emit_op(e_create_operation(E_OP_SUB, e_create_null(), e_create_null()));
                 }
                 /*| MINUS math_expression {
@@ -568,6 +580,11 @@ void emit_op(e_op op) {
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
+		case E_OP_CONCAT:
+			printf("CONCAT\n");
+			byte_op.op1 = (uint32_t)0;
+			byte_op.op2 = (uint32_t)0;
+			break;
         case E_OP_JZ:
             printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
             byte_op.op1 = (uint32_t)op.op1.val;
@@ -629,13 +646,13 @@ void print_outstream(void) {
     unsigned int r = 0;
     unsigned int print_out = 0;
     for(unsigned int i = 0; i < E_OUT_TOTAL_SIZE; i++) {
-        if(i%9 == 0 && !print_out) {
-            printf("[%d] ", i / 9);
-        }
+        //if(i%9 == 0 && !print_out) {
+        //    printf("[%d] ", i / 9);
+        //}
     
         printf("0x%02X ", out_bytes[i]);
         
-        if(r == 0 && out_bytes[i] == 0x00) {
+        if(i == E_OUT_SIZE/*r == 0 && out_bytes[i] == 0x00)*/) {
             // Opcode 0x00, end
             if(!print_out) {
 				printf("\n -- DATA SEGMENT -- \n");

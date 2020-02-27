@@ -492,8 +492,8 @@ static const yytype_uint16 yyrline[] =
        0,    67,    67,    70,    71,    72,    75,    76,    77,    78,
       79,    92,    95,    97,   121,   143,   178,   182,   221,   226,
      231,   236,   241,   246,   251,   254,   257,   260,   263,   266,
-     270,   300,   324,   332,   349,   367,   368,   371,   402,   421,
-     422,   425
+     270,   308,   336,   344,   361,   379,   380,   383,   414,   433,
+     434,   437
 };
 #endif
 
@@ -1762,26 +1762,34 @@ yyreduce:
                     printf("OP1 type is %d\n", (yyvsp[(1) - (3)].nval).type);
                     printf("OP2 type is %d\n", (yyvsp[(3) - (3)].nval).type);
 
-					if((yyvsp[(1) - (3)].nval).type == E_ARGT_STRING && (yyvsp[(3) - (3)].nval).type == E_ARGT_STRING) {
+					if((yyvsp[(1) - (3)].nval).type == E_ARGT_STRING || (yyvsp[(3) - (3)].nval).type == E_ARGT_STRING) {
 						// Result type is string
-                        // Concatenate both strings and store the new string in the ds
 						char buf[E_MAX_STRLEN];
-						unsigned int slen1 = strlen((yyvsp[(1) - (3)].nval).str.sval);
-						unsigned int slen2 = strlen((yyvsp[(3) - (3)].nval).str.sval);
 
-						if(slen1 + slen2 > E_MAX_STRLEN) {
-							yyerror("Resulting string too long");
-						} else {
-							strcpy(buf, (yyvsp[(1) - (3)].nval).str.sval);
-							strcat(buf, (yyvsp[(3) - (3)].nval).str.sval);
+						if((yyvsp[(3) - (3)].nval).type == E_ARGT_STRING && (yyvsp[(1) - (3)].nval).type == E_ARGT_STRING) {
+                        	// Concatenate both strings and store the new string in the ds
+							unsigned int slen1 = strlen((yyvsp[(1) - (3)].nval).str.sval);
+							unsigned int slen2 = strlen((yyvsp[(3) - (3)].nval).str.sval);
+
+							if(slen1 + slen2 > E_MAX_STRLEN) {
+								yyerror("Resulting string too long");
+							} else {
+								strcpy(buf, (yyvsp[(1) - (3)].nval).str.sval);
+								strcat(buf, (yyvsp[(3) - (3)].nval).str.sval);
+							}
 
 							// Add string data to data segment (bytecode section)
 							int str_index = ds_store_string(buf);
 							emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
-
-							(yyval.nval).type = E_STRING;
-							(yyval.nval).str.sval = strdup(buf);
+						} else {
+							// If one expression is of type number, we can't create a new string while compiling,
+							// as number values are not stored in the compiling process!
+							// So the VM needs to build the string while runtime
+							emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_null()));
 						}
+
+						(yyval.nval).type = E_STRING;
+						(yyval.nval).str.sval = strdup(buf);
 					} else {
 						// Numbers result in an add operation
 						emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
@@ -1792,9 +1800,13 @@ yyreduce:
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 300 "grammar.y"
+#line 308 "grammar.y"
     { 
                     /* 3 - a */
+                    if((yyvsp[(1) - (3)].nval).type == E_ARGT_STRING || (yyvsp[(3) - (3)].nval).type == E_ARGT_STRING) {
+                    	yyerror("Cannot substract string(s)");
+                    }
+
                     emit_op(e_create_operation(E_OP_SUB, e_create_null(), e_create_null()));
                 ;}
     break;
@@ -1802,7 +1814,7 @@ yyreduce:
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 324 "grammar.y"
+#line 336 "grammar.y"
     {
 						if(strlen((yyvsp[(1) - (1)].nval).str.sval) >= E_MAX_STRLEN) {
 							yyerror("String too long");
@@ -1814,7 +1826,7 @@ yyreduce:
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 332 "grammar.y"
+#line 344 "grammar.y"
     { 
                     // Get instruction count of opening if
                     e_stack_status_ret s = e_stack_pop(&bp_stack);
@@ -1835,7 +1847,7 @@ yyreduce:
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 349 "grammar.y"
+#line 361 "grammar.y"
     {
                     // Insert JNE [16 bit dummy_addr]
                     emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
@@ -1857,7 +1869,7 @@ yyreduce:
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 371 "grammar.y"
+#line 383 "grammar.y"
     {
                     printf("LOOP END\n");
                     
@@ -1892,7 +1904,7 @@ yyreduce:
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 402 "grammar.y"
+#line 414 "grammar.y"
     { 
                 // Loop creates a new scope
                 e_status_ret s_scope = e_create_scope();
@@ -1915,14 +1927,14 @@ yyreduce:
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 425 "grammar.y"
+#line 437 "grammar.y"
     { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[(1) - (1)].nval).val; ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1926 "grammar.tab.c"
+#line 1938 "grammar.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2134,7 +2146,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 427 "grammar.y"
+#line 439 "grammar.y"
 
 
 void yyerror(const char* s) {
@@ -2279,6 +2291,11 @@ void emit_op(e_op op) {
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
+		case E_OP_CONCAT:
+			printf("CONCAT\n");
+			byte_op.op1 = (uint32_t)0;
+			byte_op.op2 = (uint32_t)0;
+			break;
         case E_OP_JZ:
             printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
             byte_op.op1 = (uint32_t)op.op1.val;
@@ -2340,13 +2357,13 @@ void print_outstream(void) {
     unsigned int r = 0;
     unsigned int print_out = 0;
     for(unsigned int i = 0; i < E_OUT_TOTAL_SIZE; i++) {
-        if(i%9 == 0 && !print_out) {
-            printf("[%d] ", i / 9);
-        }
+        //if(i%9 == 0 && !print_out) {
+        //    printf("[%d] ", i / 9);
+        //}
     
         printf("0x%02X ", out_bytes[i]);
         
-        if(r == 0 && out_bytes[i] == 0x00) {
+        if(i == E_OUT_SIZE/*r == 0 && out_bytes[i] == 0x00)*/) {
             // Opcode 0x00, end
             if(!print_out) {
 				printf("\n -- DATA SEGMENT -- \n");
