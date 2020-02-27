@@ -492,8 +492,8 @@ static const yytype_uint16 yyrline[] =
        0,    67,    67,    70,    71,    72,    75,    76,    77,    78,
       79,    92,    95,    97,   121,   143,   178,   182,   221,   226,
      231,   236,   241,   246,   251,   254,   257,   260,   263,   266,
-     270,   308,   336,   344,   361,   379,   380,   383,   414,   433,
-     434,   437
+     270,   311,   339,   347,   364,   382,   383,   386,   417,   436,
+     437,   440
 };
 #endif
 
@@ -1553,7 +1553,7 @@ yyreduce:
             if((yyvsp[(4) - (4)].nval).type == E_NUMBER) {
 				v = e_create_number((yyvsp[(4) - (4)].nval).val);
 				opv = e_create_number(E_ARGT_NUMBER);
-			} else if((yyvsp[(4) - (4)].nval).type == E_NUMBER) {
+			} else if((yyvsp[(4) - (4)].nval).type == E_STRING) {
 				v = e_create_string((yyvsp[(4) - (4)].nval).str.sval);
                 opv = e_create_number(E_ARGT_STRING);
 			}
@@ -1771,6 +1771,9 @@ yyreduce:
 							unsigned int slen1 = strlen((yyvsp[(1) - (3)].nval).str.sval);
 							unsigned int slen2 = strlen((yyvsp[(3) - (3)].nval).str.sval);
 
+							printf("strlen s1: %d, s2: %d\n", slen1, slen2);
+							printf("vals are s1: %f, s2: %f\n", (yyvsp[(1) - (3)].nval).val, (yyvsp[(3) - (3)].nval).val);
+
 							if(slen1 + slen2 > E_MAX_STRLEN) {
 								yyerror("Resulting string too long");
 							} else {
@@ -1800,7 +1803,7 @@ yyreduce:
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 308 "grammar.y"
+#line 311 "grammar.y"
     { 
                     /* 3 - a */
                     if((yyvsp[(1) - (3)].nval).type == E_ARGT_STRING || (yyvsp[(3) - (3)].nval).type == E_ARGT_STRING) {
@@ -1814,7 +1817,7 @@ yyreduce:
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 336 "grammar.y"
+#line 339 "grammar.y"
     {
 						if(strlen((yyvsp[(1) - (1)].nval).str.sval) >= E_MAX_STRLEN) {
 							yyerror("String too long");
@@ -1826,7 +1829,7 @@ yyreduce:
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 344 "grammar.y"
+#line 347 "grammar.y"
     { 
                     // Get instruction count of opening if
                     e_stack_status_ret s = e_stack_pop(&bp_stack);
@@ -1847,7 +1850,7 @@ yyreduce:
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 361 "grammar.y"
+#line 364 "grammar.y"
     {
                     // Insert JNE [16 bit dummy_addr]
                     emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
@@ -1869,7 +1872,7 @@ yyreduce:
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 383 "grammar.y"
+#line 386 "grammar.y"
     {
                     printf("LOOP END\n");
                     
@@ -1904,7 +1907,7 @@ yyreduce:
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 414 "grammar.y"
+#line 417 "grammar.y"
     { 
                 // Loop creates a new scope
                 e_status_ret s_scope = e_create_scope();
@@ -1927,14 +1930,14 @@ yyreduce:
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 437 "grammar.y"
+#line 440 "grammar.y"
     { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[(1) - (1)].nval).val; ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1938 "grammar.tab.c"
+#line 1941 "grammar.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2146,7 +2149,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 439 "grammar.y"
+#line 442 "grammar.y"
 
 
 void yyerror(const char* s) {
@@ -2336,7 +2339,7 @@ void double_to_bytearray(double din, uint8_t bin[]) {
 int ds_store_string(const char* str) {
     // Stores a string in the required format [LENGTH, 2 Bytes][<str data>]
     uint32_t r_len = strlen(str);
-    if(r_len > UINT16_MAX || out_ds_cnt + 1 > E_OUT_TOTAL_SIZE) {
+    if(r_len > UINT16_MAX || out_ds_cnt + r_len > E_OUT_TOTAL_SIZE) {
     	yyerror("String literal is too large");
     } else {
     	uint32_t start_index = out_ds_cnt;
@@ -2349,7 +2352,6 @@ int ds_store_string(const char* str) {
     	}
     	return start_index;
     }
-    return -1;
 }
 
 void print_outstream(void) {

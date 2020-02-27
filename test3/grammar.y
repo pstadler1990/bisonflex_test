@@ -151,7 +151,7 @@ assign: ASSIGN IDENTIFIER EQUALS string_expression {
             if($4.type == E_NUMBER) {
 				v = e_create_number($4.val);
 				opv = e_create_number(E_ARGT_NUMBER);
-			} else if($4.type == E_NUMBER) {
+			} else if($4.type == E_STRING) {
 				v = e_create_string($4.str.sval);
                 opv = e_create_number(E_ARGT_STRING);
 			}
@@ -625,7 +625,7 @@ void double_to_bytearray(double din, uint8_t bin[]) {
 int ds_store_string(const char* str) {
     // Stores a string in the required format [LENGTH, 2 Bytes][<str data>]
     uint32_t r_len = strlen(str);
-    if(r_len > UINT16_MAX || out_ds_cnt + 1 > E_OUT_TOTAL_SIZE) {
+    if(r_len > UINT16_MAX || out_ds_cnt + r_len > E_OUT_TOTAL_SIZE) {
     	yyerror("String literal is too large");
     } else {
     	uint32_t start_index = out_ds_cnt;
@@ -638,7 +638,6 @@ int ds_store_string(const char* str) {
     	}
     	return start_index;
     }
-    return -1;
 }
 
 void print_outstream(void) {
