@@ -6,8 +6,8 @@
 
 #define E_VERSION "0.01"
 #define E_SYS_SIZE_DOUBLE   ((int)sizeof(double))
-#define E_OUT_DS_SIZE       ((int)500)
-#define E_OUT_SIZE          ((int)2000)
+#define E_OUT_DS_SIZE       ((int)100/*500*/)
+#define E_OUT_SIZE          ((int)250/*2000*/)
 #define E_OUT_TOTAL_SIZE    ((int)E_OUT_DS_SIZE + E_OUT_SIZE)
 #define E_OP_BSIZE          ((int)9)
 
