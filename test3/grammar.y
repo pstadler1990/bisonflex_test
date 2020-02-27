@@ -61,7 +61,7 @@
 
 %type<nval> number
 %type<nval> math_expression
-
+%type<nval> string_expression
 
 %%
 prgm: expression_list
@@ -92,9 +92,9 @@ expression: assign
             | PRINT_BYTES { print_outstream(); }
             ;
             
-line_sep: NEWLINE { lc++; printf("new line [%d]\n", lc); };
+line_sep: NEWLINE { lc++; };
             
-assign: ASSIGN IDENTIFIER EQUALS STRING {
+assign: ASSIGN IDENTIFIER EQUALS string_expression {
         	e_opcode op;
             e_status_ret s;
 
@@ -118,11 +118,35 @@ assign: ASSIGN IDENTIFIER EQUALS STRING {
 				error_pprint(s.status);
 			}
         }
+        | IDENTIFIER EQUALS math_expression {
+                    /* Change value of number type variable, a = 3 */
+                    // PUSHG $3 [index] (value, index)
+                    // PUSHL $3 [index] (value, index)
+                    e_opcode op;
+                    e_status_ret s;
+
+                    s = e_table_find_entry(&global_sym_table, $1);
+                    op = E_OP_PUSHG;
+
+                    if(s.status != E_STATUS_OK) {
+        				s = e_table_find_entry(&local_sym_table[scope_level], $1);
+        				op = E_OP_PUSHL;
+                    }
+
+                    if(s.status == E_STATUS_OK) {
+                        int gst_index = s.ival;
+                        emit_op(e_create_operation(op, e_create_number(gst_index), e_create_number(E_ARGT_NUMBER)));
+                    } else {
+                        error_pprint(s.status);
+                    }
+        }
 		| ASSIGN IDENTIFIER EQUALS math_expression {
             /* Number type (integer|float) definition with initialization, let x = 42 */
             e_opcode op;
             e_status_ret s;
-            
+
+            printf("argtype expr: %d\n", $4.type);
+
             if(scope_level == 0) {
                 // PUSHG [index]
                 s = e_table_add_entry(&global_sym_table, $2, e_create_number($4.val));
@@ -136,28 +160,6 @@ assign: ASSIGN IDENTIFIER EQUALS STRING {
 
             if(s.status == E_STATUS_OK) {
                 emit_op(e_create_operation(op, e_create_number(s.ival), e_create_number(E_ARGT_NUMBER)));
-            } else {
-                error_pprint(s.status);
-            }
-        }
-        | IDENTIFIER EQUALS math_expression {
-            /* Change value of number type variable, a = 3 */
-            // PUSHG $3 [index] (value, index)
-            // PUSHL $3 [index] (value, index)
-            e_opcode op;
-            e_status_ret s;
-
-            s = e_table_find_entry(&global_sym_table, $1);
-            op = E_OP_PUSHG;
-
-            if(s.status != E_STATUS_OK) {
-				s = e_table_find_entry(&local_sym_table[scope_level], $1);
-				op = E_OP_PUSHL;
-            }
-
-            if(s.status == E_STATUS_OK) {
-                int gst_index = s.ival;   
-                emit_op(e_create_operation(op, e_create_number(gst_index), e_create_number(E_ARGT_NUMBER)));
             } else {
                 error_pprint(s.status);
             }
@@ -186,15 +188,24 @@ math_expression: number {
                         s = e_table_find_entry(&global_sym_table, $1);
                         op = E_OP_POPG;
                     }
-                    
+
                     if(s.status == E_STATUS_OK) {
                         int gst_index = s.ival;
                         emit_op(e_create_operation(op, e_create_number(gst_index), e_create_null()));
+
+                        $$.type = s.argtype;
+                        if(s.argtype == E_ARGT_NUMBER) {
+                        	$$.val = s.fval;
+                        } else if(s.argtype == E_ARGT_STRING) {
+                        	$$.str.sval = strdup(s.sval.sval);
+                        	printf("--> STR: %s\n", $$.str.sval);
+                        }
+
                     } else {
                         for(int i = 0; i < local_sym_table[scope_level].entries; i++) {
                             printf("\t%s\t%f\n", local_sym_table[scope_level].tab_ptr[i].idname, local_sym_table[scope_level].tab_ptr[i].svalue.val);
                         }
-                    
+
                         error_pprint(s.status);
                     }
                 }
@@ -249,7 +260,35 @@ math_expression: number {
                 }
                 | math_expression PLUS math_expression { 
                     /* 3 + a */
-                    emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
+                    printf("OP1 type is %d\n", $1.type);
+                    printf("OP2 type is %d\n", $3.type);
+
+                    // Both math_expressions are of type string:
+					// ADD ends in:
+					// Result type is string
+					// Concatenate both strings and store the new string in the ds
+					if($1.type == E_ARGT_STRING && $3.type == E_ARGT_STRING) {
+						char buf[E_MAX_STRLEN];
+						unsigned int slen1 = strlen($1.str.sval);
+						unsigned int slen2 = strlen($3.str.sval);
+						printf("len1: %d len2: %d\n", slen1, slen2);
+						if(slen1 + slen2 > E_MAX_STRLEN) {
+							yyerror("String too long");
+						} else {
+							strcpy(buf, $1.str.sval);
+							strcat(buf, $3.str.sval);
+							printf("New - string %s\n", buf);
+
+							// Add string data to data segment (bytecode section)
+							int str_index = ds_store_string(buf);
+							emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
+
+							$$.type = E_STRING;
+						}
+					} else {
+						// Numbers result in an add operation
+						emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
+					}
                 }
                 | math_expression MINUS math_expression { 
                     /* 3 - a */
@@ -274,6 +313,14 @@ math_expression: number {
                     }
                 }*/
                 ;
+
+string_expression: STRING {
+						if(strlen($1.str.sval) >= E_MAX_STRLEN) {
+							yyerror("String too long");
+						}
+						$$ = $1;
+				   }
+				   ;
                 
 if_expression: if_condition expression_list BLOCK_ENDIF { 
                     // Get instruction count of opening if

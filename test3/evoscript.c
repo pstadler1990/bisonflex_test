@@ -116,7 +116,12 @@ e_table_find_entry(const e_table* tab, const char* idname) {
 
     printf("------ FINDTABLE -------\n");
     for(int i = 0; i < tab->entries; i++) {
-        printf("[%d] %s\n", i, tab->tab_ptr[i].idname);
+        printf("[%d] %s\t(type: %d)", i, tab->tab_ptr[i].idname, tab->tab_ptr[i].svalue.argtype);
+        if(tab->tab_ptr[i].svalue.argtype == E_ARGT_STRING) {
+            printf("\tStr: %s\n", tab->tab_ptr[i].svalue.sval.sval);
+        } else if(tab->tab_ptr[i].svalue.argtype == E_ARGT_NUMBER) {
+            printf("\tValue: %f\n", tab->tab_ptr[i].svalue.val);
+        }
     }
     printf("-------------------\n");
     
@@ -133,7 +138,14 @@ e_table_find_entry(const e_table* tab, const char* idname) {
     } while(p < tab->entries);
     
     if(f != -1) {
-        return (e_status_ret) { .status = E_STATUS_OK, .ival = p };
+        e_status_ret ret_ok;
+        ret_ok.status = E_STATUS_OK;
+        ret_ok.ival = p;
+        ret_ok.argtype = tab->tab_ptr[p].svalue.argtype;
+        if(ret_ok.argtype == E_ARGT_STRING) {
+            ret_ok.sval = tab->tab_ptr[p].svalue.sval;
+        }
+        return ret_ok;
     } else {
         return (e_status_ret) { .status = E_STATUS_NOTFOUND };
     }

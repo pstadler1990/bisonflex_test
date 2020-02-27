@@ -29,7 +29,6 @@
                                 yylval.nval.type = E_STRING;
                                 yylval.nval.str.slen = strlen(yytext);
                                 yylval.nval.str.sval = strdup(yytext);
-                                //printf("Lex string END! %s\n", yytext);
                                 return STRING;
                             }
 "="                         { return EQUALS; }

@@ -23,10 +23,11 @@ typedef enum {
     E_STATUS_OK = 1,
 } e_statusc;
 
+#define E_MAX_STRLEN    ((int)1024)
 typedef enum {
-    E_ARGT_NULL,
-    E_ARGT_NUMBER,
-    E_ARGT_STRING
+    E_ARGT_NULL = 2,
+    E_ARGT_NUMBER = 0,
+    E_ARGT_STRING = 1,
 } e_arg_type;
 
 typedef struct {
@@ -70,11 +71,10 @@ typedef struct {
 
 typedef struct {
     e_statusc status;
-    union {
-        int ival;
-        float fval;
-        e_str_type sval;
-    };
+    e_arg_type argtype;
+    int ival;
+    float fval;
+    e_str_type sval;
 } e_status_ret;
 
 // VM
