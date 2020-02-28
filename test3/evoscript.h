@@ -23,6 +23,12 @@ typedef enum {
     E_STATUS_OK = 1,
 } e_statusc;
 
+typedef enum {
+    E_CONCAT_FIRST,
+    E_CONCAT_SECOND,
+    E_CONCAT_BOTH
+} e_concat_type;
+
 #define E_MAX_STRLEN    ((int)1024)
 typedef enum {
     E_ARGT_NULL = 2,

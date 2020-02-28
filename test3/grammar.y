@@ -176,7 +176,13 @@ assign: IDENTIFIER EQUALS assignable_expression {
         }
         ;
 
-assignable_expression: string_expression
+assignable_expression: string_expression {
+					 		// Add string data to data segment (bytecode section)
+							int str_index = ds_store_string($1.str.sval);
+							// This is totally independent from the variable's scope (both, global and local strings are stored in the
+							// data section, only the variable's visibility is scope bound
+							emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
+					   }
 				   	   | math_expression
 				   	   ;
 
@@ -269,15 +275,25 @@ math_expression: number {
                 | math_expression PLUS math_expression { 
                     /* 3 + a */
 					// Numbers result in an add operation
-					printf("Math addition\n");
-					emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
+					if($1.type == E_ARGT_STRING || $3.type == E_ARGT_STRING) {
+						printf("addign two string identifiers\n");
+
+						$$.type = E_STRING;
+
+						// If one expression is of type number, we can't create a new string while compiling,
+						// as number values are not stored in the compiling process!
+						// So the VM needs to build the string while runtime
+						emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_number(E_CONCAT_BOTH)));
+					} else {
+						// Number addition
+						emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
+					}
                 }
                 | math_expression MINUS math_expression { 
                     /* 3 - a */
                     if($1.type == E_ARGT_STRING || $3.type == E_ARGT_STRING) {
                     	yyerror("Cannot substract string(s)");
                     }
-
                     emit_op(e_create_operation(E_OP_SUB, e_create_null(), e_create_null()));
                 }
                 /*| MINUS math_expression {
@@ -324,31 +340,51 @@ string_expression: STRING {
 				   		strcpy(buf, $1.str.sval);
 				   		strcat(buf, $3.str.sval);
 
-				   		// Add string data to data segment (bytecode section)
-						int str_index = ds_store_string(buf);
-						// This is totally independent from the variable's scope (both, global and local strings are stored in the
-						// data section, only the variable's visibility is scope bound
-						emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
-
 				   		$$.str.sval = buf;
 				   }
 				   | string_expression PLUS math_expression {
 				   		printf("string plus math_expr\n");
 
-				   		// Add string data to data segment (bytecode section)
-						int str_index = ds_store_string($1.str.sval);
-						// This is totally independent from the variable's scope (both, global and local strings are stored in the
-						// data section, only the variable's visibility is scope bound
-						emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
+				   		if($1.type == E_ARGT_STRING && $3.type == E_ARGT_STRING) {
+							printf("addign two string identifiers\n");
+							$$.type = E_STRING;
 
-						$$.type = E_STRING;
-						$$.str.sval = strdup($1.str.sval);
-						$$.str.str_index = str_index;
 
-						// If one expression is of type number, we can't create a new string while compiling,
-						// as number values are not stored in the compiling process!
-						// So the VM needs to build the string while runtime
-						emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_null()));
+
+
+
+
+							// TODO: BUG!!!
+							// String + Identifier
+							// Identifier + String
+							// results in a single concat without the required push op before!
+							// this ends in an error in the vm, as the stack size is 1, not 2
+
+
+
+
+
+
+							// If one expression is of type number, we can't create a new string while compiling,
+							// as number values are not stored in the compiling process!
+							// So the VM needs to build the string while runtime
+							emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_number(E_CONCAT_BOTH)));
+                        } else {
+                        	// Add string data to data segment (bytecode section)
+							int str_index = ds_store_string($1.str.sval);
+							// This is totally independent from the variable's scope (both, global and local strings are stored in the
+							// data section, only the variable's visibility is scope bound
+							emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
+
+							$$.type = E_STRING;
+							$$.str.sval = strdup($1.str.sval);
+							$$.str.str_index = str_index;
+
+							// If one expression is of type number, we can't create a new string while compiling,
+							// as number values are not stored in the compiling process!
+							// So the VM needs to build the string while runtime
+							emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_number(E_CONCAT_SECOND)));
+                        }
 				   }
 				   | math_expression PLUS string_expression {
 						printf("math plus string\n");
@@ -366,7 +402,7 @@ string_expression: STRING {
 						// If one expression is of type number, we can't create a new string while compiling,
 						// as number values are not stored in the compiling process!
 						// So the VM needs to build the string while runtime
-						emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_null()));
+						emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_number(E_CONCAT_FIRST)));
 				   }
 				   ;
                 
