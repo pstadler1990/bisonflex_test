@@ -102,9 +102,11 @@
     
     bool loop_has_break[E_LOCAL_SYM_TAB_SCOPES];
 
+    bool ignore_next_push = false;
+
 
 /* Line 189 of yacc.c  */
-#line 108 "grammar.tab.c"
+#line 110 "grammar.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -169,7 +171,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 36 "grammar.y"
+#line 38 "grammar.y"
 
     e_type nval;
     char* sname;
@@ -177,7 +179,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 181 "grammar.tab.c"
+#line 183 "grammar.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -189,7 +191,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 193 "grammar.tab.c"
+#line 195 "grammar.tab.c"
 
 #ifdef short
 # undef short
@@ -490,10 +492,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    68,    68,    71,    72,    73,    76,    77,    78,    79,
-      80,    93,    96,    98,   144,   179,   186,   189,   193,   226,
-     231,   236,   241,   246,   251,   256,   259,   262,   265,   268,
-     271,   275,   292,   323,   330,   345,   389,   409,   426,   444,
+       0,    70,    70,    73,    74,    75,    78,    79,    80,    81,
+      82,    95,    98,   100,   146,   181,   192,   195,   199,   232,
+     237,   242,   247,   252,   257,   262,   265,   268,   271,   274,
+     277,   281,   298,   329,   336,   351,   379,   409,   426,   444,
      445,   448,   479,   498,   499,   502
 };
 #endif
@@ -1461,7 +1463,7 @@ yyreduce:
         case 10:
 
 /* Line 1455 of yacc.c  */
-#line 80 "grammar.y"
+#line 82 "grammar.y"
     { 
                 if(loop_level == 0) {
                     yyerror("Break without proper loop");
@@ -1480,21 +1482,21 @@ yyreduce:
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 93 "grammar.y"
+#line 95 "grammar.y"
     { print_outstream(); ;}
     break;
 
   case 12:
 
 /* Line 1455 of yacc.c  */
-#line 96 "grammar.y"
+#line 98 "grammar.y"
     { lc++; ;}
     break;
 
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 98 "grammar.y"
+#line 100 "grammar.y"
     {
                     /* Change value of number type variable, a = 3 */
                     // PUSHG $3 [index] (value, index)
@@ -1546,7 +1548,7 @@ yyreduce:
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 144 "grammar.y"
+#line 146 "grammar.y"
     {
             /* Number type (integer|float) definition with initialization, let x = 42 */
             e_opcode op;
@@ -1585,20 +1587,24 @@ yyreduce:
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 179 "grammar.y"
+#line 181 "grammar.y"
     {
-					 		// Add string data to data segment (bytecode section)
-							int str_index = ds_store_string((yyvsp[(1) - (1)].nval).str.sval);
-							// This is totally independent from the variable's scope (both, global and local strings are stored in the
-							// data section, only the variable's visibility is scope bound
-							emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
+							if(!ignore_next_push) {
+								// Add string data to data segment (bytecode section)
+								int str_index = ds_store_string((yyvsp[(1) - (1)].nval).str.sval);
+								// This is totally independent from the variable's scope (both, global and local strings are stored in the
+								// data section, only the variable's visibility is scope bound
+								emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
+							} else {
+								ignore_next_push = false;
+							}
 					   ;}
     break;
 
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 189 "grammar.y"
+#line 195 "grammar.y"
     {
                     // PUSH [number]
                     emit_op(e_create_operation(E_OP_PUSH, e_create_number((yyvsp[(1) - (1)].nval).val), e_create_null()));
@@ -1608,7 +1614,7 @@ yyreduce:
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 193 "grammar.y"
+#line 199 "grammar.y"
     { 
                     /* Find and pop a global or local variable */
                     e_opcode op;
@@ -1647,7 +1653,7 @@ yyreduce:
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 226 "grammar.y"
+#line 232 "grammar.y"
     {
                     /* a == b */
                     // EQ
@@ -1658,7 +1664,7 @@ yyreduce:
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 231 "grammar.y"
+#line 237 "grammar.y"
     {
                     /* a != b */
                     emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
@@ -1669,7 +1675,7 @@ yyreduce:
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 236 "grammar.y"
+#line 242 "grammar.y"
     {
                     /* a < b */
                     // LT
@@ -1680,7 +1686,7 @@ yyreduce:
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 241 "grammar.y"
+#line 247 "grammar.y"
     {
                     /* a > b */
                     // GT
@@ -1691,7 +1697,7 @@ yyreduce:
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 246 "grammar.y"
+#line 252 "grammar.y"
     {
                     /* a <= b */
                     // LTEQ
@@ -1702,7 +1708,7 @@ yyreduce:
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 251 "grammar.y"
+#line 257 "grammar.y"
     {
                     /* a >= b */
                     // GTEQ
@@ -1713,7 +1719,7 @@ yyreduce:
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 256 "grammar.y"
+#line 262 "grammar.y"
     {
                     emit_op(e_create_operation(E_OP_AND, e_create_null(), e_create_null()));
                 ;}
@@ -1722,7 +1728,7 @@ yyreduce:
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 259 "grammar.y"
+#line 265 "grammar.y"
     {
                     emit_op(e_create_operation(E_OP_OR, e_create_null(), e_create_null()));
                 ;}
@@ -1731,7 +1737,7 @@ yyreduce:
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 262 "grammar.y"
+#line 268 "grammar.y"
     {
                     emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
                 ;}
@@ -1740,7 +1746,7 @@ yyreduce:
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 265 "grammar.y"
+#line 271 "grammar.y"
     {
                     (yyval.nval) = (yyvsp[(2) - (3)].nval);
                 ;}
@@ -1749,7 +1755,7 @@ yyreduce:
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 268 "grammar.y"
+#line 274 "grammar.y"
     { 
                     emit_op(e_create_operation(E_OP_MUL, e_create_null(), e_create_null()));
                 ;}
@@ -1758,7 +1764,7 @@ yyreduce:
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 271 "grammar.y"
+#line 277 "grammar.y"
     { 
                     /* 3 / a */
                     emit_op(e_create_operation(E_OP_DIV, e_create_null(), e_create_null()));
@@ -1768,7 +1774,7 @@ yyreduce:
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 275 "grammar.y"
+#line 281 "grammar.y"
     { 
                     /* 3 + a */
 					// Numbers result in an add operation
@@ -1791,7 +1797,7 @@ yyreduce:
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 292 "grammar.y"
+#line 298 "grammar.y"
     { 
                     /* 3 - a */
                     if((yyvsp[(1) - (3)].nval).type == E_ARGT_STRING || (yyvsp[(3) - (3)].nval).type == E_ARGT_STRING) {
@@ -1804,7 +1810,7 @@ yyreduce:
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 323 "grammar.y"
+#line 329 "grammar.y"
     {
 						if(strlen((yyvsp[(1) - (1)].nval).str.sval) >= E_MAX_STRLEN) {
 							yyerror("String too long");
@@ -1817,7 +1823,7 @@ yyreduce:
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 330 "grammar.y"
+#line 336 "grammar.y"
     {
 				   		printf("string plus string_expr (%s) (%s)\n", (yyvsp[(1) - (3)].nval).str.sval, (yyvsp[(3) - (3)].nval).str.sval);
 
@@ -1838,57 +1844,41 @@ yyreduce:
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 345 "grammar.y"
+#line 351 "grammar.y"
     {
 				   		printf("string plus math_expr\n");
 
-				   		if((yyvsp[(1) - (3)].nval).type == E_ARGT_STRING && (yyvsp[(3) - (3)].nval).type == E_ARGT_STRING) {
-							printf("addign two string identifiers\n");
-							(yyval.nval).type = E_STRING;
+						// Add string data to data segment (bytecode section)
+						int str_index = ds_store_string((yyvsp[(1) - (3)].nval).str.sval);
+						// This is totally independent from the variable's scope (both, global and local strings are stored in the
+						// data section, only the variable's visibility is scope bound
+						emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
 
+						(yyval.nval).type = E_STRING;
+						(yyval.nval).str.sval = strdup((yyvsp[(1) - (3)].nval).str.sval);
+						(yyval.nval).str.str_index = str_index;
 
-
-
-
-
-							// TODO: BUG!!!
-							// String + Identifier
-							// Identifier + String
-							// results in a single concat without the required push op before!
-							// this ends in an error in the vm, as the stack size is 1, not 2
-
-
-
-
-
-
-							// If one expression is of type number, we can't create a new string while compiling,
-							// as number values are not stored in the compiling process!
-							// So the VM needs to build the string while runtime
+						// If one expression is of type number, we can't create a new string while compiling,
+						// as number values are not stored in the compiling process!
+						// So the VM needs to build the string while runtime
+						if((yyvsp[(1) - (3)].nval).type == E_ARGT_STRING && (yyvsp[(3) - (3)].nval).type == E_ARGT_STRING) {
 							emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_number(E_CONCAT_BOTH)));
-                        } else {
-                        	// Add string data to data segment (bytecode section)
-							int str_index = ds_store_string((yyvsp[(1) - (3)].nval).str.sval);
-							// This is totally independent from the variable's scope (both, global and local strings are stored in the
-							// data section, only the variable's visibility is scope bound
-							emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
 
-							(yyval.nval).type = E_STRING;
-							(yyval.nval).str.sval = strdup((yyvsp[(1) - (3)].nval).str.sval);
-							(yyval.nval).str.str_index = str_index;
-
-							// If one expression is of type number, we can't create a new string while compiling,
-							// as number values are not stored in the compiling process!
-							// So the VM needs to build the string while runtime
+							// TODO: HACKY!
+							// There's a false PUSH OP after the concat (generated by the string concat itself in the string_expression rule
+							// Emitting an additional JUMP OP jumps over this operation
+							// emit_op(e_create_operation(E_OP_JMP, e_create_number(addr_count + 2), e_create_number(0xFFFFFFFF)));
+							ignore_next_push = true;
+						} else{
 							emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_number(E_CONCAT_SECOND)));
-                        }
+						}
 				   ;}
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 389 "grammar.y"
+#line 379 "grammar.y"
     {
 						printf("math plus string\n");
 
@@ -1905,7 +1895,17 @@ yyreduce:
 						// If one expression is of type number, we can't create a new string while compiling,
 						// as number values are not stored in the compiling process!
 						// So the VM needs to build the string while runtime
-						emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_number(E_CONCAT_FIRST)));
+						if((yyvsp[(1) - (3)].nval).type == E_ARGT_STRING && (yyvsp[(3) - (3)].nval).type == E_ARGT_STRING) {
+							emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_number(E_CONCAT_BOTH)));
+
+							// TODO: HACKY!
+							// There's a false PUSH OP after the concat (generated by the string concat itself in the string_expression rule
+							// Emitting an additional JUMP OP jumps over this operation
+							// emit_op(e_create_operation(E_OP_JMP, e_create_number(addr_count + 2), e_create_number(0xFFFFFFFF)));
+							ignore_next_push = true;
+						} else {
+							emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_number(E_CONCAT_FIRST)));
+						}
 				   ;}
     break;
 
