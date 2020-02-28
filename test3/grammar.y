@@ -60,6 +60,7 @@
 %left P_OPEN P_CLOSE
 
 %type<nval> number
+%type<nval> assignable_expression
 %type<nval> math_expression
 %type<nval> string_expression
 
@@ -93,8 +94,8 @@ expression: assign
             ;
             
 line_sep: NEWLINE { lc++; };
-            
-assign: IDENTIFIER EQUALS math_expression {
+
+assign: IDENTIFIER EQUALS assignable_expression {
                     /* Change value of number type variable, a = 3 */
                     // PUSHG $3 [index] (value, index)
                     // PUSHL $3 [index] (value, index)
@@ -140,7 +141,7 @@ assign: IDENTIFIER EQUALS math_expression {
                         error_pprint(s.status);
                     }
         }
-		| ASSIGN IDENTIFIER EQUALS math_expression {
+		| ASSIGN IDENTIFIER EQUALS assignable_expression {
             /* Number type (integer|float) definition with initialization, let x = 42 */
             e_opcode op;
             e_status_ret s;
@@ -174,6 +175,10 @@ assign: IDENTIFIER EQUALS math_expression {
             }
         }
         ;
+
+assignable_expression: string_expression
+				   	   | math_expression
+				   	   ;
 
 math_expression: number {
                     // PUSH [number]
@@ -211,17 +216,6 @@ math_expression: number {
 
                         error_pprint(s.status);
                     }
-                }
-                | string_expression {
-                	// Add string data to data segment (bytecode section)
-					int str_index = ds_store_string($1.str.sval);
-					// This is totally independent from the variable's scope (both, global and local strings are stored in the
-					// data section, only the variable's visibility is scope bound
-					emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
-
-					$$.type = E_STRING;
-					$$.str.sval = strdup($1.str.sval);
-					$$.str.str_index = str_index;
                 }
                 | math_expression REL_EQ math_expression {
                     /* a == b */
@@ -274,41 +268,9 @@ math_expression: number {
                 }
                 | math_expression PLUS math_expression { 
                     /* 3 + a */
-                    printf("OP1 type is %d\n", $1.type);
-                    printf("OP2 type is %d\n", $3.type);
-
-					if($1.type == E_ARGT_STRING || $3.type == E_ARGT_STRING) {
-						// Result type is string
-						char buf[E_MAX_STRLEN];
-
-						if($3.type == E_ARGT_STRING && $1.type == E_ARGT_STRING) {
-                        	// Concatenate both strings and store the new string in the ds
-							unsigned int slen1 = strlen($1.str.sval);
-							unsigned int slen2 = strlen($3.str.sval);
-
-							if(slen1 + slen2 > E_MAX_STRLEN) {
-								yyerror("Resulting string too long");
-							} else {
-								strcpy(buf, $1.str.sval);
-								strcat(buf, $3.str.sval);
-							}
-
-							// Add string data to data segment (bytecode section)
-							int str_index = ds_store_string(buf);
-							emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
-						} else {
-							// If one expression is of type number, we can't create a new string while compiling,
-							// as number values are not stored in the compiling process!
-							// So the VM needs to build the string while runtime
-							emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_null()));
-						}
-
-						$$.type = E_STRING;
-						$$.str.sval = strdup(buf);
-					} else {
-						// Numbers result in an add operation
-						emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
-					}
+					// Numbers result in an add operation
+					printf("Math addition\n");
+					emit_op(e_create_operation(E_OP_ADD, e_create_null(), e_create_null()));
                 }
                 | math_expression MINUS math_expression { 
                     /* 3 - a */
@@ -338,11 +300,73 @@ math_expression: number {
                 }*/
                 ;
 
+// "A"
+// "A" + "B"
+// "A" + 3
+// "A" + a
 string_expression: STRING {
 						if(strlen($1.str.sval) >= E_MAX_STRLEN) {
 							yyerror("String too long");
 						}
+						printf("Single string: %s\n", $1.str.sval);
 						$$ = $1;
+				   }
+				   | string_expression PLUS string_expression {
+				   		printf("string plus string_expr (%s) (%s)\n", $1.str.sval, $3.str.sval);
+
+				   		char buf[E_MAX_STRLEN];
+
+				   		unsigned int slen1 = strlen($1.str.sval);
+				   		unsigned int slen2 = strlen($3.str.sval);
+				   		if(slen1 + slen2 > E_MAX_STRLEN) {
+				   			yyerror("Cannot concatenate strings (result string is too long)");
+				   		}
+				   		strcpy(buf, $1.str.sval);
+				   		strcat(buf, $3.str.sval);
+
+				   		// Add string data to data segment (bytecode section)
+						int str_index = ds_store_string(buf);
+						// This is totally independent from the variable's scope (both, global and local strings are stored in the
+						// data section, only the variable's visibility is scope bound
+						emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
+
+				   		$$.str.sval = buf;
+				   }
+				   | string_expression PLUS math_expression {
+				   		printf("string plus math_expr\n");
+
+				   		// Add string data to data segment (bytecode section)
+						int str_index = ds_store_string($1.str.sval);
+						// This is totally independent from the variable's scope (both, global and local strings are stored in the
+						// data section, only the variable's visibility is scope bound
+						emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
+
+						$$.type = E_STRING;
+						$$.str.sval = strdup($1.str.sval);
+						$$.str.str_index = str_index;
+
+						// If one expression is of type number, we can't create a new string while compiling,
+						// as number values are not stored in the compiling process!
+						// So the VM needs to build the string while runtime
+						emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_null()));
+				   }
+				   | math_expression PLUS string_expression {
+						printf("math plus string\n");
+
+						// Add string data to data segment (bytecode section)
+						int str_index = ds_store_string($3.str.sval);
+						// This is totally independent from the variable's scope (both, global and local strings are stored in the
+						// data section, only the variable's visibility is scope bound
+						emit_op(e_create_operation(E_OP_PUSH, e_create_number(str_index), e_create_null()));
+
+						$$.type = E_STRING;
+						$$.str.sval = strdup($3.str.sval);
+						$$.str.str_index = str_index;
+
+						// If one expression is of type number, we can't create a new string while compiling,
+						// as number values are not stored in the compiling process!
+						// So the VM needs to build the string while runtime
+						emit_op(e_create_operation(E_OP_CONCAT, e_create_null(), e_create_null()));
 				   }
 				   ;
                 
@@ -508,9 +532,10 @@ void emit_op(e_op op) {
             byte_op.op1 = (uint32_t)op.op1.val;
             byte_op.op2 = (uint32_t)op.op2.val;
             
-            printf("************************ SYMBOL TABLE [%d] **\n", scope_level);
+            printf("************************# SYMBOL TABLE [%d] **\n", scope_level);
             for(unsigned int i=0; i < local_sym_table[scope_level].entries; i++) {
-                printf("[%d] %s\n", i, local_sym_table[scope_level].tab_ptr[i].idname);
+
+                printf("[%d] %s (type: %d)\n", i, local_sym_table[scope_level].tab_ptr[i].idname, local_sym_table[scope_level].tab_ptr[i].svalue.argtype);
             }
             printf("****************************************\n");
             
@@ -588,7 +613,7 @@ void emit_op(e_op op) {
 		case E_OP_CONCAT:
 			printf("CONCAT\n");
 			byte_op.op1 = (uint32_t)0;
-			byte_op.op2 = (uint32_t)0;
+			byte_op.op2 = (uint32_t)op.op2.val;
 			break;
         case E_OP_JZ:
             printf("JZ [%d %d]\n", (int)op.op1.val, (int)op.op2.val);
