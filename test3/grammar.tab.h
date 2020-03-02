@@ -66,7 +66,8 @@
      LOOP_FOREVER = 282,
      LOOP_BREAK = 283,
      NEWLINE = 284,
-     PRINT_BYTES = 285
+     PRINT_BYTES = 285,
+     PRINT = 286
    };
 #endif
 
@@ -85,7 +86,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 89 "grammar.tab.h"
+#line 90 "grammar.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

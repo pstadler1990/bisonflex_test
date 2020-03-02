@@ -85,11 +85,12 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
     } else {
         int p = 0, f = 0;
         do {
-            if(tab->tab_ptr[p].used == E_TAB_ENTRY_FREE 
+            const e_table_entry cur = tab->tab_ptr[p];
+            if(cur.used == E_TAB_ENTRY_FREE
                 && f == 0) {
                 f = p;
-            } else if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED) {
-                if(strcmp(tab->tab_ptr[p].idname, idname) == 0) {
+            } else if(cur.used == E_TAB_ENTRY_USED) {
+                if(strcmp(cur.idname, idname) == 0) {
                     used = 1;
                     tab->tab_ptr[p] = new_node;
                     if(used) {

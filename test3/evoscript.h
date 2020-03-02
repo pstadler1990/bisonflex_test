@@ -6,7 +6,7 @@
 
 #define E_VERSION "0.01"
 #define E_SYS_SIZE_DOUBLE   ((int)sizeof(double))
-#define E_OUT_DS_SIZE       ((int)250/*500*/)
+#define E_OUT_DS_SIZE       ((int)100/*500*/)
 #define E_OUT_SIZE          ((int)250/*2000*/)
 #define E_OUT_TOTAL_SIZE    ((int)E_OUT_DS_SIZE + E_OUT_SIZE)
 #define E_OP_BSIZE          ((int)9)
@@ -109,6 +109,8 @@ typedef enum {
     
     E_OP_JZ = 0x40,        /* Jump if zero,                            JZ [addr]                           */
     E_OP_JMP = 0x41,       /* Unconditional jump,                      JMP [addr]                          */
+
+    E_OP_PRINT  = 0x50,    /* Print statement (debug)                  PRINT(expr)                         */
 } e_opcode;
 
 typedef struct {

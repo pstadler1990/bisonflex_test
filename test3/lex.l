@@ -12,6 +12,7 @@
 [ \t]                       ;
 [\n:]                       { return NEWLINE; }
 "?"                         { return PRINT_BYTES; }
+"print"                     { return PRINT; }
 "if"                        { return BLOCK_IF; }
 "then"                      { return BLOCK_THEN; }
 "endif"                     { return BLOCK_ENDIF; }
