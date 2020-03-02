@@ -91,9 +91,9 @@ e_table_add_entry(e_table* tab, const char* idname, e_table_value val) {
             } else if(tab->tab_ptr[p].used == E_TAB_ENTRY_USED) {
                 if(strcmp(tab->tab_ptr[p].idname, idname) == 0) {
                     used = 1;
-                    tab->tab_ptr[slot_index] = new_node;
+                    tab->tab_ptr[p] = new_node;
                     if(used) {
-                        printf("overriding slot index %d (%s) with argtype: %d\n", slot_index, idname, new_node.svalue.argtype);
+                        printf("overriding slot index %d (%s) with argtype: %d\n", p, idname, new_node.svalue.argtype);
                     }
                     return (e_status_ret) { .status = E_STATUS_OK };
                     //return (e_status_ret) { .status = E_STATUS_ALRDYDEF };
