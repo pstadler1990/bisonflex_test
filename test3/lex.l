@@ -24,6 +24,7 @@
 "repeat"                    { return LOOP_REPEAT; }
 "forever"                   { return LOOP_FOREVER; }
 "break"                     { return LOOP_BREAK; }
+"mod"                       { return MOD; }
 [0-9]+                      { yylval.nval.val = atof(yytext); yylval.nval.type = E_NUMBER; return NUMBER; }
 [0-9]*\.[0-9]+              { yylval.nval.val = atof(yytext); yylval.nval.type = E_NUMBER; return NUMBER; }
 [a-zA-Z_][a-zA-Z_0-9]*      { yylval.sname = strdup(yytext); return IDENTIFIER; }

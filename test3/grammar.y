@@ -47,6 +47,7 @@
 %token AND OR NOT
 %token REL_LT REL_LTEQ REL_NOTEQ REL_EQ REL_GTEQ REL_GT
 %token PLUS MINUS
+%token MOD
 %token MULTIPLY DIVIDE
 %token P_OPEN P_CLOSE
 
@@ -60,6 +61,7 @@
 %left AND OR NOT
 %left REL_LT REL_LTEQ REL_NOTEQ REL_EQ REL_GTEQ REL_GT
 %left PLUS MINUS
+%left MOD
 %left MULTIPLY DIVIDE
 %left P_OPEN P_CLOSE
 
@@ -281,6 +283,10 @@ math_expression: number {
                     /* 3 / a */
                     emit_op(e_create_operation(E_OP_DIV, e_create_null(), e_create_null()));
                 }
+				| math_expression MOD math_expression {
+					/* 3 % a */
+					emit_op(e_create_operation(E_OP_MOD, e_create_null(), e_create_null()));
+				}
                 | math_expression PLUS math_expression { 
                     /* 3 + a */
 					// Numbers result in an add operation
@@ -676,6 +682,11 @@ void emit_op(e_op op) {
             byte_op.op1 = (uint32_t)0;
             byte_op.op2 = (uint32_t)0;
             break;
+		case E_OP_MOD:
+			printf("MOD\n");
+			byte_op.op1 = (uint32_t)0;
+			byte_op.op2 = (uint32_t)0;
+			break;
         case E_OP_OR:
             printf("OR\n");
             byte_op.op1 = (uint32_t)0;

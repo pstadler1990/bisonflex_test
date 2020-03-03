@@ -55,20 +55,21 @@
      REL_GT = 271,
      PLUS = 272,
      MINUS = 273,
-     MULTIPLY = 274,
-     DIVIDE = 275,
-     P_OPEN = 276,
-     P_CLOSE = 277,
-     BLOCK_IF = 278,
-     BLOCK_THEN = 279,
-     BLOCK_ELSE = 280,
-     BLOCK_ENDIF = 281,
-     LOOP_REPEAT = 282,
-     LOOP_FOREVER = 283,
-     LOOP_BREAK = 284,
-     NEWLINE = 285,
-     PRINT_BYTES = 286,
-     PRINT = 287
+     MOD = 274,
+     MULTIPLY = 275,
+     DIVIDE = 276,
+     P_OPEN = 277,
+     P_CLOSE = 278,
+     BLOCK_IF = 279,
+     BLOCK_THEN = 280,
+     BLOCK_ELSE = 281,
+     BLOCK_ENDIF = 282,
+     LOOP_REPEAT = 283,
+     LOOP_FOREVER = 284,
+     LOOP_BREAK = 285,
+     NEWLINE = 286,
+     PRINT_BYTES = 287,
+     PRINT = 288
    };
 #endif
 
@@ -87,7 +88,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 91 "grammar.tab.h"
+#line 92 "grammar.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
