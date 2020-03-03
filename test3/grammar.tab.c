@@ -90,6 +90,7 @@
     
     static void double_to_bytearray(double din, uint8_t bin[]);
     static int ds_store_string(const char* str);
+    static int ds_get_size(void);
     
     void print_outstream(void);
     
@@ -106,7 +107,7 @@
 
 
 /* Line 189 of yacc.c  */
-#line 110 "grammar.tab.c"
+#line 111 "grammar.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -172,7 +173,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 38 "grammar.y"
+#line 39 "grammar.y"
 
     e_type nval;
     char* sname;
@@ -180,7 +181,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 184 "grammar.tab.c"
+#line 185 "grammar.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -192,7 +193,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 196 "grammar.tab.c"
+#line 197 "grammar.tab.c"
 
 #ifdef short
 # undef short
@@ -494,11 +495,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    71,    71,    74,    75,    76,    79,    80,    81,    82,
-      83,    96,    97,   100,   102,   148,   183,   194,   197,   201,
-     234,   239,   244,   249,   254,   259,   264,   267,   270,   273,
-     276,   279,   283,   300,   327,   334,   349,   375,   401,   418,
-     436,   437,   440,   471,   490,   491,   494,   505
+       0,    72,    72,    75,    76,    77,    80,    81,    82,    83,
+      84,    97,    98,   101,   103,   149,   184,   195,   198,   202,
+     235,   240,   245,   250,   255,   260,   265,   268,   271,   274,
+     277,   280,   284,   301,   328,   335,   350,   376,   402,   419,
+     437,   438,   441,   472,   491,   492,   495,   506
 };
 #endif
 
@@ -1469,7 +1470,7 @@ yyreduce:
         case 10:
 
 /* Line 1455 of yacc.c  */
-#line 83 "grammar.y"
+#line 84 "grammar.y"
     { 
                 if(loop_level == 0) {
                     yyerror("Break without proper loop");
@@ -1488,21 +1489,21 @@ yyreduce:
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 96 "grammar.y"
+#line 97 "grammar.y"
     { print_outstream(); ;}
     break;
 
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 100 "grammar.y"
+#line 101 "grammar.y"
     { lc++; ;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 102 "grammar.y"
+#line 103 "grammar.y"
     {
                     /* Change value of number type variable, a = 3 */
                     // PUSHG $3 [index] (value, index)
@@ -1554,7 +1555,7 @@ yyreduce:
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 148 "grammar.y"
+#line 149 "grammar.y"
     {
             /* Number type (integer|float) definition with initialization, let x = 42 */
             e_opcode op;
@@ -1593,7 +1594,7 @@ yyreduce:
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 183 "grammar.y"
+#line 184 "grammar.y"
     {
 							if(!ignore_next_push) {
 								// Add string data to data segment (bytecode section)
@@ -1610,7 +1611,7 @@ yyreduce:
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 197 "grammar.y"
+#line 198 "grammar.y"
     {
                     // PUSH [number]
                     emit_op(e_create_operation(E_OP_PUSH, e_create_number((yyvsp[(1) - (1)].nval).val), e_create_null()));
@@ -1620,7 +1621,7 @@ yyreduce:
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 201 "grammar.y"
+#line 202 "grammar.y"
     { 
                     /* Find and pop a global or local variable */
                     e_opcode op;
@@ -1659,7 +1660,7 @@ yyreduce:
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 234 "grammar.y"
+#line 235 "grammar.y"
     {
                     /* a == b */
                     // EQ
@@ -1670,7 +1671,7 @@ yyreduce:
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 239 "grammar.y"
+#line 240 "grammar.y"
     {
                     /* a != b */
                     emit_op(e_create_operation(E_OP_EQ, e_create_null(), e_create_null()));
@@ -1681,7 +1682,7 @@ yyreduce:
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 244 "grammar.y"
+#line 245 "grammar.y"
     {
                     /* a < b */
                     // LT
@@ -1692,7 +1693,7 @@ yyreduce:
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 249 "grammar.y"
+#line 250 "grammar.y"
     {
                     /* a > b */
                     // GT
@@ -1703,7 +1704,7 @@ yyreduce:
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 254 "grammar.y"
+#line 255 "grammar.y"
     {
                     /* a <= b */
                     // LTEQ
@@ -1714,7 +1715,7 @@ yyreduce:
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 259 "grammar.y"
+#line 260 "grammar.y"
     {
                     /* a >= b */
                     // GTEQ
@@ -1725,7 +1726,7 @@ yyreduce:
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 264 "grammar.y"
+#line 265 "grammar.y"
     {
                     emit_op(e_create_operation(E_OP_AND, e_create_null(), e_create_null()));
                 ;}
@@ -1734,7 +1735,7 @@ yyreduce:
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 267 "grammar.y"
+#line 268 "grammar.y"
     {
                     emit_op(e_create_operation(E_OP_OR, e_create_null(), e_create_null()));
                 ;}
@@ -1743,7 +1744,7 @@ yyreduce:
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 270 "grammar.y"
+#line 271 "grammar.y"
     {
                     emit_op(e_create_operation(E_OP_NOT, e_create_null(), e_create_null()));
                 ;}
@@ -1752,7 +1753,7 @@ yyreduce:
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 273 "grammar.y"
+#line 274 "grammar.y"
     {
                     (yyval.nval) = (yyvsp[(2) - (3)].nval);
                 ;}
@@ -1761,7 +1762,7 @@ yyreduce:
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 276 "grammar.y"
+#line 277 "grammar.y"
     { 
                     emit_op(e_create_operation(E_OP_MUL, e_create_null(), e_create_null()));
                 ;}
@@ -1770,7 +1771,7 @@ yyreduce:
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 279 "grammar.y"
+#line 280 "grammar.y"
     { 
                     /* 3 / a */
                     emit_op(e_create_operation(E_OP_DIV, e_create_null(), e_create_null()));
@@ -1780,7 +1781,7 @@ yyreduce:
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 283 "grammar.y"
+#line 284 "grammar.y"
     { 
                     /* 3 + a */
 					// Numbers result in an add operation
@@ -1803,7 +1804,7 @@ yyreduce:
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 300 "grammar.y"
+#line 301 "grammar.y"
     { 
                     /* 3 - a */
                     if((yyvsp[(1) - (3)].nval).type == E_ARGT_STRING || (yyvsp[(3) - (3)].nval).type == E_ARGT_STRING) {
@@ -1816,7 +1817,7 @@ yyreduce:
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 327 "grammar.y"
+#line 328 "grammar.y"
     {
 						if(strlen((yyvsp[(1) - (1)].nval).str.sval) >= E_MAX_STRLEN) {
 							yyerror("String too long");
@@ -1829,7 +1830,7 @@ yyreduce:
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 334 "grammar.y"
+#line 335 "grammar.y"
     {
 				   		printf("string plus string_expr (%s) (%s)\n", (yyvsp[(1) - (3)].nval).str.sval, (yyvsp[(3) - (3)].nval).str.sval);
 
@@ -1850,7 +1851,7 @@ yyreduce:
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 349 "grammar.y"
+#line 350 "grammar.y"
     {
 				   		printf("string plus math_expr\n");
 
@@ -1882,7 +1883,7 @@ yyreduce:
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 375 "grammar.y"
+#line 376 "grammar.y"
     {
 						printf("math plus string\n");
 
@@ -1912,7 +1913,7 @@ yyreduce:
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 401 "grammar.y"
+#line 402 "grammar.y"
     { 
                     // Get instruction count of opening if
                     e_stack_status_ret s = e_stack_pop(&bp_stack);
@@ -1933,7 +1934,7 @@ yyreduce:
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 418 "grammar.y"
+#line 419 "grammar.y"
     {
                     // Insert JNE [16 bit dummy_addr]
                     emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
@@ -1955,7 +1956,7 @@ yyreduce:
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 440 "grammar.y"
+#line 441 "grammar.y"
     {
                     printf("LOOP END\n");
                     
@@ -1990,7 +1991,7 @@ yyreduce:
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 471 "grammar.y"
+#line 472 "grammar.y"
     { 
                 // Loop creates a new scope
                 e_status_ret s_scope = e_create_scope();
@@ -2013,7 +2014,7 @@ yyreduce:
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 494 "grammar.y"
+#line 495 "grammar.y"
     {
 						if((yyvsp[(3) - (4)].nval).type == E_STRING) {
 							emit_op(e_create_operation(E_OP_PRINT, e_create_null(), e_create_number(E_ARGT_STRING)));
@@ -2028,14 +2029,14 @@ yyreduce:
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 505 "grammar.y"
+#line 506 "grammar.y"
     { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[(1) - (1)].nval).val; ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 2039 "grammar.tab.c"
+#line 2040 "grammar.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2247,7 +2248,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 507 "grammar.y"
+#line 508 "grammar.y"
 
 
 void yyerror(const char* s) {
@@ -2458,32 +2459,49 @@ int ds_store_string(const char* str) {
     }
 }
 
+int
+ds_get_size(void) {
+	uint32_t i = 1;
+	uint32_t offset = E_OUT_SIZE + i;
+
+	if(i + 1 < E_OUT_SIZE) {
+		uint16_t size = (out_bytes[offset] << 8) | out_bytes[offset+1];
+		while(size != 0) {
+			i = i + size + 2;
+			offset = E_OUT_SIZE + i;
+			size = (out_bytes[offset] << 8) | out_bytes[offset+1];
+		}
+	}
+	return i;
+}
+
 void print_outstream(void) {
     printf("print stream *****\n");
     unsigned int r = 0;
     unsigned int print_out = 0;
+    unsigned int ds = 0;
     for(unsigned int i = 0; i < E_OUT_TOTAL_SIZE; i++) {
-        //if(i%9 == 0 && !print_out) {
-        //    printf("[%d] ", i / 9);
-        //}
-    
         printf("0x%02X ", out_bytes[i]);
         
-        if(i == E_OUT_SIZE/*r == 0 && out_bytes[i] == 0x00)*/) {
+        //if(!print_out && (i == E_OUT_SIZE || (r == 0 && out_bytes[i] == 0x00))) {
+       	if(!print_out && i == E_OUT_SIZE) {
             // Opcode 0x00, end
-            if(!print_out) {
-				// printf("\n -- DATA SEGMENT -- \n");
-				i = E_OUT_SIZE;
-				print_out = 1;
-			}
+			// printf("\n -- DATA SEGMENT -- \n");
+			//i = E_OUT_SIZE;
+			print_out = 1;
         }
+
+        //if(print_out) {
+        //	ds++;
+        //	if(ds == ds_get_size()) {
+        //		break;
+        //	}
+        //}
     
         if(++r == 9) {
             printf("\n");
             r = 0;
         }
-        
-        
     }
     printf("\n");
 }

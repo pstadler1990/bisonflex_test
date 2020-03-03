@@ -78,7 +78,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 38 "grammar.y"
+#line 39 "grammar.y"
 
     e_type nval;
     char* sname;

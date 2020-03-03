@@ -19,6 +19,7 @@
     
     static void double_to_bytearray(double din, uint8_t bin[]);
     static int ds_store_string(const char* str);
+    static int ds_get_size(void);
     
     void print_outstream(void);
     
@@ -714,32 +715,49 @@ int ds_store_string(const char* str) {
     }
 }
 
+int
+ds_get_size(void) {
+	uint32_t i = 1;
+	uint32_t offset = E_OUT_SIZE + i;
+
+	if(i + 1 < E_OUT_SIZE) {
+		uint16_t size = (out_bytes[offset] << 8) | out_bytes[offset+1];
+		while(size != 0) {
+			i = i + size + 2;
+			offset = E_OUT_SIZE + i;
+			size = (out_bytes[offset] << 8) | out_bytes[offset+1];
+		}
+	}
+	return i;
+}
+
 void print_outstream(void) {
     printf("print stream *****\n");
     unsigned int r = 0;
     unsigned int print_out = 0;
+    unsigned int ds = 0;
     for(unsigned int i = 0; i < E_OUT_TOTAL_SIZE; i++) {
-        //if(i%9 == 0 && !print_out) {
-        //    printf("[%d] ", i / 9);
-        //}
-    
         printf("0x%02X ", out_bytes[i]);
         
-        if(i == E_OUT_SIZE/*r == 0 && out_bytes[i] == 0x00)*/) {
+        //if(!print_out && (i == E_OUT_SIZE || (r == 0 && out_bytes[i] == 0x00))) {
+       	if(!print_out && i == E_OUT_SIZE) {
             // Opcode 0x00, end
-            if(!print_out) {
-				// printf("\n -- DATA SEGMENT -- \n");
-				i = E_OUT_SIZE;
-				print_out = 1;
-			}
+			// printf("\n -- DATA SEGMENT -- \n");
+			//i = E_OUT_SIZE;
+			print_out = 1;
         }
+
+        //if(print_out) {
+        //	ds++;
+        //	if(ds == ds_get_size()) {
+        //		break;
+        //	}
+        //}
     
         if(++r == 9) {
             printf("\n");
             r = 0;
         }
-        
-        
     }
     printf("\n");
 }
