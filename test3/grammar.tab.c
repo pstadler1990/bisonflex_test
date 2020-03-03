@@ -501,9 +501,9 @@ static const yytype_uint16 yyrline[] =
        0,    72,    72,    75,    76,    77,    80,    81,    82,    83,
       84,    97,    98,   101,   103,   149,   184,   195,   198,   202,
      235,   240,   245,   250,   255,   260,   265,   268,   271,   274,
-     277,   280,   284,   301,   328,   335,   350,   376,   402,   407,
-     425,   426,   429,   444,   457,   482,   483,   486,   517,   536,
-     537,   540,   549
+     277,   280,   284,   301,   328,   335,   350,   376,   402,   405,
+     423,   424,   427,   438,   448,   470,   471,   474,   505,   524,
+     525,   528,   537
 };
 #endif
 
@@ -1917,19 +1917,10 @@ yyreduce:
 				   ;}
     break;
 
-  case 38:
-
-/* Line 1455 of yacc.c  */
-#line 402 "grammar.y"
-    {
-					printf("ENDIF/ELSE\n");
-               ;}
-    break;
-
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 407 "grammar.y"
+#line 405 "grammar.y"
     {
                     // Insert JNE [16 bit dummy_addr]
                     emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
@@ -1951,7 +1942,7 @@ yyreduce:
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 429 "grammar.y"
+#line 427 "grammar.y"
     {
 					// Get instruction count of opening if
 					e_stack_status_ret s = e_stack_pop(&bp_stack);
@@ -1959,11 +1950,7 @@ yyreduce:
 						// Patch jump dummy_addr from previous jump
 						jmp_patch(s.val.ival, addr_count);
 					}
-
-					printf("BLOCK END (ENDIF) at line: %d\n", addr_count);
-
 					e_status_ret s_scope = e_close_scope();
-
 					error_pprint(s.status);
 					error_pprint(s_scope.status);
 			  ;}
@@ -1972,16 +1959,13 @@ yyreduce:
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 444 "grammar.y"
+#line 438 "grammar.y"
     {
 			  		e_stack_status_ret s = e_stack_pop(&bp_stack);
 					if(s.status == E_STATUS_OK) {
 						// Patch jump dummy_addr from previous jump
 						jmp_patch(s.val.ival, addr_count);
 					}
-
-					printf("BLOCK END (ELSE ENDIF) at line: %d\n", addr_count);
-
 					error_pprint(s.status);
 			  ;}
     break;
@@ -1989,17 +1973,14 @@ yyreduce:
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 457 "grammar.y"
+#line 448 "grammar.y"
     {
-					printf("ELSE branch\n");
 					// Get instruction count of opening if
 					e_stack_status_ret s = e_stack_pop(&bp_stack);
 					if(s.status == E_STATUS_OK) {
 						// Patch jump dummy_addr from previous jump
 						jmp_patch(s.val.ival, addr_count);
 					}
-
-					printf("BLOCK END at line: %d\n", addr_count);
 
 					e_status_ret s_scope = e_close_scope();
 
@@ -2018,7 +1999,7 @@ yyreduce:
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 486 "grammar.y"
+#line 474 "grammar.y"
     {
                     printf("LOOP END\n");
                     
@@ -2053,7 +2034,7 @@ yyreduce:
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 517 "grammar.y"
+#line 505 "grammar.y"
     { 
                 // Loop creates a new scope
                 e_status_ret s_scope = e_create_scope();
@@ -2076,7 +2057,7 @@ yyreduce:
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 540 "grammar.y"
+#line 528 "grammar.y"
     {
 						if((yyvsp[(3) - (4)].nval).type == E_STRING) {
 							emit_op(e_create_operation(E_OP_PRINT, e_create_null(), e_create_number(E_ARGT_STRING)));
@@ -2089,14 +2070,14 @@ yyreduce:
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 549 "grammar.y"
+#line 537 "grammar.y"
     { (yyval.nval).type = E_NUMBER; (yyval.nval).val = (yyvsp[(1) - (1)].nval).val; ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 2100 "grammar.tab.c"
+#line 2081 "grammar.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2308,7 +2289,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 551 "grammar.y"
+#line 539 "grammar.y"
 
 
 void yyerror(const char* s) {

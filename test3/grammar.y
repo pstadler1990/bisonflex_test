@@ -399,9 +399,7 @@ string_expression: STRING {
 				   }
 				   ;
                 
-if_expression: if_condition expression_list if_endifelse {
-					printf("ENDIF/ELSE\n");
-               }
+if_expression: if_condition expression_list if_endifelse
                ;
                
 if_condition: BLOCK_IF math_expression if_blockthen {
@@ -433,11 +431,7 @@ if_endifelse: BLOCK_ENDIF {
 						// Patch jump dummy_addr from previous jump
 						jmp_patch(s.val.ival, addr_count);
 					}
-
-					printf("BLOCK END (ENDIF) at line: %d\n", addr_count);
-
 					e_status_ret s_scope = e_close_scope();
-
 					error_pprint(s.status);
 					error_pprint(s_scope.status);
 			  }
@@ -447,23 +441,17 @@ if_endifelse: BLOCK_ENDIF {
 						// Patch jump dummy_addr from previous jump
 						jmp_patch(s.val.ival, addr_count);
 					}
-
-					printf("BLOCK END (ELSE ENDIF) at line: %d\n", addr_count);
-
 					error_pprint(s.status);
 			  }
 			  ;
 
 if_blockelse: if_else {
-					printf("ELSE branch\n");
 					// Get instruction count of opening if
 					e_stack_status_ret s = e_stack_pop(&bp_stack);
 					if(s.status == E_STATUS_OK) {
 						// Patch jump dummy_addr from previous jump
 						jmp_patch(s.val.ival, addr_count);
 					}
-
-					printf("BLOCK END at line: %d\n", addr_count);
 
 					e_status_ret s_scope = e_close_scope();
 
