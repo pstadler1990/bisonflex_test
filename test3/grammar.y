@@ -440,7 +440,7 @@ if_endifelse: block_endif
 						// Patch jump dummy_addr from previous jump
 						jmp_patch(s.val.ival, addr_count);
 					}
-					//error_pprint(s.status);
+					error_pprint(s.status);
 			  }
 			  ;
 
@@ -460,8 +460,8 @@ block_endif: BLOCK_ENDIF {
 						jmp_patch(s.val.ival, addr_count);
 					}
 					e_status_ret s_scope = e_close_scope();
-					//error_pprint(s.status);
-					//error_pprint(s_scope.status);
+					error_pprint(s.status);
+					error_pprint(s_scope.status);
 				}
 				;
 
