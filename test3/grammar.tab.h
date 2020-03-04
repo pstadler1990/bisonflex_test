@@ -63,13 +63,14 @@
      BLOCK_IF = 279,
      BLOCK_THEN = 280,
      BLOCK_ELSE = 281,
-     BLOCK_ENDIF = 282,
-     LOOP_REPEAT = 283,
-     LOOP_FOREVER = 284,
-     LOOP_BREAK = 285,
-     NEWLINE = 286,
-     PRINT_BYTES = 287,
-     PRINT = 288
+     BLOCK_ELSEIF = 282,
+     BLOCK_ENDIF = 283,
+     LOOP_REPEAT = 284,
+     LOOP_FOREVER = 285,
+     LOOP_BREAK = 286,
+     NEWLINE = 287,
+     PRINT_BYTES = 288,
+     PRINT = 289
    };
 #endif
 
@@ -88,7 +89,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 92 "grammar.tab.h"
+#line 93 "grammar.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

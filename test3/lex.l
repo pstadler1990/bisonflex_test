@@ -16,6 +16,7 @@
 "if"                        { return BLOCK_IF; }
 "then"                      { return BLOCK_THEN; }
 "else"                      { return BLOCK_ELSE; }
+"elseif"                    { return BLOCK_ELSEIF; }
 "endif"                     { return BLOCK_ENDIF; }
 "let"                       { return ASSIGN; }
 "and"                       { return AND; }

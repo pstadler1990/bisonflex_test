@@ -51,7 +51,7 @@
 %token MULTIPLY DIVIDE
 %token P_OPEN P_CLOSE
 
-%token BLOCK_IF BLOCK_THEN BLOCK_ELSE BLOCK_ENDIF
+%token BLOCK_IF BLOCK_THEN BLOCK_ELSE BLOCK_ELSEIF BLOCK_ENDIF
 %token LOOP_REPEAT LOOP_FOREVER LOOP_BREAK
 
 %token NEWLINE
@@ -405,10 +405,12 @@ string_expression: STRING {
 				   }
 				   ;
                 
-if_expression: if_condition expression_list if_endifelse
-               ;
-               
+if_expression: if_condition expression_list if_elseif if_endifelse
+			   | if_condition expression_list if_endifelse;
+
 if_condition: BLOCK_IF math_expression if_blockthen {
+					printf("IF BLOCK****\n");
+
                     // Insert JNE [16 bit dummy_addr]
                     emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
                     
@@ -430,39 +432,72 @@ if_blockthen: BLOCK_THEN
               | BLOCK_THEN line_sep
               ;
 
-if_endifelse: BLOCK_ENDIF {
+if_endifelse: block_endif
+			  | if_blockelse expression_list block_endif {
 					// Get instruction count of opening if
 					e_stack_status_ret s = e_stack_pop(&bp_stack);
 					if(s.status == E_STATUS_OK) {
 						// Patch jump dummy_addr from previous jump
 						jmp_patch(s.val.ival, addr_count);
 					}
-					e_status_ret s_scope = e_close_scope();
-					error_pprint(s.status);
-					error_pprint(s_scope.status);
-			  }
-			  | if_blockelse expression_list BLOCK_ENDIF {
-			  		e_stack_status_ret s = e_stack_pop(&bp_stack);
-					if(s.status == E_STATUS_OK) {
-						// Patch jump dummy_addr from previous jump
-						jmp_patch(s.val.ival, addr_count);
-					}
-					error_pprint(s.status);
+					//error_pprint(s.status);
 			  }
 			  ;
 
-if_blockelse: if_else {
+if_elseif: if_elseif if_elseif_expression
+		   | if_elseif_expression
+		   ;
+
+if_elseif_expression: elseif_condition expression_list;
+
+block_endif: BLOCK_ENDIF {
+					printf("ENDIF************\n");
+
 					// Get instruction count of opening if
 					e_stack_status_ret s = e_stack_pop(&bp_stack);
 					if(s.status == E_STATUS_OK) {
 						// Patch jump dummy_addr from previous jump
 						jmp_patch(s.val.ival, addr_count);
 					}
-
 					e_status_ret s_scope = e_close_scope();
+					//error_pprint(s.status);
+					//error_pprint(s_scope.status);
+				}
+				;
 
+elseif_condition: if_blockelseif math_expression if_blockthen {
+					// Insert JNE [16 bit dummy_addr]
+					emit_op(e_create_operation(E_OP_JZ, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
+
+					// Copy jmp instruction to a table (to be patched later in the if_expression)
+					e_internal_type addr =  { .ival = addr_count };
+					e_stack_status_ret s2 = e_stack_push(&bp_stack, addr);
+				 }
+				 ;
+
+if_blockelseif: BLOCK_ELSEIF {
+						printf("ELSEIF BLOCK (line: %d)****\n", addr_count);
+
+						// Get instruction count of opening if
+						e_stack_status_ret s = e_stack_pop(&bp_stack);
+						if(s.status == E_STATUS_OK) {
+							// Patch jump dummy_addr from previous jump
+							jmp_patch(s.val.ival, addr_count);
+						}
+						error_pprint(s.status);
+			   }
+			   ;
+
+if_blockelse: if_else {
+					printf("ELSE BLOCK****\n");
+
+					// Get instruction count of opening if
+					e_stack_status_ret s = e_stack_pop(&bp_stack);
+					if(s.status == E_STATUS_OK) {
+						// Patch jump dummy_addr from previous jump
+						jmp_patch(s.val.ival, addr_count + 1);
+					}
 					error_pprint(s.status);
-					error_pprint(s_scope.status);
 
 					// Insert JNE [16 bit dummy_addr]
 					emit_op(e_create_operation(E_OP_JMP, e_create_number(0xFFFFFFFF), e_create_number(0xFFFFFFFF)));
